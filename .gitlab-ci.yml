@@ -8,7 +8,7 @@ stages:
   - pre-production
   - production
 before_script:
-  - node --v
+  - node -v
 Build React APP Dev-release:
   stage: pre-production
   script:
