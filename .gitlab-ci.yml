@@ -1,0 +1,35 @@
+image: node
+
+cache:
+  paths:
+    - node_modules/
+
+stages:
+  - pre-production
+  - production
+
+Build React APP Dev-release:
+  stage: pre-production
+  script:
+    - yarn
+    - yarn build
+    - echo "Deploying to development server"
+    - cp -r build/ /var/www/
+    - echo "Finished copying the build files"
+  tags:
+    - dev-shell
+  only:
+    - dev
+
+Build React APP Prod-release:
+  stage: production
+  script:
+    - yarn
+    - yarn build
+    - echo "Deploying to development server"
+    - cp -r build/ /var/www/
+    - echo "Finished copying the build files"
+  tags:
+    - prod-shell
+  only:
+    - main
