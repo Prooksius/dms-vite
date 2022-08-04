@@ -31,7 +31,7 @@ function App() {
       <Helmet />
       <BrowserRouter>
         <GlobalWrapper>
-          <Routes location={location}>
+          <Routes location={window.location}>
             {routes
               .filter((item) => item.auth === false || item.auth === logged)
               .map(({ path, Component, subRoutes }) => (
