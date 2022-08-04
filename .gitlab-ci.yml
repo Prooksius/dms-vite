@@ -24,9 +24,9 @@ Build React APP Dev-release:
 Build React APP Prod-release:
   stage: production
   script:
-    - yarn
+    - yarn install
     - yarn build
-    - echo "Deploying to development server"
+    - echo "Deploying to production server"
     - cp -r build/ /var/www/
     - echo "Finished copying the build files"
   tags:
