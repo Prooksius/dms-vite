@@ -11,7 +11,8 @@ before_script:
 Build React APP Dev-release:
   stage: pre-production
   script:
-    - yarn
+    - cat "$dev" > .env
+    - yarn install
     - yarn build
     - echo "Deploying to development server"
     - sudo cp -r build/* /var/www
@@ -24,6 +25,7 @@ Build React APP Dev-release:
 Build React APP Prod-release:
   stage: production
   script:
+    - cat "$prod" > .env
     - yarn install
     - yarn build
     - echo "Deploying to production server"

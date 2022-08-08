@@ -53,7 +53,7 @@ const GlobalWrapper: React.FC = ({ children }) => {
   const loggedStatus = useSelector(listAuthStatus)
 
   const goToLogin = () => {
-    window.location.href = "https://sso.seoreserved.ru/auth?service=dms"
+    window.location.href = process.env.REACT_APP_SSO_URL
   }
 
   useEffect(() => {
