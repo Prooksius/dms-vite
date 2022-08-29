@@ -229,11 +229,11 @@ export const DomainsList: React.FC = () => {
               <span
                 style={{
                   color:
-                    row.available_condition === "available" ? "green" : "red",
+                    row.available_condition === "200" ? "green" : "red",
                   fontWeight: 600,
                 }}
               >
-                {codeNames[row.available_condition]}
+                {row.available_condition}
               </span>
             ),
           },
