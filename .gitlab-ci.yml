@@ -15,10 +15,10 @@ Build React APP Dev-release:
     - yarn install
     - yarn build
     - echo "Deploying to development server"
-    - sudo cp -r build/* /var/www
+    - sudo cp -r build/* /var/www/frontend
     - echo "Finished copying the build files"
   tags:
-    - dev-shell
+    - dev
   only:
     - dev
 
@@ -29,9 +29,9 @@ Build React APP Prod-release:
     - yarn install
     - yarn build
     - echo "Deploying to production server"
-    - sudo cp -r build/* /var/www
+    - sudo cp -r build/* /var/www/frontend
     - echo "Finished copying the build files"
   tags:
-    - prod-shell
+    - prod
   only:
     - main
