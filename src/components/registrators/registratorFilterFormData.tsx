@@ -15,7 +15,7 @@ export const filterFormData: MyFormData = {
       dirty: false,
     },
     provider_id: {
-      label: "DNS-хостинг",
+      label: "Провайдер",
       value: "",
       valueObj: { value: "", label: "Не выбрано" },
       valueArr: [],
