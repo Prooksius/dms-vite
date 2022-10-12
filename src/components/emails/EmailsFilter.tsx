@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { TransitionGroup, CSSTransition } from "react-transition-group"
 import { toastAlert } from "@config"
 import {
@@ -37,10 +37,19 @@ type SelectedValue = {
   value: string
 }
 
+const useQuery = () => {
+  // Use the URLSearchParams API to extract the query parameters
+  // useLocation().search will have the query parameters eg: ?foo=bar&a=b
+  const loc = useLocation()
+  return { route: loc.pathname, query: new URLSearchParams(loc.search) }
+}
+
 const EmailsFilterInner: React.FC = () => {
   const dispatch = useDispatch()
   const ref = useRef(null)
   const btnRef = useRef(null)
+  const { route, query } = useQuery()
+  const navigate = useNavigate()
 
   const { form, setFieldValue } = useContext(FormWrapperContext)
 
@@ -58,7 +67,10 @@ const EmailsFilterInner: React.FC = () => {
         filter[key]
       ) {
         return true
-      } else if (emailsFilterFormData.fields[key].type === "checkbox" && filter[key]) {
+      } else if (
+        emailsFilterFormData.fields[key].type === "checkbox" &&
+        filter[key]
+      ) {
         return true
       } else if (
         emailsFilterFormData.fields[key].type === "select" &&
@@ -91,6 +103,8 @@ const EmailsFilterInner: React.FC = () => {
   const submitHandler = (token: string, formData: MyFormData) => {
     console.log("submitHandler")
     dispatch(setFilter(formData.fields))
+    query.delete("page")
+    navigate(`${route}?${query.toString()}`)
     setTimeout(() => {
       setFilterOpen(false)
     }, 500)
@@ -115,6 +129,8 @@ const EmailsFilterInner: React.FC = () => {
     dispatch(setTootipShow(false))
     setTimeout(() => {
       dispatch(setFilter(form.fields))
+      query.delete("page")
+      navigate(`${route}?${query.toString()}`)
     }, 250)
   }
 
@@ -125,6 +141,8 @@ const EmailsFilterInner: React.FC = () => {
     dispatch(setTootipShow(false))
     setTimeout(() => {
       dispatch(setFilter(form.fields))
+      query.delete("page")
+      navigate(`${route}?${query.toString()}`)
     }, 300)
   }
 

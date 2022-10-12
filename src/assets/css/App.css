@@ -948,6 +948,7 @@ form .sixty-percent-row {
 /* page --> */
 .page-container .page-contents {
   position: relative;
+  flex: 1;
   overflow-y: hidden;
 }
 
@@ -1095,6 +1096,8 @@ form .sixty-percent-row {
 }
 
 .page-container {
+  display: flex;
+  flex-direction: column;
   flex: 1;
 }
 .page-contents {

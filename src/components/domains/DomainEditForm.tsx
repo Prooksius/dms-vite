@@ -92,14 +92,11 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
             />
             <h5>NS</h5>
             <TextArrayField name="ns" />
-            <CheckboxField name="integration_registrator_status" />
-            <CheckboxField name="integration_cloudflare_status" />
           </div>
           <div className="col-lg-3 col-md-6 col-sm-12">
             <h4>Мониторинг</h4>
             <CheckboxField name="whois_status" />
             <CheckboxField name="available_status" />
-            <CheckboxField name="pagespeed_status" />
             <CheckboxField name="rkn_status" />
             <CheckboxField name="ssl_status" />
             <CheckboxField name="expirationtime_status" />

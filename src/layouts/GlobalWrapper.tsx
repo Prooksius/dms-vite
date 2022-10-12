@@ -13,6 +13,7 @@ import {
 } from "@store/slices/serversSlice"
 import {
   fetchDomainPage,
+  fetchDomainAll,
   listDomainsFilterChanges,
 } from "@store/slices/domainsSlice"
 import {
@@ -53,7 +54,8 @@ const GlobalWrapper: React.FC = ({ children }) => {
   const loggedStatus = useSelector(listAuthStatus)
 
   const goToLogin = () => {
-    window.location.href = process.env.REACT_APP_SSO_URL
+    //window.location.href = process.env.REACT_APP_SSO_URL
+    window.location.href = "https://sso.seoreserved.ru/auth?service=dms_local"
   }
 
   useEffect(() => {
@@ -76,7 +78,10 @@ const GlobalWrapper: React.FC = ({ children }) => {
   }, [serversFilterChanges])
 
   useEffect(() => {
-    if (domainsFilterChanges) dispatch(fetchDomainPage())
+    if (domainsFilterChanges) {
+      dispatch(fetchDomainPage())
+      dispatch(fetchDomainAll())
+    }
     // eslint-disable-next-line
   }, [domainsFilterChanges])
 

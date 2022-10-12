@@ -14,7 +14,7 @@ import {
   OptionsObject,
   Additional,
 } from "@components/app/forms/formWrapper/types"
-import ts from "typescript"
+//import ts from "typescript"
 
 interface SubdomainsRecord {
   id?: number
@@ -96,11 +96,13 @@ interface DomainsFilter
 
 interface DomainsState {
   list: DomainsRecord[]
+  listAll: DomainsRecord[]
   page: number
   itemsInPage: number
   itemsCount: number
   status: StatusType
   editStatus: string
+  allStatus: string
   loaded: boolean
   error: string | null
   search: string
@@ -116,69 +118,14 @@ type DomainEditRecord = {
   registrator_id: number
   server_id: number
   provider_id: number
-  integration_cloudflare_status: boolean
-  integration_registrator_status: boolean
   ns: string[]
   whois_status: boolean
   available_status: boolean
   rkn_status: boolean
   ssl_status: boolean
-  pagespeed_status: boolean
   geo_status: string[]
   expirationtime_status: boolean
   subdomains: SubdomainsEditRecord[]
-}
-
-const fillDomainRecord = ({ fields }: MyFormData): DomainsRecord => {
-  const subdomains = fields.subdomains.valueArr.map((subdomain: Subdomain) => {
-    return {
-      created_at: new Date().toISOString(),
-      deleted_at: null,
-      subdomain_name: subdomain.title,
-      a: subdomain.type === "A" ? subdomain.value : "",
-      cname: subdomain.type === "CNAME" ? subdomain.value : "",
-      available_status: subdomain.available_check,
-      available_condition: subdomain.available_check
-        ? "available"
-        : "unavailable",
-    }
-  })
-
-  const bodyData: DomainsRecord = {
-    created_at: new Date().toISOString(),
-    deleted_at: null,
-    name: fields.name.value,
-    available_status: fields.available_status.value === "1" ? true : false,
-    available_condition:
-      fields.available_status.value === "1" ? "available" : "unavailable",
-    department_name: fields.department_name.valueObj.value,
-    expirationtime_status: true,
-    expirationtime_condition: "available",
-    geo_condition: [""],
-    geo_status: [""],
-    integration_cloudflare_status:
-      fields.integration_cloudflare_status.value === "1" ? true : false,
-    integration_registrator_status:
-      fields.integration_registrator_status.value === "1" ? true : false,
-    monitoring_id: 0,
-    ns: fields.ns.valueArr.map((item) => item.value),
-    pagespeed_status: fields.pagespeed_status.value === "1" ? true : false,
-    provider_id: Number(fields.provider_id.valueObj.value),
-    dns_hosting: fields.provider_id.valueObj.label,
-    registrator_id: Number(fields.registrator_id.valueObj.value),
-    registrator_name: fields.registrator_id.valueObj.label,
-    server_id: Number(fields.server_id.valueObj.value),
-    server_name: fields.server_id.valueObj.label,
-    rkn_status: fields.rkn_status.value === "1" ? true : false,
-    ssl_status: fields.ssl_status.value === "1" ? true : false,
-    whois_status: fields.whois_status.value === "1" ? true : false,
-    subdomains: subdomains,
-    registration_date: new Date().toISOString(),
-    whois_condition:
-      fields.whois_status.value === "1" ? "available" : "unavailable",
-  }
-
-  return bodyData
 }
 
 const fillDomainEditRecord = (
@@ -207,12 +154,7 @@ const fillDomainEditRecord = (
     name: fields.name.value,
     available_status: fields.available_status.value === "1" ? true : false,
     department_name: fields.department_name.valueObj.value,
-    integration_cloudflare_status:
-      fields.integration_cloudflare_status.value === "1" ? true : false,
-    integration_registrator_status:
-      fields.integration_registrator_status.value === "1" ? true : false,
     ns: fields.ns.valueArr.map((item) => item.value),
-    pagespeed_status: fields.pagespeed_status.value === "1" ? true : false,
     expirationtime_status:
       fields.expirationtime_status.value === "1" ? true : false,
     provider_id: Number(fields.provider_id.valueObj.value),
@@ -300,6 +242,53 @@ export const loadDepartmentOptions = async (
   }
 }
 
+export const fetchDomainAll = createAsyncThunk(
+  "/domains/fetchDomainAll",
+  async (params, { getState }) => {
+    const { domains } = <RootState>getState()
+
+    const response = await axiosInstance.get<ServerGetResponse<DomainsRecord>>(
+      `/domains/?offset=0&limit=999999999999&name=${domains.search}${
+        domains.filter.available_condition?.value
+          ? "&available_condition=" + domains.filter.available_condition.value
+          : ""
+      }${
+        domains.filter.active?.value
+          ? "&active=" +
+            (domains.filter.active.value === "1" ? "true" : "false")
+          : "&active=true"
+      }&department_name=${
+        domains.filter.department_name?.value
+          ? domains.filter.department_name.value
+          : ""
+      }&provider_id=${
+        domains.filter.provider_id?.value
+          ? domains.filter.provider_id.value
+          : ""
+      }&server_id=${
+        domains.filter.server_id?.value ? domains.filter.server_id.value : ""
+      }&registrator_id=${
+        domains.filter.registrator_id?.value
+          ? domains.filter.registrator_id.value
+          : ""
+      }&registration_date=${
+        domains.filter.registration_date
+          ? domains.filter.registration_date.split(".").reverse().join("-")
+          : ""
+      }&expirationtime_condition=${
+        domains.filter.expirationtime_condition
+          ? domains.filter.expirationtime_condition
+              .split(".")
+              .reverse()
+              .join("-")
+          : ""
+      }`
+    )
+    console.log("response.data", response.data)
+    return response.data
+  }
+)
+
 export const fetchDomainPage = createAsyncThunk(
   "/domains/fetchDomainPage",
   async (params, { getState }) => {
@@ -316,7 +305,7 @@ export const fetchDomainPage = createAsyncThunk(
         domains.filter.active?.value
           ? "&active=" +
             (domains.filter.active.value === "1" ? "true" : "false")
-          : ""
+          : "&active=true"
       }&department_name=${
         domains.filter.department_name?.value
           ? domains.filter.department_name.value
@@ -388,11 +377,13 @@ export const archiveDomain = createAsyncThunk(
 
 const initialState: DomainsState = {
   list: [],
+  listAll: [],
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
   status: "idle",
   editStatus: "idle",
+  allStatus: "idle",
   loaded: false,
   error: null,
   search: "",
@@ -420,6 +411,7 @@ export const domainsSlice = createSlice({
             ? payload[key].valueObj
             : payload[key].value
       })
+      state.page = 1
       state.filterChanges++
     },
     setPage: (state, { payload }: PayloadAction<number>) => {
@@ -459,6 +451,19 @@ export const domainsSlice = createSlice({
   },
   extraReducers(builder) {
     builder
+      .addCase(fetchDomainAll.pending, (state) => {
+        state.allStatus = "loading"
+      })
+      .addCase(fetchDomainAll.fulfilled, (state, { payload }) => {
+        state.listAll = payload.data
+        state.allStatus = "succeeded"
+      })
+      .addCase(fetchDomainAll.rejected, (state, action) => {
+        toastAlert(
+          "Ошибка чтения всех доменов: " + action.error.message,
+          "error"
+        )
+      })
       .addCase(fetchDomainPage.pending, (state) => {
         state.status = "loading"
       })
@@ -545,6 +550,9 @@ export const {
 
 export default domainsSlice.reducer
 
+export const listDomainsAll = (state: RootState) => state.domains.listAll
+export const listDomainsAllStatus = (state: RootState) =>
+  state.domains.allStatus
 export const listDomains = (state: RootState) => state.domains.list
 export const listDomainsStatus = (state: RootState) => state.domains.status
 export const listDomainsLoaded = (state: RootState) => state.domains.loaded

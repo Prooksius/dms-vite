@@ -232,6 +232,8 @@ export const RegistratorsList: React.FC = () => {
               >
                 <button
                   type="button"
+                  data-tip="Создать новый аккаунт"
+                  data-for="for-left"
                   className="btn btn-blue btn-line"
                   onClick={() => {
                     setEditId(null)

@@ -31,7 +31,7 @@ export const filterFormData: MyFormData = {
       dirty: false,
     },
     registrator_id: {
-      label: "Регистратор",
+      label: "Аккаунт хостинга",
       type: "select",
       value: "",
       valueObj: { value: "", label: "Не выбрано" },

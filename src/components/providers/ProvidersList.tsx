@@ -24,6 +24,7 @@ import Popuper from "@components/app/Popuper"
 import { SearchEntity } from "@components/app/SearchEntity"
 import { DataGrid } from "@components/app/DataGrid"
 import { PaginationDataGrid } from "@components/app/PaginationDataGrid"
+import { PlusIcon } from "@components/app/icons/PlusIcon"
 
 export const ProvidersList: React.FC = () => {
   const [editId, setEditId] = useState(0)
@@ -82,6 +83,11 @@ export const ProvidersList: React.FC = () => {
             },
           },
           {
+            title: "Url",
+            width: "1 1",
+            getValue: (row) => row.url
+          },
+          {
             title: "Добавлен",
             width: "1 1",
             getValue: (row) => formatDateTime(row.created_at, "datetime"),
@@ -95,6 +101,21 @@ export const ProvidersList: React.FC = () => {
                 search={search}
                 setSearch={(value) => dispatch(setSearch(value))}
               />
+              <div className="add-record__container">
+                <button
+                  type="button"
+                  data-tip="Создать нового провайдера"
+                  data-for="for-left"
+                  className="btn btn-blue btn-line"
+                  onClick={() => {
+                    setEditId(null)
+                    setEditOpened(true)
+                  }}
+                >
+                  <span>Добавить</span>
+                  <PlusIcon />
+                </button>
+              </div>{" "}
             </div>
           </div>
         )}
@@ -108,6 +129,7 @@ export const ProvidersList: React.FC = () => {
         contentType={undefined}
       >
         <h3>Изменение</h3>
+        <p>Здесь будет форма</p>
       </Popuper>
     </>
   )

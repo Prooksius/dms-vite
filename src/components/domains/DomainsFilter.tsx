@@ -8,10 +8,14 @@ import React, {
   useState,
 } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { TransitionGroup, CSSTransition } from "react-transition-group"
 import { toastAlert } from "@config"
-import { setFilter, listDomainsFilter, loadDepartmentOptions } from "@store/slices/domainsSlice"
+import {
+  setFilter,
+  listDomainsFilter,
+  loadDepartmentOptions,
+} from "@store/slices/domainsSlice"
 import SelectField from "@components/app/forms/formFields/SelectField"
 import SelectAsyncField from "@components/app/forms/formFields/SelectAsyncField"
 import TextField from "@components/app/forms/formFields/TextField"
@@ -50,10 +54,19 @@ type SelectedValue = {
   value: string
 }
 
+const useQuery = () => {
+  // Use the URLSearchParams API to extract the query parameters
+  // useLocation().search will have the query parameters eg: ?foo=bar&a=b
+  const loc = useLocation()
+  return { route: loc.pathname, query: new URLSearchParams(loc.search) }
+}
+
 const DomainsFilterInner: React.FC = () => {
   const dispatch = useDispatch()
   const ref = useRef(null)
   const btnRef = useRef(null)
+  const { route, query } = useQuery()
+  const navigate = useNavigate()
 
   const tooltipShow = useSelector(listTooltipShow)
 
@@ -109,6 +122,8 @@ const DomainsFilterInner: React.FC = () => {
   const submitHandler = (token: string, formData: MyFormData) => {
     console.log("submitHandler")
     dispatch(setFilter(formData.fields))
+    query.delete("page")
+    navigate(`${route}?${query.toString()}`)
     setTimeout(() => {
       setFilterOpen(false)
     }, 500)
@@ -144,6 +159,8 @@ const DomainsFilterInner: React.FC = () => {
     dispatch(setTootipShow(false))
     setTimeout(() => {
       dispatch(setFilter(form.fields))
+      query.delete("page")
+      navigate(`${route}?${query.toString()}`)
     }, 300)
   }
 

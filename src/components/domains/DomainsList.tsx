@@ -7,11 +7,13 @@ import { confirmationAlert, formatDateTime, toastAlert } from "@config"
 import { CSVLink, CSVDownload } from "react-csv"
 import {
   listDomains,
+  listDomainsAll,
   archiveDomain,
   deleteDomain,
   listDomainsPage,
   listDomainsItemsCount,
   listDomainsStatus,
+  listDomainsAllStatus,
   listDomainsItemsInPage,
   listDomainsFilter,
   listDomainsFilterChanges,
@@ -25,6 +27,7 @@ import {
   closeDomainPopups,
   reloadPage,
   DomainsRecord,
+  fetchDomainAll,
 } from "@store/slices/domainsSlice"
 import { CaretIcon } from "@components/app/icons/CaretIcon"
 import { DotsIcon } from "@components/app/icons/DotsIcon"
@@ -54,8 +57,9 @@ export const DomainsList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const items = useSelector(listDomains)
+  const itemsAll = useSelector(listDomainsAll)
 
-  const exportItems = items.map((item) => {
+  const exportItems = itemsAll.map((item) => {
     return {
       ...item,
       ns: item.ns ? item.ns.join("; ") : "",
@@ -66,6 +70,7 @@ export const DomainsList: React.FC = () => {
   })
 
   const status = useSelector(listDomainsStatus)
+  const statusAll = useSelector(listDomainsAllStatus)
   const page = useSelector(listDomainsPage)
   const itemsInPage = useSelector(listDomainsItemsInPage)
   const search = useSelector(listDomainsSearch)
@@ -155,7 +160,7 @@ export const DomainsList: React.FC = () => {
             </div>
           </div>
         )}
-        rowHeight={62}
+        rowHeight={71}
         data={items}
         page={page}
         setPage={changePage}
@@ -228,8 +233,7 @@ export const DomainsList: React.FC = () => {
             getValue: (row) => (
               <span
                 style={{
-                  color:
-                    row.available_condition == "200" ? "green" : "red",
+                  color: row.available_condition == "200" ? "green" : "red",
                   fontWeight: 600,
                 }}
               >
@@ -293,18 +297,20 @@ export const DomainsList: React.FC = () => {
                 setSearch={(value) => dispatch(setSearch(value))}
               />
               <DomainsFilter />
-              <div
-                className="add-record__container"
-                data-tip="Экспортировать отображаемые данные в csv"
-                data-for="for-left"
-              >
-                <CSVLink data={exportItems} target="_blank">
-                  <button type="button" className="btn btn-black">
-                    <span>Экспорт</span>
-                    <DownloadIcon />
-                  </button>
-                </CSVLink>
-              </div>
+              {statusAll === "succeeded" && (
+                <div
+                  className="add-record__container"
+                  data-tip="Экспортировать данные в csv"
+                  data-for="for-left"
+                >
+                  <CSVLink data={exportItems} target="_blank">
+                    <button type="button" className="btn btn-black">
+                      <span>Экспорт</span>
+                      <DownloadIcon />
+                    </button>
+                  </CSVLink>
+                </div>
+              )}
               <div className="add-record__container">
                 <button
                   type="button"
