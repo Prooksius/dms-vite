@@ -7,8 +7,8 @@ import withReactContent from "sweetalert2-react-content"
 const MySwal = withReactContent(Swal)
 
 export const APP_TITLE = "DMS"
-//export const REACT_APP_DB_URL = process.env.REACT_APP_DB_URL
-export const REACT_APP_DB_URL = "https://dev.seodms.com/api/v1.0"
+export const REACT_APP_DB_URL = process.env.REACT_APP_DB_URL
+//export const REACT_APP_DB_URL = "https://dev.seodms.com/api/v1.0"
 
 let lastId = 0
 
