@@ -2,6 +2,8 @@ import Swal from "sweetalert2"
 import { toast } from "react-toastify"
 import withReactContent from "sweetalert2-react-content"
 
+// test text
+
 const MySwal = withReactContent(Swal)
 
 export const APP_TITLE = "DMS"
