@@ -30,6 +30,8 @@ export type ValidationsData = {
   required?: boolean
   minLength?: number
   maxLength?: number
+  minValue?: number
+  maxValue?: number
   email?: boolean
   sameAs?: string
   isIP?: boolean

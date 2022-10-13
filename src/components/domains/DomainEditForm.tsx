@@ -90,7 +90,9 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
               name={"provider_id"}
               searchCallback={loadProviderOptions}
             />
-            <h5>NS</h5>
+            <h5>
+              NS <span className="required">*</span>
+            </h5>
             <TextArrayField name="ns" />
           </div>
           <div className="col-lg-3 col-md-6 col-sm-12">

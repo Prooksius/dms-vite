@@ -83,7 +83,10 @@ export const domainEditFormData: MyFormData = {
       value: "",
       valueObj: { value: "", label: "Не выбрано" },
       valueArr: [],
-      validations: {},
+      validations: {
+        required: true,
+        minValue: 1,
+      },
       errorMessage: "",
       dirty: false,
     },

@@ -461,12 +461,17 @@ button.close {
   white-space: normal;
 }
 
-.form-field label .required {
+.form-field label .required,
+h5 span.required {
   display: inline-block;
   color: red;
   font-size: 24px;
   line-height: 0;
   transform: translate(2px, 6px);
+}
+h5 span.required {
+  font-size: 14px;
+  vertical-align: top;
 }
 .form-field.radio-field {
   padding: 15px 10px 10px 10px;

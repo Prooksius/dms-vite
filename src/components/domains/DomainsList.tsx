@@ -274,9 +274,10 @@ export const DomainsList: React.FC = () => {
                     className="btn btn-white"
                     onClick={() => archiveHandler(row.id)}
                   >
-                    В архив
+                    Удалить
                   </button>
                   <button
+                    style={{ display: "none" }}
                     type="button"
                     className="btn btn-white"
                     onClick={() => deleteHandler(row.id)}
