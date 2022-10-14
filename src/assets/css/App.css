@@ -363,6 +363,10 @@ button.close {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .btn.btn-radio {
   border: 1px solid #d6d6d6;
@@ -1241,6 +1245,7 @@ form .sixty-percent-row {
 }
 
 .pagination-tablelist__row-down {
+  position: relative;
   background-color: #eaf0f8;
   border-radius: 0 0 12px 12px;
   padding: 20px;
@@ -1273,6 +1278,12 @@ form .sixty-percent-row {
   margin-left: 0;
 }
 
+.pagination-tablelist__icons {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  width: 60px;
+}
 .pagination-tablelist__info {
   display: flex;
   flex-direction: column;

@@ -40,6 +40,9 @@ import { DomainEditForm } from "./DomainEditForm"
 import { SearchEntity } from "@components/app/SearchEntity"
 import { DataGrid } from "@components/app/DataGrid"
 import { PaginationDataGrid } from "@components/app/PaginationDataGrid"
+import { SslCheckIcon } from "@components/app/icons/SslCheckIcon"
+import { RknCheckIcon } from "@components/app/icons/RknCheckIcon"
+import { DateCheckIcon } from "@components/app/icons/DateCheckIcon"
 
 interface ConditionNames {
   [key: string]: string
@@ -125,7 +128,12 @@ export const DomainsList: React.FC = () => {
       <PaginationDataGrid
         status={status}
         getExpanded={(row) => (
-          <div className="pagination-tablelist__row-down with-button-td">
+          <div className="pagination-tablelist__row-down">
+            <div className="pagination-tablelist__icons">
+              <SslCheckIcon enabled={row.ssl_status} />
+              <RknCheckIcon enabled={row.rkn_status} />
+              <DateCheckIcon enabled={row.expirationtime_status} />
+            </div>
             <div className="pagination-tablelist__info">
               <span className="title">Имя регистратора</span>
               <span className="value">{row.registrator_name}</span>
@@ -298,20 +306,22 @@ export const DomainsList: React.FC = () => {
                 setSearch={(value) => dispatch(setSearch(value))}
               />
               <DomainsFilter />
-              {statusAll === "succeeded" && (
-                <div
-                  className="add-record__container"
-                  data-tip="Экспортировать данные в csv"
-                  data-for="for-left"
-                >
-                  <CSVLink data={exportItems} target="_blank">
-                    <button type="button" className="btn btn-black">
-                      <span>Экспорт</span>
-                      <DownloadIcon />
-                    </button>
-                  </CSVLink>
-                </div>
-              )}
+              <div
+                className="add-record__container"
+                data-tip="Экспортировать данные в csv"
+                data-for="for-left"
+              >
+                <CSVLink data={exportItems} target="_blank">
+                  <button
+                    type="button"
+                    disabled={statusAll !== "succeeded"}
+                    className="btn btn-black"
+                  >
+                    <span>Экспорт</span>
+                    <DownloadIcon />
+                  </button>
+                </CSVLink>
+              </div>
               <div className="add-record__container">
                 <button
                   type="button"
