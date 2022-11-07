@@ -18,13 +18,20 @@ type FieldType = "text" | "email" | "select" | "checkbox" | "radio" | "array"
 
 export type SubdomainType = "A" | "CNAME" | ""
 
-type DefaultSelectValue = {
+export type ServerStatus = "up" | "down"
+
+export type DefaultSelectValue = {
   value: string
   label?: string
   image?: string
 }
 type EmptySelectValue = { value: ""; label: "Не выбрано"; image?: "" }
 export type SelectValue = DefaultSelectValue | EmptySelectValue
+
+export type FieldsDependency = {
+  field: string
+  type: string
+}
 
 export type ValidationsData = {
   required?: boolean
@@ -49,6 +56,11 @@ export type Additional = {
 export type NS = {
   value: string
 }
+export type IPAddr = {
+  ip_addr: string
+  server_status: ServerStatus
+  monitoring_id: number
+}
 export type Subdomain = {
   id: number
   title: string
@@ -69,6 +81,7 @@ export interface FieldData extends Record<string, any> {
   options?: SelectValue[]
   dropdown?: DropdownType
   validations: ValidationsData
+  dependency?: FieldsDependency
   errorMessage: string
   dirty: boolean
 }

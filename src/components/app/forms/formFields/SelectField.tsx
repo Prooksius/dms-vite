@@ -1,8 +1,8 @@
-import React, { useContext } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import classnames from "classnames"
 import { FormWrapperContext } from "../formWrapper/formWrapperContext"
 import Select, { components } from "react-select"
-import { SelectValue } from "../formWrapper/types"
+import { FieldData, SelectValue } from "../formWrapper/types"
 
 const { SingleValue, Option } = components
 
@@ -62,12 +62,50 @@ const customStyles = {
 
 interface SelectFieldProps {
   name: string
+  loadCallback?: (param: string) => Promise<SelectValue[]>
 }
 
-const SelectField: React.FC<SelectFieldProps> = ({ name }) => {
+const SelectField: React.FC<SelectFieldProps> = ({ name, loadCallback }) => {
   const { form, setFieldValue } = useContext(FormWrapperContext)
 
   const thisField = form.fields[name]
+  const dependField = form.fields[thisField.dependency?.field]
+
+  const getDepFieldValue = (thisField: FieldData): string => {
+    if (thisField.dependency) {
+      if (dependField.type in ["text", "checkbox", "radio"]) {
+        return dependField.value
+      } else if (dependField.type === "select") {
+        return dependField.valueObj.value
+      }
+    }
+    return ""
+  }
+  const [localFieldValue, setLocalFieldValue] = useState(thisField.valueObj)
+  const [options, setOptions] = useState(thisField.options)
+  const [depValue, setDepValue] = useState("")
+
+  useEffect(() => {
+    const setDeps = async () => {
+      const val = getDepFieldValue(thisField)
+      if (dependField && depValue != val) {
+        if (depValue) {
+          setFieldValue({
+            field: name,
+            value: { value: "", label: "Не выбрано" },
+          })
+          setLocalFieldValue({ value: "", label: "Не выбрано" })
+        }
+        setDepValue(val)
+        if (loadCallback) {
+          const options = await loadCallback(val)
+          thisField.options = options
+          setOptions(options)
+        }
+      }
+    }
+    setDeps()
+  })
 
   if (!thisField) {
     return (
@@ -92,7 +130,7 @@ const SelectField: React.FC<SelectFieldProps> = ({ name }) => {
       {dropdownType === "images" && (
         <Select
           styles={customStyles}
-          value={thisField.valueObj}
+          value={localFieldValue}
           placeholder={null}
           className="multiselect"
           classNamePrefix="inner"
@@ -101,25 +139,27 @@ const SelectField: React.FC<SelectFieldProps> = ({ name }) => {
             Option: IconOption,
             IndicatorSeparator: () => null,
           }}
-          onChange={(selectedOption) =>
+          onChange={(selectedOption) => {
             setFieldValue({ field: name, value: selectedOption })
-          }
-          options={thisField.options}
+            setLocalFieldValue(selectedOption)
+          }}
+          options={options}
         />
       )}
       {dropdownType !== "images" && (
         <Select
-          value={thisField.valueObj}
+          value={localFieldValue}
           placeholder="Не выбрано"
           className="multiselect"
           classNamePrefix="inner"
           components={{
             IndicatorSeparator: () => null,
           }}
-          onChange={(selectedOption) =>
+          onChange={(selectedOption) => {
             setFieldValue({ field: name, value: selectedOption })
-          }
-          options={thisField.options}
+            setLocalFieldValue(selectedOption)
+          }}
+          options={options}
         />
       )}
       <label>

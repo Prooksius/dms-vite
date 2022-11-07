@@ -274,6 +274,7 @@ ul {
 }
 
 button.close {
+  appearance: none;
   -webkit-appearance: none;
   padding: 0;
   cursor: pointer;
@@ -294,6 +295,7 @@ button.close {
 .btn {
   position: relative;
   text-align: center;
+  appearance: none;
   -webkit-appearance: none;
   display: -webkit-inline-box;
   display: -ms-inline-flexbox;
@@ -348,6 +350,9 @@ button.close {
 }
 .btn.btn-simple:hover {
   background-color: #ececec;
+}
+.btn.btn-simple.btn-red:hover {
+  background-color: #c61126;
 }
 .btn.btn-simple:active {
   background-color: #bebebe;
@@ -889,6 +894,7 @@ form .sixty-percent-row {
   display: block;
   width: 100%;
   height: 100%;
+  appearance: none;
   -webkit-appearance: none;
   opacity: 0;
 }

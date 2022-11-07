@@ -12,9 +12,8 @@ import {
   StatusType,
   OptionsObject,
   Additional,
+  IPAddr,
 } from "@components/app/forms/formWrapper/types"
-
-type ServerStatus = "up" | "down"
 
 export interface ServersRecord {
   id?: number
@@ -22,13 +21,13 @@ export interface ServersRecord {
   deleted_at?: string
   name: string
   department_name: string
-  ip_addr: string
+  ip_addr: IPAddr[]
+  provider_id: number
   registrator_id: number
   login_link_cp: string
   web_panel: string
-  monitoring_id: number
-  status: ServerStatus
   registrator_login: string
+  registrator_name: string
   provider_name: string
   record_open?: boolean
   popup_open?: boolean
@@ -67,7 +66,7 @@ type ServerEditRecord = {
   deleted_at: string | null
   name: string
   department_name: string
-  ip_addr: string
+  ip_addr: string[]
   registrator_id: number
   login_link_cp: string
   web_panel: string
@@ -82,7 +81,7 @@ const fillServerRecord = ({ fields }: MyFormData): ServerEditRecord => {
     registrator_id: Number(fields.registrator_id.valueObj.value),
     login_link_cp: fields.login_link_cp.value,
     web_panel: fields.web_panel.value,
-    ip_addr: fields.ip_addr.value,
+    ip_addr: fields.ip_addr.valueArr.map((item) => item.value),
   }
 
   return bodyData
@@ -177,10 +176,12 @@ export const addServer = createAsyncThunk(
 
 export const editServer = createAsyncThunk(
   "servers/editServer",
-  async (server: MyFormData) => {
-    const bodyData = fillServerRecord(server)
+  async ({ form, record }: { form: MyFormData; record: ServersRecord }) => {
+    const bodyData = fillServerRecord(form)
+    bodyData.created_at = record.created_at
+    bodyData.deleted_at = record.deleted_at
 
-    const response = await axiosInstance.put(`/servers/${server.id}`, bodyData)
+    const response = await axiosInstance.put(`/servers/${form.id}`, bodyData)
     return response.data
   }
 )

@@ -106,6 +106,18 @@ export const ServersList: React.FC = () => {
               <span className="title">Веб-панель (опционально)</span>
               <span className="value">{row.web_panel}</span>
             </div>
+            <div className="pagination-tablelist__info">
+              <span className="title">IP-адреса</span>
+              <span className="value">
+                {row.ip_addr &&
+                  row.ip_addr.map((ipItem) => (
+                    <span key={ipItem.ip_addr}>
+                      {ipItem.ip_addr}
+                      <br />
+                    </span>
+                  ))}
+              </span>
+            </div>
           </div>
         )}
         data={items}
@@ -160,29 +172,15 @@ export const ServersList: React.FC = () => {
             ),
           },
           {
-            title: "IP",
+            title: "IPs",
             width: "1 1",
-            getValue: (row) => row.ip_addr,
+            getValue: (row) =>
+              row.ip_addr.map((ipRow) => ipRow.ip_addr).join(", "),
           },
           {
             title: "Отдел",
             width: "1 1",
             getValue: (row) => row.department_name,
-          },
-          {
-            title: "UP/DOWN",
-            width: "1 1",
-            getValue: (row) => (
-              <span
-                style={{
-                  color: row.status === "up" ? "green" : "red",
-                  textTransform: "uppercase",
-                  fontWeight: 600,
-                }}
-              >
-                {row.status}
-              </span>
-            ),
           },
           {
             title: "",

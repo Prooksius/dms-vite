@@ -66,6 +66,7 @@ type SearchReturn = {
   hasMore: boolean
   additional: {
     page: number
+    param?: any
   }
 }
 
@@ -87,7 +88,7 @@ const SelectAsyncField: React.FC<SelectAsyncFieldProps> = ({
   const thisField = form.fields[name]
   const [inputValue, setInputValue] = useState(thisField?.valueObj?.label)
 
-  if (!thisField) {
+   if (!thisField) {
     return (
       <div className="form-field">
         {name} - Ошибка: поле не найдено в списке полей формы

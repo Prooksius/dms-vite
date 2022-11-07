@@ -180,7 +180,13 @@ export const addRegistrator = createAsyncThunk(
 
 export const editRegistrator = createAsyncThunk(
   "registrators/editRegistrator",
-  async ({ form, record }: { form: MyFormData; record: RegistratorsRecord }) => {
+  async ({
+    form,
+    record,
+  }: {
+    form: MyFormData
+    record: RegistratorsRecord
+  }) => {
     const bodyData = fillRegistratorRecord(form)
     bodyData.created_at = record.created_at
     bodyData.deleted_at = record.deleted_at
