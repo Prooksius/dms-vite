@@ -3,7 +3,7 @@ import classnames from "classnames"
 import { FormWrapperContext } from "../formWrapper/formWrapperContext"
 import { components } from "react-select"
 import { AsyncPaginate } from "react-select-async-paginate"
-import { Additional } from "@components/app/forms/formWrapper/types"
+import { Additional, DefaultSelectValue } from "@components/app/forms/formWrapper/types"
 
 const { SingleValue, Option } = components
 
@@ -96,9 +96,9 @@ const SelectAsyncField: React.FC<SelectAsyncFieldProps> = ({
     )
   }
 
-  const defaultOptions = []
+  const defaultOptions: DefaultSelectValue[] = []
   if (thisField.valueObj.value) {
-    defaultOptions.push(thisField.valueObj)
+    //defaultOptions.push(thisField.valueObj)
   }
 
   const required = thisField.validations.required || false

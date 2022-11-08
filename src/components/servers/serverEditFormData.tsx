@@ -94,7 +94,7 @@ export const serverEditFormData: MyFormData = {
       },
       dependency: {
         field: "provider_id",
-        type: "loadDropdown",
+        type: "loadOptions",
       },
       errorMessage: "",
       dirty: false,
@@ -145,7 +145,6 @@ export const fillServerForm = (
       filledFormData.fields.provider_id.valueObj = provider
       filledFormData.fields.provider_id.options = [
         { value: "", label: "Не выбрано" },
-        provider,
       ]
     } else {
       filledFormData.fields.provider_id.valueObj = {
@@ -162,7 +161,6 @@ export const fillServerForm = (
       filledFormData.fields.registrator_id.valueObj = registrator
       filledFormData.fields.registrator_id.options = [
         { value: "", label: "Не выбрано" },
-        registrator,
       ]
     } else {
       filledFormData.fields.registrator_id.valueObj = {

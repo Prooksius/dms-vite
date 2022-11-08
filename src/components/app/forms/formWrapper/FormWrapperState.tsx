@@ -10,6 +10,8 @@ import {
   FormContextSetFieldFunc,
   FormContextCheckFormFunc,
   FormContextProps,
+  CHECK_FIELD,
+  FormContextCheckFieldFunc,
 } from "./types"
 import { FormWrapperContext } from "./formWrapperContext"
 import { formWrapperReducer } from "./formWrapperReducer"
@@ -31,6 +33,9 @@ export const FormWrapperState: React.FC<FormWrapperStateProps> = ({
   const checkForm: FormContextCheckFormFunc = () =>
     dispatch({ type: CHECK_FORM })
 
+  const checkField: FormContextCheckFieldFunc = (field_id: string) =>
+    dispatch({ type: CHECK_FIELD, payload: { field: field_id } })
+
   const clearForm: FormContextCheckFormFunc = () =>
     dispatch({ type: CLEAR_FORM })
 
@@ -40,6 +45,7 @@ export const FormWrapperState: React.FC<FormWrapperStateProps> = ({
   const contextProps: FormContextProps = {
     form: formState,
     checkForm,
+    checkField,
     setForm,
     clearForm,
     setFieldValue,

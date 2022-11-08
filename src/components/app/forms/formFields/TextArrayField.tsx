@@ -54,7 +54,10 @@ const TextArrayField: React.FC<TextArrayFieldProps> = ({ name }) => {
                 onChange={(e) =>
                   setFieldValue({
                     field: name,
-                    value: { value: e.target.value },
+                    value: {
+                      value: e.target.value,
+                      checked: true,
+                    },
                     index,
                   })
                 }

@@ -47,15 +47,23 @@ export interface DomainsRecord {
   deleted_at?: string
   name: string
   department_name: string
-  registrator_id: number
+
+  provider_id: number
   registrator_name: string
+  registrator_id: number
+  registrator_acc_name: string
   server_id: number
   server_name: string
-  provider_id: number
-  dns_hosting: string
+
+  hosting_id: number
+  hosting_name: string
+  hosting_acc_id: number
+  hosting_acc_name: string
   integration_cloudflare_status: boolean
   integration_registrator_status: boolean
+
   ns: string[]
+
   whois_status: boolean
   whois_condition: string
   available_status: boolean
@@ -68,11 +76,14 @@ export interface DomainsRecord {
   pagespeed_condition?: string
   geo_status: string[]
   expirationtime_status: boolean
+  expirationtime_condition: string
+
   subdomains: SubdomainsRecord[]
   monitoring_id: number
   registration_date: string
   geo_condition: string[]
-  expirationtime_condition: string
+  notes: string
+
   record_open?: boolean
   popup_open?: boolean
 }
@@ -115,10 +126,15 @@ type DomainEditRecord = {
   deleted_at: string
   name: string
   department_name: string
-  registrator_id: number
+
   server_id: number
+  registrator_id: number
   provider_id: number
+  hosting_id: number
+  hosting_acc_id: number
+
   ns: string[]
+
   whois_status: boolean
   available_status: boolean
   rkn_status: boolean
@@ -126,6 +142,8 @@ type DomainEditRecord = {
   geo_status: string[]
   expirationtime_status: boolean
   subdomains: SubdomainsEditRecord[]
+
+  notes: string
 }
 
 const fillDomainEditRecord = (
@@ -159,12 +177,15 @@ const fillDomainEditRecord = (
       fields.expirationtime_status.value === "1" ? true : false,
     provider_id: Number(fields.provider_id.valueObj.value),
     registrator_id: Number(fields.registrator_id.valueObj.value),
+    hosting_id: Number(fields.hosting_id.valueObj.value),
+    hosting_acc_id: Number(fields.hosting_acc_id.valueObj.value),
     server_id: Number(fields.server_id.valueObj.value),
     rkn_status: fields.rkn_status.value === "1" ? true : false,
     ssl_status: fields.ssl_status.value === "1" ? true : false,
     whois_status: fields.whois_status.value === "1" ? true : false,
     subdomains: subdomains,
     geo_status: [],
+    notes: fields.notes.value,
   }
 
   return bodyData

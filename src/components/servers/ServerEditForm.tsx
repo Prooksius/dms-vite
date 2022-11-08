@@ -1,11 +1,8 @@
 import React, { ReactElement } from "react"
 import FormWrapper from "@components/app/forms/formWrapper/FormWrapper"
-import { toastAlert } from "@config"
 import TextField from "@components/app/forms/formFields/TextField"
 import SelectField from "@components/app/forms/formFields/SelectField"
 import TextArrayField from "@components/app/forms/formFields/TextArrayField"
-import CheckboxField from "@components/app/forms/formFields/CheckboxField"
-import RadioField from "@components/app/forms/formFields/RadioField"
 import {
   selectServerById,
   addServer,
@@ -20,20 +17,14 @@ import {
   fillServerForm,
 } from "./serverEditFormData"
 import {
-  DefaultSelectValue,
   MyFormData,
-  SelectValue,
 } from "@components/app/forms/formWrapper/types"
 import SelectAsyncField from "@components/app/forms/formFields/SelectAsyncField"
 import {
   getProviderRegistratorNames,
-  loadRegistratorOptions,
-  RegistratorsShortRecord,
 } from "@store/slices/registratorsSlice"
 import { loadDepartmentOptions } from "@store/slices/domainsSlice"
 import { loadProviderOptions } from "@store/slices/providersSlice"
-import { axiosInstance } from "@store/axiosInstance"
-import { ServerGetResponse } from "@store/index"
 
 interface ServerEditFormProps {
   id?: number

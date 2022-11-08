@@ -37,7 +37,7 @@ export const filterFormData: MyFormData = {
       validations: {},
       dependency: {
         field: "provider_id",
-        type: "loadDropdown",
+        type: "loadOptions",
       },
       errorMessage: "",
       dirty: false,

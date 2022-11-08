@@ -24,8 +24,14 @@ import { MyFormData } from "@components/app/forms/formWrapper/types"
 import SubdomainsField from "@components/app/forms/formFields/SubdomainsField"
 import SelectAsyncField from "@components/app/forms/formFields/SelectAsyncField"
 import { loadServerOptions } from "@store/slices/serversSlice"
-import { loadRegistratorOptions } from "@store/slices/registratorsSlice"
+import {
+  getProviderRegistratorNames,
+  getRegistratorNS,
+  loadRegistratorOptions,
+} from "@store/slices/registratorsSlice"
 import { loadProviderOptions } from "@store/slices/providersSlice"
+import TextareaField from "@components/app/forms/formFields/TextareaField"
+import CheckboxArrayField from "@components/app/forms/formFields/CheckboxArrayField"
 
 interface DomainEditFormProps {
   id?: number
@@ -80,20 +86,30 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
               searchCallback={loadServerOptions}
             />
             <SelectAsyncField
-              name={"registrator_id"}
-              searchCallback={loadRegistratorOptions}
+              name={"provider_id"}
+              searchCallback={loadProviderOptions}
             />
+            <SelectField
+              name={"registrator_id"}
+              loadCallback={getProviderRegistratorNames}
+            />
+            <TextareaField name="notes" />
           </div>
           <div className="col-lg-3 col-md-6 col-sm-12">
             <h4>DNS хостинг</h4>
             <SelectAsyncField
-              name={"provider_id"}
+              name={"hosting_id"}
               searchCallback={loadProviderOptions}
             />
-            <h5>
-              NS <span className="required">*</span>
-            </h5>
-            <TextArrayField name="ns" />
+            <SelectField
+              name={"hosting_acc_id"}
+              loadCallback={getProviderRegistratorNames}
+            />
+            <CheckboxArrayField
+              name="ns"
+              initialLoad={false}
+              loadCallback={getRegistratorNS}
+            />
           </div>
           <div className="col-lg-3 col-md-6 col-sm-12">
             <h4>Мониторинг</h4>

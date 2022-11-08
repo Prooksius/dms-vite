@@ -13,6 +13,7 @@ import {
   OptionsObject,
   Additional,
   DefaultSelectValue,
+  NS,
 } from "@components/app/forms/formWrapper/types"
 
 export interface RegistratorsRecord {
@@ -120,6 +121,27 @@ export const getProviderRegistratorNames = async (
   }))
   ret.unshift({ value: "", label: "Не выбрано" })
   return ret
+}
+
+export const getRegistratorNS = async (param: any): Promise<NS[]> => {
+  if (!param) param = "-1"
+  let item: NS[] = []
+  try {
+    const response = await axiosInstance.get<RegistratorsRecord>(
+      `/registrators/getOne/${param}`
+    )
+
+    console.log("response.data", response.data)
+    item = response.data.ns
+      ? response.data.ns.map((item) => ({
+          value: item,
+          checked: true,
+        }))
+      : []
+  } catch (e) {
+    item = []
+  }
+  return item
 }
 
 // load options using API call

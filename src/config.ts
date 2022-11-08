@@ -43,7 +43,7 @@ export function formatDateTime(
   return new Intl.DateTimeFormat(lang, options).format(new Date(value))
 }
 
-export function pluralType(n: number, lang = 'ru-RU'): number {
+export function pluralType(n: number, lang = "ru-RU"): number {
   if (lang === "ru-RU") {
     return n % 10 == 1 && n % 100 != 11
       ? 0

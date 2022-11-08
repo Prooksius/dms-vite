@@ -50,7 +50,7 @@ export const domainEditFormData: MyFormData = {
       dirty: false,
     },
     provider_id: {
-      label: "Провайдер",
+      label: "Регистратор",
       value: "",
       valueObj: { value: "", label: "Не выбрано" },
       valueArr: [],
@@ -64,7 +64,7 @@ export const domainEditFormData: MyFormData = {
       dirty: false,
     },
     registrator_id: {
-      label: "Регистратор",
+      label: "Аккаунт регистратора",
       type: "select",
       value: "",
       valueObj: { value: "", label: "Не выбрано" },
@@ -74,18 +74,58 @@ export const domainEditFormData: MyFormData = {
       validations: {
         required: true,
       },
+      dependency: {
+        field: "provider_id",
+        type: "loadOptions",
+      },
+      errorMessage: "",
+      dirty: false,
+    },
+    hosting_id: {
+      label: "Хостинг",
+      value: "",
+      valueObj: { value: "", label: "Не выбрано" },
+      valueArr: [],
+      type: "select",
+      dropdown: "default",
+      options: [{ value: "", label: "Не выбрано" }],
+      validations: {
+        required: true,
+      },
+      errorMessage: "",
+      dirty: false,
+    },
+    hosting_acc_id: {
+      label: "Аккаунт хостинга",
+      type: "select",
+      value: "",
+      valueObj: { value: "", label: "Не выбрано" },
+      valueArr: [],
+      dropdown: "default",
+      options: [{ value: "", label: "Не выбрано" }],
+      validations: {
+        required: true,
+      },
+      dependency: {
+        field: "hosting_id",
+        type: "loadOptions",
+      },
       errorMessage: "",
       dirty: false,
     },
     ns: {
-      label: "",
-      type: "array",
+      label: "NS",
+      type: "checklist",
       value: "",
       valueObj: { value: "", label: "Не выбрано" },
       valueArr: [],
       validations: {
         required: true,
         minValue: 1,
+      },
+      dependency: {
+        field: "hosting_acc_id",
+        type: "loadOptions",
       },
       errorMessage: "",
       dirty: false,
@@ -182,6 +222,18 @@ export const domainEditFormData: MyFormData = {
       errorMessage: "",
       dirty: false,
     },
+    notes: {
+      label: "Комментарии",
+      type: "text",
+      value: "",
+      valueObj: { value: "", label: "Не выбрано" },
+      valueArr: [],
+      validations: {
+        maxLength: 5000,
+      },
+      errorMessage: "",
+      dirty: false,
+    },
   },
 }
 
@@ -191,6 +243,7 @@ export const clearDomainForm = (filledFormData: MyFormData) => {
     filledFormData.fields[key].errorMessage = ""
   })
   filledFormData.fields.name.value = ""
+  filledFormData.fields.notes.value = ""
   filledFormData.fields.department_name.value = ""
   filledFormData.fields.server_id.valueObj = {
     value: "",
@@ -201,6 +254,14 @@ export const clearDomainForm = (filledFormData: MyFormData) => {
     label: "Не выбрано",
   }
   filledFormData.fields.registrator_id.valueObj = {
+    value: "",
+    label: "Не выбрано",
+  }
+  filledFormData.fields.hosting_id.valueObj = {
+    value: "",
+    label: "Не выбрано",
+  }
+  filledFormData.fields.hosting_acc_id.valueObj = {
     value: "",
     label: "Не выбрано",
   }
@@ -240,10 +301,12 @@ export const fillDomainForm = (
     const ns = recordNS.map((item) => {
       return {
         value: item,
+        checked: true,
       } as NS
     })
 
     filledFormData.fields.name.value = domain.name
+    filledFormData.fields.notes.value = domain.notes
     filledFormData.fields.department_name.valueObj = {
       value: domain.department_name,
       label: domain.department_name,
@@ -269,7 +332,7 @@ export const fillDomainForm = (
     if (domain.provider_id) {
       const provider = {
         value: String(domain.provider_id),
-        label: domain.dns_hosting,
+        label: domain.registrator_name,
       }
       filledFormData.fields.provider_id.valueObj = provider
       filledFormData.fields.provider_id.options = [
@@ -286,15 +349,47 @@ export const fillDomainForm = (
     if (domain.registrator_id) {
       const registrator = {
         value: String(domain.registrator_id),
-        label: domain.registrator_name,
+        label: domain.registrator_acc_name,
       }
       filledFormData.fields.registrator_id.valueObj = registrator
       filledFormData.fields.registrator_id.options = [
         { value: "", label: "Не выбрано" },
-        registrator,
       ]
     } else {
       filledFormData.fields.registrator_id.valueObj = {
+        value: "",
+        label: "Не выбрано",
+      }
+    }
+
+    if (domain.hosting_id) {
+      const hosting = {
+        value: String(domain.hosting_id),
+        label: domain.hosting_name,
+      }
+      filledFormData.fields.hosting_id.valueObj = hosting
+      filledFormData.fields.hosting_id.options = [
+        { value: "", label: "Не выбрано" },
+        hosting,
+      ]
+    } else {
+      filledFormData.fields.hosting_id.valueObj = {
+        value: "",
+        label: "Не выбрано",
+      }
+    }
+
+    if (domain.hosting_acc_id) {
+      const hosting_acc = {
+        value: String(domain.hosting_acc_id),
+        label: domain.hosting_acc_name,
+      }
+      filledFormData.fields.hosting_acc_id.valueObj = hosting_acc
+      filledFormData.fields.hosting_acc_id.options = [
+        { value: "", label: "Не выбрано" },
+      ]
+    } else {
+      filledFormData.fields.hosting_acc_id.valueObj = {
         value: "",
         label: "Не выбрано",
       }

@@ -426,10 +426,11 @@ button.close {
   margin-bottom: 0;
 }
 .form-field > input,
+.form-field > textarea,
 .form-field > select {
   border: 1px solid var(--lightBorderColor);
   background: #fff;
-  padding: 15px;
+  padding: 15px 10px;
   border-radius: 5px;
   width: 100%;
   font-size: 16px;
@@ -438,11 +439,16 @@ button.close {
   font-feature-settings: "pnum" on, "lnum" on;
   transition: all 0.3s ease;
 }
-.form-field.hasValue > input {
+.form-field > textarea {
+  resize: vertical;
+}
+.form-field.hasValue > input,
+.form-field.hasValue > textarea {
   border: 1px solid var(--lightBorderColor);
   background: #fff;
 }
-.form-field > input:focus {
+.form-field > input:focus,
+.form-field > textarea:focus {
   border: 1px solid var(--linkColor);
   background: #fff;
 }
@@ -502,22 +508,35 @@ h5 span.required {
   padding: 0;
   left: 5px;
 }
-.form-field.invalid .checkbox .checkbox-inner input[type="checkbox"] + i {
+.form-field.invalid .checkbox .checkbox-inner input[type="checkbox"] + i,
+.form-field.invalid .checkbox-array {
   border-color: var(--errorColor);
 }
+.form-field.invalid
+  .checkbox-array
+  .checkbox
+  .checkbox-inner
+  input[type="checkbox"]
+  + i {
+  border-color: #cbcbcb;
+}
 .form-field > input:focus ~ label,
+.form-field > textarea:focus ~ label,
 .form-field.date-time-field .rdt.rdtOpen ~ label,
 .form-field > select:focus ~ label {
   color: var(--linkColor);
 }
 .form-field > input:focus ~ label,
+.form-field > textarea:focus ~ label,
 .form-field.radio-field > label,
 .form-field > select ~ label,
 .form-field.date-time-field .rdt.rdtOpen ~ label,
 .form-field.date-time-field.hasValue .rdt ~ label,
 .form-field.hasValue .multiselect ~ label,
 .form-field.phonemask-field > label,
-.form-field.hasValue input ~ label {
+.form-field.hasValue input ~ label,
+.form-field.hasValue .checkbox-array ~ label,
+.form-field.hasValue textarea ~ label {
   background: #fff;
   transform: scale(0.75) translateX(8px) translateY(-30px);
 }
@@ -552,6 +571,16 @@ h5 span.required {
   margin-top: 10px;
   margin-bottom: -35px;
   margin-left: -11px;
+}
+
+.form-field .checkbox-array {
+  display: flex;
+  flex-direction: column;
+  gap: 15px 10px;
+  padding: 15px 10px;
+  border: 1px solid var(--lightBorderColor);
+  border-radius: 5px;
+  min-height: 53px;
 }
 
 .form-field.date-time-field svg {
@@ -836,6 +865,8 @@ form .form-field.invalid select {
   border-color: var(--errorColor);
 }
 form .form-field.valid:not(.form-array-field) input,
+form .form-field.valid textarea,
+form .form-field.valid .checkbox-array,
 form .form-field.valid select {
   border-color: var(--successColor);
 }
@@ -885,7 +916,6 @@ form .sixty-percent-row {
 }
 .checkbox .checkbox-inner input[type="checkbox"],
 .radio .radio-inner input[type="radio"] {
-  z-index: 2;
   position: absolute;
   top: 0;
   left: 0;
@@ -909,6 +939,7 @@ form .sixty-percent-row {
   background-color: #fff;
   border: 1px solid #cbcbcb;
   border-radius: 4px;
+  pointer-events: none;
   transition: all 0.15s ease;
 }
 .radio .radio-inner input[type="radio"] + i {

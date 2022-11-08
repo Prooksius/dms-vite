@@ -14,7 +14,14 @@ export type ActionType =
   | typeof CHECK_FIELD
 
 type DropdownType = "default" | "images"
-type FieldType = "text" | "email" | "select" | "checkbox" | "radio" | "array"
+type FieldType =
+  | "text"
+  | "email"
+  | "select"
+  | "checkbox"
+  | "radio"
+  | "array"
+  | "checklist"
 
 export type SubdomainType = "A" | "CNAME" | ""
 
@@ -55,6 +62,7 @@ export type Additional = {
 
 export type NS = {
   value: string
+  checked: boolean
 }
 export type IPAddr = {
   ip_addr: string
@@ -105,11 +113,13 @@ export type MyFormData = {
 export type FormContextSetFormFunc = (form: MyFormData) => void
 export type FormContextSetFieldFunc = (field: FormFieldData) => void
 export type FormContextCheckFormFunc = () => void
+export type FormContextCheckFieldFunc = (field_id: string) => void
 
 export interface FormContextProps {
   form: MyFormData
   setForm: FormContextSetFormFunc
   checkForm: FormContextCheckFormFunc
+  checkField: FormContextCheckFieldFunc
   clearForm: FormContextCheckFormFunc
   setFieldValue: FormContextSetFieldFunc
 }

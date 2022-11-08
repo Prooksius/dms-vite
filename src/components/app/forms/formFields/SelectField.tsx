@@ -65,7 +65,10 @@ interface SelectFieldProps {
   loadCallback?: (param: string) => Promise<SelectValue[]>
 }
 
-const SelectField: React.FC<SelectFieldProps> = ({ name, loadCallback }) => {
+const SelectField: React.FC<SelectFieldProps> = ({
+  name,
+  loadCallback = null,
+}) => {
   const { form, setFieldValue } = useContext(FormWrapperContext)
 
   const thisField = form.fields[name]
@@ -73,7 +76,7 @@ const SelectField: React.FC<SelectFieldProps> = ({ name, loadCallback }) => {
 
   const getDepFieldValue = (thisField: FieldData): string => {
     if (thisField.dependency) {
-      if (dependField.type in ["text", "checkbox", "radio"]) {
+      if (["text", "checkbox", "radio"].includes(dependField.type)) {
         return dependField.value
       } else if (dependField.type === "select") {
         return dependField.valueObj.value
@@ -89,18 +92,20 @@ const SelectField: React.FC<SelectFieldProps> = ({ name, loadCallback }) => {
     const setDeps = async () => {
       const val = getDepFieldValue(thisField)
       if (dependField && depValue != val) {
-        if (depValue) {
-          setFieldValue({
-            field: name,
-            value: { value: "", label: "Не выбрано" },
-          })
-          setLocalFieldValue({ value: "", label: "Не выбрано" })
-        }
-        setDepValue(val)
-        if (loadCallback) {
-          const options = await loadCallback(val)
-          thisField.options = options
-          setOptions(options)
+        if (thisField.dependency?.type === "loadOptions") {
+          if (depValue) {
+            setFieldValue({
+              field: name,
+              value: { value: "", label: "Не выбрано" },
+            })
+            setLocalFieldValue({ value: "", label: "Не выбрано" })
+          }
+          setDepValue(val)
+          if (loadCallback) {
+            const options = await loadCallback(val)
+            thisField.options = options
+            setOptions(options)
+          }
         }
       }
     }

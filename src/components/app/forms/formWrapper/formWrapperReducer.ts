@@ -12,6 +12,7 @@ import {
   ActionType,
   SelectValue,
   ArrayValue,
+  NS,
 } from "./types"
 import {
   ValidatorProps,
@@ -123,6 +124,11 @@ const handlers: FormHandlers = {
               fieldValue = (<SelectValue>payload.value).value
             } else if (field.type === "array") {
               fieldValue = String(field.valueArr.length)
+            } else if (field.type === "checklist") {
+              fieldValue = String(
+                field.valueArr.filter((valueItem) => (<NS>valueItem).checked)
+                  .length
+              )
             }
             // В вызове функции валидатора:
             //  - первый параметр - параметр валидатора (например в случае minLength(5) - это 5)
@@ -170,6 +176,11 @@ const handlers: FormHandlers = {
               fieldValue = field.valueObj.value
             } else if (field.type === "array") {
               fieldValue = String(field.valueArr.length)
+            } else if (field.type === "checklist") {
+              fieldValue = String(
+                field.valueArr.filter((valueItem) => (<NS>valueItem).checked)
+                  .length
+              )
             }
             // В вызове функции валидатора:
             //  - первый параметр - параметр валидатора (например в случае minLength(5) - это 5)
@@ -198,9 +209,9 @@ const handlers: FormHandlers = {
     const fields = copyState.fields
     console.log("Object.entries(fields)", Object.entries(fields))
 
-    Object.entries(fields).every(([key, field]) => {
+    Object.entries(fields).every(([key2, field]) => {
       const validations = field.validations
-      console.log("validations", key, validations)
+      //console.log("validations", key, validations)
       if (Object.keys(validations).length) {
         field.errorMessage = ""
         field.dirty = true
@@ -212,7 +223,17 @@ const handlers: FormHandlers = {
             fieldValue = field.valueObj.value
           } else if (field.type === "array") {
             fieldValue = String(field.valueArr.length)
+          } else if (field.type === "checklist") {
+            fieldValue = String(
+              field.valueArr.filter((valueItem) => (<NS>valueItem).checked)
+                .length
+            )
           }
+          console.log("field", { field: key2, value: fieldValue })
+          console.log(
+            "in",
+            ["text", "email", "radio", "checkbox"].includes(field.type)
+          )
           const invalid = validateHandlers[key](
             value,
             fieldValue,
@@ -238,7 +259,7 @@ const handlers: FormHandlers = {
         field.value = ""
       } else if (field.type === "select") {
         field.valueObj = { value: "", label: "Не выбрано" }
-      } else if (field.type === "array") {
+      } else if (["array", "checklist"].includes(field.type)) {
         field.valueArr = []
       }
     })

@@ -140,7 +140,7 @@ export const DomainsList: React.FC = () => {
             </div>
             <div className="pagination-tablelist__info">
               <span className="title">Аккаунт регистратора</span>
-              <span className="value">-</span>
+              <span className="value">{row.registrator_acc_name}</span>
             </div>
             <div className="pagination-tablelist__info">
               <span className="title">NS Записи</span>
@@ -233,7 +233,7 @@ export const DomainsList: React.FC = () => {
           {
             title: "DNS-хостинг",
             width: "1 1",
-            getValue: (row) => row.dns_hosting,
+            getValue: (row) => row.hosting_name,
           },
           {
             title: "Код ответа",
