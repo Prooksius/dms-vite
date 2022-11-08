@@ -111,9 +111,15 @@ export const ServersList: React.FC = () => {
               <span className="value">
                 {row.ip_addr &&
                   row.ip_addr.map((ipItem) => (
-                    <span key={ipItem.ip_addr}>
+                    <span
+                      key={ipItem.ip_addr}
+                      style={{
+                        display: "block",
+                        color: ipItem.server_status === "up" ? "green" : "red",
+                        fontWeight: 600,
+                      }}
+                    >
                       {ipItem.ip_addr}
-                      <br />
                     </span>
                   ))}
               </span>

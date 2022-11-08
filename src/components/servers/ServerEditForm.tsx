@@ -26,6 +26,7 @@ import {
 } from "@components/app/forms/formWrapper/types"
 import SelectAsyncField from "@components/app/forms/formFields/SelectAsyncField"
 import {
+  getProviderRegistratorNames,
   loadRegistratorOptions,
   RegistratorsShortRecord,
 } from "@store/slices/registratorsSlice"
@@ -58,30 +59,6 @@ export const ServerEditForm: React.FC<ServerEditFormProps> = ({
     } else {
       dispatch(addServer(formData))
     }
-  }
-
-  const getProviderRegistratorNames = async (
-    param: any
-  ): Promise<DefaultSelectValue[]> => {
-    let items: RegistratorsShortRecord[] = []
-    try {
-      const response = await axiosInstance.get<
-        ServerGetResponse<RegistratorsShortRecord>
-      >(
-        `/registrators/getNames?offset=0&limit=99999999999&provider_id=${param}&name=&partial=true`
-      )
-
-      console.log("response.data", response.data)
-      items = response.data.data ? response.data.data : []
-    } catch (e) {
-      items = []
-    }
-    const ret = items.map((item) => ({
-      value: String(item.id),
-      label: item.name,
-    }))
-    ret.unshift({ value: "", label: "Не выбрано" })
-    return ret
   }
 
   const goFurther = () => {

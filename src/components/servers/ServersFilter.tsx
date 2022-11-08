@@ -28,8 +28,9 @@ import { FormWrapperContext } from "@components/app/forms/formWrapper/formWrappe
 import { DeleteIconSmall } from "@components/app/icons/DeleteIconSmall"
 import { listTooltipShow, setTootipShow } from "@store/slices/globalsSlice"
 import ReactTooltip from "react-tooltip"
-import { loadRegistratorOptions } from "@store/slices/registratorsSlice"
+import { getProviderRegistratorNames } from "@store/slices/registratorsSlice"
 import { loadDepartmentOptions } from "@store/slices/domainsSlice"
+import { loadProviderOptions } from "@store/slices/providersSlice"
 
 type ItemsObject = {
   id: string
@@ -251,14 +252,16 @@ const ServersFilterInner: React.FC = () => {
                 name={"department_name"}
                 searchCallback={loadDepartmentOptions}
               />
-              <SelectField name={"server_status"} />
               <SelectAsyncField
+                name={"provider_id"}
+                searchCallback={loadProviderOptions}
+              />
+              <SelectField
                 name={"registrator_id"}
-                searchCallback={loadRegistratorOptions}
+                loadCallback={getProviderRegistratorNames}
               />
             </div>
             <div className="col-lg-6 col-md-6 col-sm-12">
-              <TextField name={"provider_name"} />
               <SelectField name={"active"} />
             </div>
           </div>

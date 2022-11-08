@@ -28,6 +28,7 @@ import {
   listRegistratorsFilterChanges,
   fetchRegistratorsPage,
 } from "@store/slices/registratorsSlice"
+import { REACT_APP_SSO_URL } from "@config"
 
 const PAGE_TITLE = "Вход"
 
@@ -54,8 +55,7 @@ const GlobalWrapper: React.FC = ({ children }) => {
   const loggedStatus = useSelector(listAuthStatus)
 
   const goToLogin = () => {
-    window.location.href = process.env.REACT_APP_SSO_URL
-    //window.location.href = "https://sso.seoreserved.ru/auth?service=dms_local"
+    window.location.href = REACT_APP_SSO_URL
   }
 
   useEffect(() => {

@@ -40,9 +40,8 @@ export interface ServersShortRecord {
 
 interface ServersFilter
   extends Record<string, string | number | boolean | SelectValue> {
-  provider_name: string
-  server_status: SelectValue
   department_name: SelectValue
+  provider_id: SelectValue
   registrator_id: SelectValue
   active: SelectValue
 }
@@ -139,17 +138,17 @@ export const fetchServersPage = createAsyncThunk(
     const response = await axiosInstance.get<ServerGetResponse<ServersRecord>>(
       `/servers/?offset=${(servers.page - 1) * servers.itemsInPage}&limit=${
         servers.itemsInPage
-      }&name=${servers.search}&registrator_id=${
+      }&name=${servers.search}&provider_id=${
+        servers.filter.provider_id?.value
+          ? servers.filter.provider_id.value
+          : ""
+      }&registrator_id=${
         servers.filter.registrator_id?.value
           ? servers.filter.registrator_id.value
           : ""
       }&department_name=${
         servers.filter.department_name?.value
           ? servers.filter.department_name.value
-          : ""
-      }${
-        servers.filter.server_status?.value
-          ? "&server_status=" + servers.filter.server_status.value
           : ""
       }${
         servers.filter.active?.value
@@ -213,9 +212,8 @@ const initialState: ServersState = {
   error: null,
   search: "",
   filter: {
-    provider_name: null,
-    server_status: null,
     department_name: null,
+    provider_id: null,
     registrator_id: null,
     active: null,
   },

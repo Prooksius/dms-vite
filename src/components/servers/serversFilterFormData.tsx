@@ -14,18 +14,14 @@ export const filterFormData: MyFormData = {
       errorMessage: "",
       dirty: false,
     },
-    server_status: {
-      label: "Статус",
+    provider_id: {
+      label: "Хостинг",
+      type: "select",
       value: "",
       valueObj: { value: "", label: "Не выбрано" },
       valueArr: [],
-      type: "select",
       dropdown: "default",
-      options: [
-        { value: "", label: "Не выбрано" },
-        { value: "down", label: "DOWN" },
-        { value: "up", label: "UP" },
-      ],
+      options: [{ value: "", label: "Не выбрано" }],
       validations: {},
       errorMessage: "",
       dirty: false,
@@ -39,6 +35,10 @@ export const filterFormData: MyFormData = {
       dropdown: "default",
       options: [{ value: "", label: "Не выбрано" }],
       validations: {},
+      dependency: {
+        field: "provider_id",
+        type: "loadDropdown",
+      },
       errorMessage: "",
       dirty: false,
     },
