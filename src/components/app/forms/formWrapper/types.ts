@@ -76,6 +76,7 @@ export type Subdomain = {
   type: SubdomainType
   available_check: boolean
   monitoring_id: number
+  checked?: boolean
 }
 export type ArrayValue = NS | Subdomain
 export type FieldValueArray = ArrayValue[]

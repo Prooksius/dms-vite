@@ -172,7 +172,7 @@ const fillDomainEditRecord = (
     name: fields.name.value,
     available_status: fields.available_status.value === "1" ? true : false,
     department_name: fields.department_name.valueObj.value,
-    ns: fields.ns.valueArr.map((item) => item.value),
+    ns: fields.ns.valueArr.filter(ns_rec => ns_rec.checked).map((item) => item.value),
     expirationtime_status:
       fields.expirationtime_status.value === "1" ? true : false,
     provider_id: Number(fields.provider_id.valueObj.value),
