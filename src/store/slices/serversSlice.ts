@@ -38,6 +38,11 @@ export interface ServersShortRecord {
   name: string
 }
 
+export interface ServerIPRecord {
+  id: number
+  ip_addr: string
+}
+
 interface ServersFilter
   extends Record<string, string | number | boolean | SelectValue> {
   department_name: SelectValue
@@ -124,6 +129,29 @@ export const loadServerOptions = async (
       page: page + 1,
     },
   }
+}
+
+export const getServerIPs = async (param: any): Promise<SelectValue[]> => {
+  if (!param) return [{ value: "", label: "Не выбрано" }]
+
+  let items: SelectValue[] = []
+  try {
+    const response = await axiosInstance.get<ServerGetResponse<ServerIPRecord>>(
+      `/servers/getIps/${param}?offset=0&limit=99999999999&partial=true`
+    )
+
+    console.log("response.data", response.data)
+    items = response.data.data
+      ? response.data.data.map((item) => ({
+          value: String(item.id),
+          label: item.ip_addr,
+        }))
+      : []
+  } catch (e) {
+    items = []
+  }
+  items.unshift({ value: "", label: "Не выбрано" })
+  return items
 }
 
 export const fetchServersPage = createAsyncThunk(

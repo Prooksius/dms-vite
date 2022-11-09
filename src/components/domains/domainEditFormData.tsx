@@ -218,7 +218,9 @@ export const domainEditFormData: MyFormData = {
       valueArr: [],
       dropdown: "default",
       options: [{ value: "", label: "Не выбрано" }],
-      validations: {},
+      validations: {
+        subdomainsIP: true
+      },
       errorMessage: "",
       dirty: false,
     },
@@ -289,8 +291,11 @@ export const fillDomainForm = (
       return {
         id: subdomain.id,
         title: subdomain.subdomain_name,
-        value: subdomain.a ? subdomain.a : subdomain.cname,
-        type: subdomain.cname ? "CNAME" : "A",
+        server_id: subdomain.server_id,
+        server_name: subdomain.server_name,
+        ip_addr_id: subdomain.ip_addr_id,
+        ip_addr: subdomain.ip_addr,
+        type: "A",
         available_check: subdomain.available_status,
         monitoring_id: subdomain.monitoring_id,
       } as Subdomain

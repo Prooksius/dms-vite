@@ -13,6 +13,7 @@ import {
   SelectValue,
   ArrayValue,
   NS,
+  Subdomain,
 } from "./types"
 import {
   ValidatorProps,
@@ -27,6 +28,7 @@ import {
   isAlpha,
   isAlphanumeric,
   isIP,
+  subdomainsIPCheck,
 } from "./myValidators"
 
 type FormPayload = {
@@ -71,6 +73,10 @@ type FormHandlers = {
 
 // Массив валидаторов, ссылающихся на другие поля формы
 const connectedFields = ["sameAs"]
+
+const checkSubdomains = (subdomains: Subdomain[]): string | boolean => {
+  return subdomainsIPCheck(subdomains)
+}
 
 const validateHandlers: FormValidHandlers = {
   required: (param, value, fields) => param && required({ value }),
@@ -130,21 +136,29 @@ const handlers: FormHandlers = {
                   .length
               )
             }
-            // В вызове функции валидатора:
-            //  - первый параметр - параметр валидатора (например в случае minLength(5) - это 5)
-            //  - второй параметр - значение текущего поля
-            //  - третий параметр - все поля формы
-            const invalid = validateHandlers[key](
-              value,
-              fieldValue,
-              copyState.fields,
-              String(value)
-            )
-            if (connectedFields.includes(key)) {
-              handlers[CHECK_FIELD](state, {
-                type: CHECK_FIELD,
-                payload: { field: String(value) },
-              })
+            let invalid: string | boolean = false
+
+            if (validateHandlers[key]) {
+              // В вызове функции валидатора:
+              //  - первый параметр - параметр валидатора (например в случае minLength(5) - это 5)
+              //  - второй параметр - значение текущего поля
+              //  - третий параметр - все поля формы
+              invalid = validateHandlers[key](
+                value,
+                fieldValue,
+                copyState.fields,
+                String(value)
+              )
+              if (connectedFields.includes(key)) {
+                handlers[CHECK_FIELD](state, {
+                  type: CHECK_FIELD,
+                  payload: { field: String(value) },
+                })
+              }
+            } else {
+              if (key === "subdomainsIP") {
+                invalid = checkSubdomains(field.valueArr as Subdomain[])
+              }
             }
             if (invalid) {
               if (typeof invalid === "string") field.errorMessage = invalid
@@ -182,16 +196,24 @@ const handlers: FormHandlers = {
                   .length
               )
             }
-            // В вызове функции валидатора:
-            //  - первый параметр - параметр валидатора (например в случае minLength(5) - это 5)
-            //  - второй параметр - значение текущего поля
-            //  - третий параметр - все поля формы
-            const invalid = validateHandlers[key](
-              value,
-              fieldValue,
-              copyState.fields,
-              String(value)
-            )
+            let invalid: string | boolean = false
+
+            if (validateHandlers[key]) {
+              // В вызове функции валидатора:
+              //  - первый параметр - параметр валидатора (например в случае minLength(5) - это 5)
+              //  - второй параметр - значение текущего поля
+              //  - третий параметр - все поля формы
+              invalid = validateHandlers[key](
+                value,
+                fieldValue,
+                copyState.fields,
+                String(value)
+              )
+            } else {
+              if (key === "subdomainsIP") {
+                invalid = checkSubdomains(field.valueArr as Subdomain[])
+              }
+            }
             if (invalid) {
               if (typeof invalid === "string") field.errorMessage = invalid
               return false
@@ -207,7 +229,7 @@ const handlers: FormHandlers = {
     const copyState = Object.assign({}, state)
 
     const fields = copyState.fields
-    console.log("Object.entries(fields)", Object.entries(fields))
+    //console.log("Object.entries(fields)", Object.entries(fields))
 
     Object.entries(fields).every(([key2, field]) => {
       const validations = field.validations
@@ -229,17 +251,20 @@ const handlers: FormHandlers = {
                 .length
             )
           }
-          console.log("field", { field: key2, value: fieldValue })
-          console.log(
-            "in",
-            ["text", "email", "radio", "checkbox"].includes(field.type)
-          )
-          const invalid = validateHandlers[key](
-            value,
-            fieldValue,
-            fields,
-            String(value)
-          )
+          let invalid: string | boolean = false
+
+          if (validateHandlers[key]) {
+            invalid = validateHandlers[key](
+              value,
+              fieldValue,
+              fields,
+              String(value)
+            )
+          } else {
+            if (key === "subdomainsIP") {
+              invalid = checkSubdomains(field.valueArr as Subdomain[])
+            }
+          }
           if (invalid) {
             if (typeof invalid === "string") field.errorMessage = invalid
             return false

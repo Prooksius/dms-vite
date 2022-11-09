@@ -49,6 +49,7 @@ export type ValidationsData = {
   email?: boolean
   sameAs?: string
   isIP?: boolean
+  subdomainsIP?: boolean
 }
 
 export type OptionsObject = {
@@ -69,11 +70,16 @@ export type IPAddr = {
   server_status: ServerStatus
   monitoring_id: number
 }
+
 export type Subdomain = {
   id: number
   title: string
-  value: string
+  value?: string
   type: SubdomainType
+  ip_addr_id: number
+  ip_addr: string
+  server_id: number
+  server_name: string
   available_check: boolean
   monitoring_id: number
   checked?: boolean

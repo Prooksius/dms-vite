@@ -101,7 +101,8 @@ const fillRegistratorRecord = ({
 export const getProviderRegistratorNames = async (
   param: any
 ): Promise<DefaultSelectValue[]> => {
-  if (!param) param = "-1"
+  if (!param) return []
+  
   let items: RegistratorsShortRecord[] = []
   try {
     const response = await axiosInstance.get<
@@ -124,7 +125,8 @@ export const getProviderRegistratorNames = async (
 }
 
 export const getRegistratorNS = async (param: any): Promise<NS[]> => {
-  if (!param) param = "-1"
+  if (!param) return []
+
   let item: NS[] = []
   try {
     const response = await axiosInstance.get<RegistratorsRecord>(

@@ -21,6 +21,10 @@ interface SubdomainsRecord {
   created_at?: string
   deleted_at?: string
   subdomain_name: string
+  server_id: number
+  server_name: string
+  ip_addr_id: number
+  ip_addr: string
   a: string
   cname: string
   available_status: boolean
@@ -34,6 +38,7 @@ interface SubdomainsEditRecord {
   created_at?: string
   deleted_at?: string
   subdomain_name: string
+  ip_addr_id: number
   a: string
   cname: string
   available_status: boolean
@@ -78,7 +83,7 @@ export interface DomainsRecord {
   expirationtime_status: boolean
   expirationtime_condition: string
 
-  subdomains: SubdomainsRecord[]
+  subdomains: SubdomainsRecord[] | null
   monitoring_id: number
   registration_date: string
   geo_condition: string[]
@@ -157,8 +162,9 @@ const fillDomainEditRecord = (
       subdomain_name: !subdomain.id
         ? subdomain.title + "." + fields.name.value
         : subdomain.title,
-      a: subdomain.type === "A" ? subdomain.value : "",
-      cname: subdomain.type === "CNAME" ? subdomain.value : "",
+      ip_addr_id: subdomain.ip_addr_id,
+      a: "",
+      cname: "",
       available_status: subdomain.available_check,
     }
     if (subdomain.id) ret.id = subdomain.id

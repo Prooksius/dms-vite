@@ -517,6 +517,12 @@ h5 span.required {
   .checkbox
   .checkbox-inner
   input[type="checkbox"]
+  + i,
+.form-field.invalid
+  .form-fild-subdomain-container
+  .checkbox
+  .checkbox-inner
+  input[type="checkbox"]
   + i {
   border-color: #cbcbcb;
 }
@@ -541,7 +547,7 @@ h5 span.required {
   transform: scale(0.75) translateX(8px) translateY(-30px);
 }
 .form-field select ~ label,
-.form-field .multiselect ~ label {
+.form-field > .multiselect ~ label {
   box-shadow: 0 5px 15px #fff;
   border-radius: 10px;
 }
@@ -619,36 +625,36 @@ h5 span.required {
     url("data:image/svg+xml;base64, PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTciIHZpZXdCb3g9IjAgMCAxNiAxNyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNOCA5LjUwMDcxTDExLjk5OTEgNS41TDE0IDcuNDk5NjVMOCAxMy41TDIgNy40OTk2NUw0LjAwMDk0IDUuNUw4IDkuNTAwNzFaIiBmaWxsPSIjMkQyRTNDIi8+PC9zdmc+")
     no-repeat right 5px top 55%;
 }
-.form-field .multiselect {
+.form-field > .multiselect {
   font-size: inherit;
 }
-.form-field .multiselect {
+.form-field > .multiselect {
   min-height: 53px;
 }
-.form-field .multiselect .inner_menu {
+.form-field > .multiselect .inner_menu {
   z-index: 53;
 }
 .multiselect .inner__single-value b {
   font-weight: normal;
 }
-.form-field .multiselect .inner__control {
+.form-field > .multiselect .inner__control {
   min-height: 53px;
   border: 1px solid var(--lightBorderColor);
   box-shadow: none;
   transition: 0.3s all ease;
 }
-.form-field .multiselect .inner__control.inner__control--is-focused {
+.form-field > .multiselect .inner__control.inner__control--is-focused {
   border: 1px solid var(--linkColor);
 }
-.form-field.valid .multiselect .inner__control {
+.form-field.valid > .multiselect .inner__control {
   border-color: var(--successColor) !important;
 }
-.form-field .multiselect .inner__control .inner__dropdown-indicator {
+.form-field > .multiselect .inner__control .inner__dropdown-indicator {
   transform: rotate(0deg);
   transition: 0.3s all ease;
 }
 .form-field
-  .multiselect
+  > .multiselect
   .inner__control.inner__control--menu-is-open
   .inner__dropdown-indicator {
   transform: rotate(180deg);
@@ -767,6 +773,7 @@ h5 span.required {
   left: 15px;
   bottom: 9px;
   opacity: 0.54;
+  pointer-events: none;
 }
 .form-fild-array-item input:focus {
   z-index: 1;
@@ -861,13 +868,14 @@ form .message.error {
 }
 
 form .form-field.invalid:not(.form-array-field) input,
-form .form-field.invalid select {
+.form-field.invalid > .multiselect .inner__control,
+form .form-field.invalid > select {
   border-color: var(--errorColor);
 }
 form .form-field.valid:not(.form-array-field) input,
 form .form-field.valid textarea,
 form .form-field.valid .checkbox-array,
-form .form-field.valid select {
+form .form-field.valid > select {
   border-color: var(--successColor);
 }
 form .three-fields,
@@ -1166,6 +1174,12 @@ form .sixty-percent-row {
   line-height: 33px;
 }
 
+.domain-status-line {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
 .domains-header {
   position: relative;
 }
@@ -1319,7 +1333,7 @@ form .sixty-percent-row {
   display: flex;
   gap: 5px;
   flex-wrap: wrap;
-  width: 60px;
+  width: 38px;
 }
 .pagination-tablelist__info {
   display: flex;

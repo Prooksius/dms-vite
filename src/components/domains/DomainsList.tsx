@@ -67,8 +67,10 @@ export const DomainsList: React.FC = () => {
       ...item,
       ns: item.ns ? item.ns.join("; ") : "",
       subdomains: item.subdomains
-        .map((subdomain) => subdomain.subdomain_name)
-        .join("; "),
+        ? item.subdomains
+            .map((subdomain) => subdomain.subdomain_name)
+            .join("; ")
+        : "",
     }
   })
 
@@ -129,11 +131,7 @@ export const DomainsList: React.FC = () => {
         status={status}
         getExpanded={(row) => (
           <div className="pagination-tablelist__row-down">
-            <div className="pagination-tablelist__icons">
-              <SslCheckIcon enabled={row.ssl_status} />
-              <RknCheckIcon enabled={row.rkn_status} />
-              <DateCheckIcon enabled={row.expirationtime_status} />
-            </div>
+            <div className="pagination-tablelist__icons"></div>
             <div className="pagination-tablelist__info">
               <span className="title">Имя регистратора</span>
               <span className="value">{row.registrator_name}</span>
@@ -208,21 +206,26 @@ export const DomainsList: React.FC = () => {
           },
           {
             title: "Состояние",
-            width: "0.5 1",
+            width: "1 1",
             getValue: (row) => (
-              <span
-                style={{
-                  color: row.deleted_at ? "red" : "green",
-                  fontWeight: 600,
-                }}
-              >
-                {row.deleted_at ? "Неактивен" : "Активен"}
-              </span>
+              <div className="domain-status-line">
+                <span
+                  style={{
+                    color: row.deleted_at ? "red" : "green",
+                    fontWeight: 600,
+                  }}
+                >
+                  {row.deleted_at ? "Неактивен" : "Активен"}
+                </span>
+                <SslCheckIcon enabled={row.ssl_status} />
+                <RknCheckIcon enabled={row.rkn_status} />
+                <DateCheckIcon enabled={row.expirationtime_status} />
+              </div>
             ),
           },
           {
             title: "Отдел",
-            width: "0.5 1",
+            width: "0.3 1",
             getValue: (row) => row.department_name,
           },
           {

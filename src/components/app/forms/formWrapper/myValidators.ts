@@ -1,5 +1,5 @@
 import validator from "validator"
-import { FieldsData, SelectValue } from "./types"
+import { FieldsData, SelectValue, Subdomain } from "./types"
 import { pluralName } from "@config"
 
 const characterNames = ["символа", "символов", "символов"]
@@ -106,4 +106,18 @@ export const sameAs = ({
   if (!validator.equals(String(value), val)) {
     return `Значение должно быть равно полю ${fields[param].label}`
   } else return false
+}
+
+export const subdomainsIPCheck = (
+  subdomains: Subdomain[]
+): string | boolean => {
+  const foundEmptyIp = subdomains.filter((item) => !item.ip_addr_id).length
+  const foundEmptyTitle = subdomains.filter((item) => item.title === "").length
+  if (foundEmptyTitle > 0) {
+    return "Поддомен обязателен"
+  }
+  if (foundEmptyIp > 0) {
+    return "IP адрес обязателен"
+  }
+  return false
 }
