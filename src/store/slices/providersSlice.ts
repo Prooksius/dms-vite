@@ -6,6 +6,7 @@ import {
   StatusType,
   OptionsObject,
   Additional,
+  MyFormData,
 } from "@components/app/forms/formWrapper/types"
 import { RootState } from "@store/index"
 import type { ServerGetResponse } from "@store/index"
@@ -26,6 +27,8 @@ export interface ProvidersRecord {
   name: string
   url: string
   type: ProviderType
+  record_open?: boolean
+  popup_open?: boolean
 }
 
 export interface ProvidersShortRecord {
@@ -38,12 +41,28 @@ interface ProvidersState {
   page: number
   itemsInPage: number
   itemsCount: number
+  sort: string
   status: StatusType
   editStatus: string
   loaded: boolean
   error: string | null
   search: string
   filterChanges: number
+  selectedIds: number[]
+}
+
+const fillProviderRecord = (fromData: MyFormData): ProvidersRecord => {
+  const fields = fromData.fields
+  const bodyData: ProvidersRecord = {
+    id: fromData.id,
+    created_at: new Date().toISOString(),
+    deleted_at: null,
+    name: fields.name.value,
+    url: fields.url.value,
+    type: "Provider",
+  }
+
+  return bodyData
 }
 
 // load options using API call
@@ -106,17 +125,60 @@ export const fetchPage = createAsyncThunk(
   }
 )
 
+export const addProvider = createAsyncThunk(
+  "providers/addProvider",
+  async ({ fields }: MyFormData) => {
+    const bodyData = fillProviderRecord({ fields })
+    const response = await axiosInstance.post("/providers/", bodyData)
+    console.log("add provider response.data", response.data)
+    return response.data
+  }
+)
+
+export const editProvider = createAsyncThunk(
+  "providers/editProvider",
+  async ({ form, record }: { form: MyFormData; record: ProvidersRecord }) => {
+    const bodyData = fillProviderRecord(form)
+    bodyData.created_at = record.created_at
+    bodyData.deleted_at = record.deleted_at
+    const response = await axiosInstance.put(
+      `/providers/${record.id}`,
+      bodyData
+    )
+    console.log("edit provider response.data", response.data)
+    return response.data
+  }
+)
+
+export const deleteProvider = createAsyncThunk(
+  "providers/deleteProvider",
+  async (id: number) => {
+    const response = await axiosInstance.delete(`/providers/${id}`)
+    return response.data
+  }
+)
+
+export const archiveProvider = createAsyncThunk(
+  "providers/archiveProvider",
+  async (id: number) => {
+    const response = await axiosInstance.put(`/providers/${id}/delete`, {})
+    return response.data
+  }
+)
+
 const initialState: ProvidersState = {
   list: [],
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
+  sort: "",
   status: "idle",
   editStatus: "idle",
   loaded: false,
   error: null,
   search: "",
   filterChanges: 0,
+  selectedIds: [],
 }
 
 export const providersSlice = createSlice({
@@ -128,6 +190,16 @@ export const providersSlice = createSlice({
         state.filterChanges++
       }
       state.page = payload
+    },
+    setSelected: (state, { payload }: PayloadAction<number[]>) => {
+      state.selectedIds = payload
+    },
+    setSort: (state, { payload }: PayloadAction<string>) => {
+      if (state.sort !== payload) {
+        state.page = initialState.page
+        state.filterChanges++
+      }
+      state.sort = payload
     },
     setItemsInPage: (state, { payload }: PayloadAction<number>) => {
       if (state.itemsInPage !== payload) {
@@ -143,6 +215,20 @@ export const providersSlice = createSlice({
     },
     reloadPage: (state) => {
       state.filterChanges++
+    },
+    toggleProviderOpen: (state, { payload }: PayloadAction<number>) => {
+      const found = state.list.find((item) => item.id === payload)
+      if (found) found.record_open = !found.record_open
+    },
+    toggleProviderPopup: (state, { payload }: PayloadAction<number>) => {
+      console.log("payload", payload)
+      const found = state.list.find((item) => item.id === payload)
+      if (found) found.popup_open = !found.popup_open
+    },
+    closeProviderPopups: (state) => {
+      state.list.map((item) => {
+        item.popup_open = false
+      })
     },
   },
   extraReducers(builder) {
@@ -169,19 +255,85 @@ export const providersSlice = createSlice({
           "error"
         )
       })
+      .addCase(addProvider.pending, (state) => {
+        state.editStatus = "loading"
+      })
+      .addCase(
+        addProvider.fulfilled,
+        (state, { payload }: PayloadAction<ProvidersRecord>) => {
+          state.editStatus = "succeeded"
+          state.filterChanges++
+          toastAlert("Provider успешно добавлен", "success")
+        }
+      )
+      .addCase(addProvider.rejected, (state, action) => {
+        state.editStatus = "failed"
+        state.error = action.error.message
+        toastAlert(
+          "Ошибка добавления Provider: " + action.error.message,
+          "error"
+        )
+      })
+      .addCase(editProvider.pending, (state) => {
+        state.editStatus = "loading"
+      })
+      .addCase(
+        editProvider.fulfilled,
+        (state, { payload }: PayloadAction<ProvidersRecord>) => {
+          state.editStatus = "succeeded"
+          state.filterChanges++
+          toastAlert("Provider успешно изменен", "success")
+        }
+      )
+      .addCase(editProvider.rejected, (state, action) => {
+        state.editStatus = "failed"
+        state.error = action.error.message
+        toastAlert(
+          "Ошибка изменения Provider: " + action.error.message,
+          "error"
+        )
+      })
+      .addCase(archiveProvider.fulfilled, (state, action) => {
+        state.filterChanges++
+        toastAlert("Provider успешно удален", "success")
+      })
+      .addCase(archiveProvider.rejected, (state, action) => {
+        toastAlert(
+          "Ошибка архивирования Provider: " + action.error.message,
+          "error"
+        )
+      })
+      .addCase(deleteProvider.fulfilled, (state, action) => {
+        state.filterChanges++
+        toastAlert("Provider успешно архивирован", "success")
+      })
+      .addCase(deleteProvider.rejected, (state, action) => {
+        toastAlert("Ошибка удаления Provider: " + action.error.message, "error")
+      })
   },
 })
 
 // Action creators are generated for each case reducer function
-export const { setSearch, setPage, setItemsInPage, reloadPage } =
-  providersSlice.actions
+export const {
+  setSearch,
+  setPage,
+  setSort,
+  setSelected,
+  setItemsInPage,
+  toggleProviderOpen,
+  toggleProviderPopup,
+  closeProviderPopups,
+  reloadPage,
+} = providersSlice.actions
 
 export default providersSlice.reducer
 
 export const listItems = (state: RootState) => state.providers.list
 export const listStatus = (state: RootState) => state.providers.status
+export const listSort = (state: RootState) => state.providers.sort
 export const listLoaded = (state: RootState) => state.providers.loaded
 export const listPage = (state: RootState) => state.providers.page
+export const listSelectedIds = (state: RootState) => state.providers.selectedIds
 export const listItemsInPage = (state: RootState) => state.providers.itemsInPage
 export const listItemsCount = (state: RootState) => state.providers.itemsCount
 export const listSearch = (state: RootState) => state.providers.search
