@@ -144,123 +144,130 @@ const SubdomainItem: React.FC<SubdomainItemProps> = ({
         ))}
       </div>
 
-      <div
-        className={classnames("form-field", { hasValue: subdomain.server_id })}
-      >
-        <AsyncPaginate
-          defaultOptions={[]}
-          debounceTimeout={500}
-          value={
-            {
-              value: String(subdomain.server_id),
-              label: subdomain.server_name
-                ? subdomain.server_name
-                : "Не выбрано",
-            } as SelectValue
-          }
-          className="multiselect"
-          classNamePrefix="inner"
-          components={{
-            IndicatorSeparator: () => null,
-          }}
-          onChange={(selectedOption) => {
-            setFieldValue({
-              field: name,
-              value: {
-                id: subdomain.id,
-                monitoring_id: subdomain.monitoring_id,
-                title: subdomain.title,
-                server_id: Number(selectedOption.value),
-                server_name: selectedOption.label,
-                ip_addr_id: subdomain.ip_addr_id,
-                ip_addr: subdomain.ip_addr,
-                type: subdomain.type || "",
-                available_check: subdomain.available_check,
-              },
-              index,
-            })
-            setServerDirty(true)
-          }}
-          getOptionLabel={(e) => e.label}
-          formatOptionLabel={(option, { context }) => {
-            return (
-              <span
-                dangerouslySetInnerHTML={{
-                  __html: option.label,
-                }}
-              ></span>
-            )
-          }}
-          getOptionValue={(e) => e.value}
-          loadOptions={loadServerOptions}
-          inputValue={serverInputValue}
-          onInputChange={(value: string) => setServerInputValue(value)}
-          additional={{
-            page: 1,
-          }}
-        />
-        <label>Сервер</label>
-        <small
-          className={classnames("error-label", {
-            opened: serverError,
-          })}
-        >
-          {serverError}
-        </small>
-      </div>
-
-      <div
-        className={classnames(
-          "form-field",
-          { hasValue: subdomain.ip_addr_id },
-          { invalid: IPError },
-          { valid: !IPError && IPDirty }
-        )}
-      >
-        <Select
-          value={
-            {
-              value: String(subdomain.ip_addr_id),
-              label: subdomain.ip_addr ? subdomain.ip_addr : "Не выбрано",
-            } as SelectValue
-          }
-          placeholder="Не выбрано"
-          className="multiselect"
-          classNamePrefix="inner"
-          components={{
-            IndicatorSeparator: () => null,
-          }}
-          onChange={(selectedOption) => {
-            setFieldValue({
-              field: name,
-              value: {
-                id: subdomain.id,
-                monitoring_id: subdomain.monitoring_id,
-                title: subdomain.title,
-                ip_addr_id: Number(selectedOption.value),
-                ip_addr: selectedOption.label,
-                server_id: subdomain.server_id,
-                server_name: subdomain.server_name,
-                type: subdomain.type || "",
-                available_check: subdomain.available_check,
-              },
-              index,
-            })
-            setIPDirty(true)
-          }}
-          options={IPList}
-        />
-        <label>
-          IP
-          <span className="required">*</span>
-        </label>
-        <small
-          className={classnames("error-label", {
-            opened: IPError,
-          })}
-        >
-          {IPError}
-        </small>
+      <div className="form__row">
+        <div className="col-lg-6 col-md-6 col-sm-12">
+          <div
+            className={classnames("form-field", {
+              hasValue: subdomain.server_id,
+            })}
+          >
+            <AsyncPaginate
+              defaultOptions={[]}
+              debounceTimeout={500}
+              value={
+                {
+                  value: String(subdomain.server_id),
+                  label: subdomain.server_name
+                    ? subdomain.server_name
+                    : "Не выбрано",
+                } as SelectValue
+              }
+              className="multiselect"
+              classNamePrefix="inner"
+              components={{
+                IndicatorSeparator: () => null,
+              }}
+              onChange={(selectedOption) => {
+                setFieldValue({
+                  field: name,
+                  value: {
+                    id: subdomain.id,
+                    monitoring_id: subdomain.monitoring_id,
+                    title: subdomain.title,
+                    server_id: Number(selectedOption.value),
+                    server_name: selectedOption.label,
+                    ip_addr_id: subdomain.ip_addr_id,
+                    ip_addr: subdomain.ip_addr,
+                    type: subdomain.type || "",
+                    available_check: subdomain.available_check,
+                  },
+                  index,
+                })
+                setServerDirty(true)
+              }}
+              getOptionLabel={(e) => e.label}
+              formatOptionLabel={(option, { context }) => {
+                return (
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: option.label,
+                    }}
+                  ></span>
+                )
+              }}
+              getOptionValue={(e) => e.value}
+              loadOptions={loadServerOptions}
+              inputValue={serverInputValue}
+              onInputChange={(value: string) => setServerInputValue(value)}
+              additional={{
+                page: 1,
+              }}
+            />
+            <label>Сервер</label>
+            <small
+              className={classnames("error-label", {
+                opened: serverError,
+              })}
+            >
+              {serverError}
+            </small>
+          </div>
+        </div>
+        <div className="col-lg-6 col-md-6 col-sm-12">
+          <div
+            className={classnames(
+              "form-field",
+              { hasValue: subdomain.ip_addr_id },
+              { invalid: IPError },
+              { valid: !IPError && IPDirty }
+            )}
+          >
+            <Select
+              value={
+                {
+                  value: String(subdomain.ip_addr_id),
+                  label: subdomain.ip_addr ? subdomain.ip_addr : "Не выбрано",
+                } as SelectValue
+              }
+              placeholder="Не выбрано"
+              className="multiselect"
+              classNamePrefix="inner"
+              components={{
+                IndicatorSeparator: () => null,
+              }}
+              onChange={(selectedOption) => {
+                setFieldValue({
+                  field: name,
+                  value: {
+                    id: subdomain.id,
+                    monitoring_id: subdomain.monitoring_id,
+                    title: subdomain.title,
+                    ip_addr_id: Number(selectedOption.value),
+                    ip_addr: selectedOption.label,
+                    server_id: subdomain.server_id,
+                    server_name: subdomain.server_name,
+                    type: subdomain.type || "",
+                    available_check: subdomain.available_check,
+                  },
+                  index,
+                })
+                setIPDirty(true)
+              }}
+              options={IPList}
+            />
+            <label>
+              IP
+              <span className="required">*</span>
+            </label>
+            <small
+              className={classnames("error-label", {
+                opened: IPError,
+              })}
+            >
+              {IPError}
+            </small>
+          </div>
+        </div>
       </div>
       <div className="checkbox">
         <div className="checkbox-inner">

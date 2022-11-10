@@ -72,6 +72,7 @@ interface ErrorsState {
   page: number
   itemsInPage: number
   itemsCount: number
+  sort: string
   status: StatusType
   editStatus: string
   loaded: boolean
@@ -79,6 +80,7 @@ interface ErrorsState {
   search: string
   filter: ErrorsFilter
   filterChanges: number
+  selectedIds: number[]
 }
 
 // load options using API call
@@ -153,6 +155,7 @@ const initialState: ErrorsState = {
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
+  sort: "",
   status: "idle",
   editStatus: "idle",
   loaded: false,
@@ -164,6 +167,7 @@ const initialState: ErrorsState = {
     entity_type: "domain",
   },
   filterChanges: 0,
+  selectedIds: [],
 }
 
 export const errorsSlice = createSlice({
@@ -181,6 +185,16 @@ export const errorsSlice = createSlice({
         state.filterChanges++
       }
       state.page = payload
+    },
+    setSelected: (state, { payload }: PayloadAction<number[]>) => {
+      state.selectedIds = payload
+    },
+    setSort: (state, { payload }: PayloadAction<string>) => {
+      if (state.sort !== payload) {
+        state.page = initialState.page
+        state.filterChanges++
+      }
+      state.sort = payload
     },
     setItemsInPage: (state, { payload }: PayloadAction<number>) => {
       if (state.itemsInPage !== payload) {
@@ -233,6 +247,8 @@ export const {
   setFilter,
   setSearch,
   setPage,
+  setSort,
+  setSelected,
   setItemsInPage,
   toggleOpen,
   reloadPage,
@@ -244,6 +260,8 @@ export const listItems = (state: RootState) => state.errors.list
 export const listStatus = (state: RootState) => state.errors.status
 export const listLoaded = (state: RootState) => state.errors.loaded
 export const listPage = (state: RootState) => state.errors.page
+export const listSort = (state: RootState) => state.errors.sort
+export const listSelectedIds = (state: RootState) => state.errors.selectedIds
 export const listItemsInPage = (state: RootState) => state.errors.itemsInPage
 export const listItemsCount = (state: RootState) => state.errors.itemsCount
 export const listFilter = (state: RootState) => state.errors.filter

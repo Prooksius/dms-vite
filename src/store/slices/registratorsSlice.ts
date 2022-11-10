@@ -53,6 +53,7 @@ interface RegistratorsState {
   page: number
   itemsInPage: number
   itemsCount: number
+  sort: string
   status: StatusType
   editStatus: string
   loaded: boolean
@@ -60,6 +61,7 @@ interface RegistratorsState {
   search: string
   filter: RegistratorsFilter
   filterChanges: number
+  selectedIds: number[]
 }
 
 type RegistratorEditRecord = {
@@ -91,7 +93,7 @@ const fillRegistratorRecord = ({
     password: fields.password.value,
     secret_word: "", // fields.secret_word.value,
     phone: "", // fields.phone.value,
-    api_key: "", // fields.api_key.value,
+    api_key: fields.api_key.value,
     ns: fields.ns.valueArr.map((item) => item.value),
   }
 
@@ -269,6 +271,7 @@ const initialState: RegistratorsState = {
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
+  sort: "",
   status: "idle",
   editStatus: "idle",
   loaded: false,
@@ -281,6 +284,7 @@ const initialState: RegistratorsState = {
     provider_id: null,
   },
   filterChanges: 0,
+  selectedIds: [],
 }
 
 export const registratorsSlice = createSlice({
@@ -301,6 +305,16 @@ export const registratorsSlice = createSlice({
         state.filterChanges++
       }
       state.page = payload
+    },
+    setSelected: (state, { payload }: PayloadAction<number[]>) => {
+      state.selectedIds = payload
+    },
+    setSort: (state, { payload }: PayloadAction<string>) => {
+      if (state.sort !== payload) {
+        state.page = initialState.page
+        state.filterChanges++
+      }
+      state.sort = payload
     },
     setItemsInPage: (state, { payload }: PayloadAction<number>) => {
       if (state.itemsInPage !== payload) {
@@ -411,6 +425,8 @@ export const {
   setFilter,
   setSearch,
   setPage,
+  setSort,
+  setSelected,
   setItemsInPage,
   toggleRegistratorOpen,
   toggleRegistratorPopup,
@@ -427,6 +443,10 @@ export const listRegistratorsLoaded = (state: RootState) =>
   state.registrators.loaded
 export const listRegistratorsPage = (state: RootState) =>
   state.registrators.page
+export const listRegistratorsSort = (state: RootState) =>
+  state.registrators.sort
+export const listRegistratorsSelectedIds = (state: RootState) =>
+  state.registrators.selectedIds
 export const listRegistratorsItemsInPage = (state: RootState) =>
   state.registrators.itemsInPage
 export const listRegistratorsItemsCount = (state: RootState) =>

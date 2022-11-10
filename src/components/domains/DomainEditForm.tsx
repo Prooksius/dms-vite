@@ -110,8 +110,7 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
               initialLoad={false}
               loadCallback={getRegistratorNS}
             />
-          </div>
-          <div className="col-lg-3 col-md-6 col-sm-12">
+            <br />
             <h4>Мониторинг</h4>
             <CheckboxField name="whois_status" />
             <CheckboxField name="available_status" />
@@ -119,7 +118,7 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
             <CheckboxField name="ssl_status" />
             <CheckboxField name="expirationtime_status" />
           </div>
-          <div className="col-lg-3 col-md-6 col-sm-12">
+          <div className="col-lg-6 col-md-12 col-sm-12">
             <h4>Поддомены</h4>
             <SubdomainsField name="subdomains" domainName="name" />
           </div>

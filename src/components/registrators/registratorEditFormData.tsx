@@ -85,6 +85,18 @@ export const registratorEditFormData: MyFormData = {
       errorMessage: "",
       dirty: false,
     },
+    api_key: {
+      label: "API Key",
+      type: "text",
+      value: "",
+      valueObj: { value: "", label: "Не выбрано" },
+      valueArr: [],
+      validations: {
+        required: true,
+      },
+      errorMessage: "",
+      dirty: false,
+    },
     ns: {
       label: "",
       type: "array",
@@ -93,7 +105,7 @@ export const registratorEditFormData: MyFormData = {
       valueArr: [],
       dropdown: "default",
       options: [{ value: "", label: "Не выбрано" }],
-      validations: {  },
+      validations: {},
       errorMessage: "",
       dirty: false,
     },

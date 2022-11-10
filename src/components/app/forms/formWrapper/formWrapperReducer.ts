@@ -138,7 +138,7 @@ const handlers: FormHandlers = {
             }
             let invalid: string | boolean = false
 
-            if (validateHandlers[key]) {
+            if (key in validateHandlers) {
               // В вызове функции валидатора:
               //  - первый параметр - параметр валидатора (например в случае minLength(5) - это 5)
               //  - второй параметр - значение текущего поля
@@ -155,11 +155,14 @@ const handlers: FormHandlers = {
                   payload: { field: String(value) },
                 })
               }
-            } else {
-              if (key === "subdomainsIP") {
+            }
+
+            if (!invalid) {
+              if (key === "subdomains") {
                 invalid = checkSubdomains(field.valueArr as Subdomain[])
               }
             }
+
             if (invalid) {
               if (typeof invalid === "string") field.errorMessage = invalid
               return false
@@ -198,7 +201,7 @@ const handlers: FormHandlers = {
             }
             let invalid: string | boolean = false
 
-            if (validateHandlers[key]) {
+            if (key in validateHandlers) {
               // В вызове функции валидатора:
               //  - первый параметр - параметр валидатора (например в случае minLength(5) - это 5)
               //  - второй параметр - значение текущего поля
@@ -209,11 +212,14 @@ const handlers: FormHandlers = {
                 copyState.fields,
                 String(value)
               )
-            } else {
-              if (key === "subdomainsIP") {
+            }
+
+            if (!invalid) {
+              if (key === "subdomains") {
                 invalid = checkSubdomains(field.valueArr as Subdomain[])
               }
             }
+
             if (invalid) {
               if (typeof invalid === "string") field.errorMessage = invalid
               return false
@@ -253,18 +259,21 @@ const handlers: FormHandlers = {
           }
           let invalid: string | boolean = false
 
-          if (validateHandlers[key]) {
+          if (key in validateHandlers) {
             invalid = validateHandlers[key](
               value,
               fieldValue,
               fields,
               String(value)
             )
-          } else {
-            if (key === "subdomainsIP") {
+          }
+
+          if (!invalid) {
+            if (key === "subdomains") {
               invalid = checkSubdomains(field.valueArr as Subdomain[])
             }
           }
+
           if (invalid) {
             if (typeof invalid === "string") field.errorMessage = invalid
             return false

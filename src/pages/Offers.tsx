@@ -1,8 +1,5 @@
-import React, { useEffect } from "react"
-import { useDispatch, useSelector } from "react-redux"
+import React from "react"
 import MainLayout from "@layouts/MainLayout"
-import { NavLink, Outlet } from "react-router-dom"
-//import { OffersList } from "@components/providers/OffersList"
 
 const PAGE_TITLE = "Офферы"
 

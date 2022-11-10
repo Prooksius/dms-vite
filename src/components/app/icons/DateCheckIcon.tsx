@@ -5,7 +5,7 @@ interface DateCheckIconProps {
 }
 export const DateCheckIcon: React.FC<DateCheckIconProps> = ({ enabled }) => {
   return (
-    <div title="Срок регистрации">
+    <div data-tip="Срок регистрации" data-for="for-top">
       <svg
         width="25"
         height="25"

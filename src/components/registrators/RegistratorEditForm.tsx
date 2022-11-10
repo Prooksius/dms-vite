@@ -75,6 +75,7 @@ export const RegistratorEditForm: React.FC<RegistratorEditFormProps> = ({
             />
             <TextField name="login" />
             <TextField name="password" />
+            <TextField name="api_key" />
           </div>
           <div className="col-lg-6 col-md-6 col-sm-12">
             <h4>Провайдер</h4>

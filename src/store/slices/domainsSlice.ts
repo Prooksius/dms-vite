@@ -116,6 +116,7 @@ interface DomainsState {
   page: number
   itemsInPage: number
   itemsCount: number
+  sort: string
   status: StatusType
   editStatus: string
   allStatus: string
@@ -124,6 +125,7 @@ interface DomainsState {
   search: string
   filter: DomainsFilter
   filterChanges: number
+  selectedIds: number[]
 }
 
 type DomainEditRecord = {
@@ -178,7 +180,9 @@ const fillDomainEditRecord = (
     name: fields.name.value,
     available_status: fields.available_status.value === "1" ? true : false,
     department_name: fields.department_name.valueObj.value,
-    ns: fields.ns.valueArr.filter(ns_rec => ns_rec.checked).map((item) => item.value),
+    ns: fields.ns.valueArr
+      .filter((ns_rec) => ns_rec.checked)
+      .map((item) => item.value),
     expirationtime_status:
       fields.expirationtime_status.value === "1" ? true : false,
     provider_id: Number(fields.provider_id.valueObj.value),
@@ -408,6 +412,7 @@ const initialState: DomainsState = {
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
+  sort: "",
   status: "idle",
   editStatus: "idle",
   allStatus: "idle",
@@ -425,6 +430,7 @@ const initialState: DomainsState = {
     active: null,
   },
   filterChanges: 0,
+  selectedIds: [],
 }
 
 export const domainsSlice = createSlice({
@@ -446,6 +452,16 @@ export const domainsSlice = createSlice({
         state.filterChanges++
       }
       state.page = payload
+    },
+    setSelected: (state, { payload }: PayloadAction<number[]>) => {
+      state.selectedIds = payload
+    },
+    setSort: (state, { payload }: PayloadAction<string>) => {
+      if (state.sort !== payload) {
+        state.page = initialState.page
+        state.filterChanges++
+      }
+      state.sort = payload
     },
     setItemsInPage: (state, { payload }: PayloadAction<number>) => {
       if (state.itemsInPage !== payload) {
@@ -568,6 +584,8 @@ export const {
   setFilter,
   setSearch,
   setPage,
+  setSort,
+  setSelected,
   setItemsInPage,
   toggleDomainOpen,
   toggleDomainPopup,
@@ -582,10 +600,13 @@ export const listDomainsAllStatus = (state: RootState) =>
   state.domains.allStatus
 export const listDomains = (state: RootState) => state.domains.list
 export const listDomainsStatus = (state: RootState) => state.domains.status
+export const listDomainsSort = (state: RootState) => state.domains.sort
 export const listDomainsLoaded = (state: RootState) => state.domains.loaded
 export const listDomainsPage = (state: RootState) => state.domains.page
 export const listDomainsItemsInPage = (state: RootState) =>
   state.domains.itemsInPage
+export const listDomainsSelectedIds = (state: RootState) =>
+  state.domains.selectedIds
 export const listDomainsItemsCount = (state: RootState) =>
   state.domains.itemsCount
 export const listDomainsFilter = (state: RootState) => state.domains.filter

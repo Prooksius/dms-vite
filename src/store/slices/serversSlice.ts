@@ -56,6 +56,7 @@ interface ServersState {
   page: number
   itemsInPage: number
   itemsCount: number
+  sort: string
   status: StatusType
   editStatus: string
   loaded: boolean
@@ -63,6 +64,7 @@ interface ServersState {
   search: string
   filter: ServersFilter
   filterChanges: number
+  selectedIds: number[]
 }
 
 type ServerEditRecord = {
@@ -234,6 +236,7 @@ const initialState: ServersState = {
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
+  sort: "",
   status: "idle",
   editStatus: "idle",
   loaded: false,
@@ -246,6 +249,7 @@ const initialState: ServersState = {
     active: null,
   },
   filterChanges: 0,
+  selectedIds: [],
 }
 
 export const serversSlice = createSlice({
@@ -266,6 +270,16 @@ export const serversSlice = createSlice({
         state.filterChanges++
       }
       state.page = payload
+    },
+    setSelected: (state, { payload }: PayloadAction<number[]>) => {
+      state.selectedIds = payload
+    },
+    setSort: (state, { payload }: PayloadAction<string>) => {
+      if (state.sort !== payload) {
+        state.page = initialState.page
+        state.filterChanges++
+      }
+      state.sort = payload
     },
     setItemsInPage: (state, { payload }: PayloadAction<number>) => {
       if (state.itemsInPage !== payload) {
@@ -376,6 +390,8 @@ export const {
   setFilter,
   setSearch,
   setPage,
+  setSort,
+  setSelected,
   setItemsInPage,
   toggleServerOpen,
   toggleServerPopup,
@@ -389,6 +405,9 @@ export const listServers = (state: RootState) => state.servers.list
 export const listServersStatus = (state: RootState) => state.servers.status
 export const listServersLoaded = (state: RootState) => state.servers.loaded
 export const listServersPage = (state: RootState) => state.servers.page
+export const listServersSort = (state: RootState) => state.servers.sort
+export const listServersSelectedIds = (state: RootState) =>
+  state.servers.selectedIds
 export const listServersItemsInPage = (state: RootState) =>
   state.servers.itemsInPage
 export const listServersItemsCount = (state: RootState) =>

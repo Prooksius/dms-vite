@@ -259,6 +259,8 @@ export const DomainsList: React.FC = () => {
               <>
                 <button
                   type="button"
+                  data-tip="Меню редактирования"
+                  data-for="for-left"
                   className="btn btn-simple"
                   onClick={() => toggleRecordPopup(row.id)}
                 >

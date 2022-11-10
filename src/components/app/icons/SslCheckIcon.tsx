@@ -5,7 +5,7 @@ interface SslCheckIconProps {
 }
 export const SslCheckIcon: React.FC<SslCheckIconProps> = ({ enabled }) => {
   return (
-    <div title="SSL-статус">
+    <div data-tip="SSL-статус" data-for="for-top">
       <svg
         width="25"
         height="25"

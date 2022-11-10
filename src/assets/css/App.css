@@ -1768,7 +1768,7 @@ form .sixty-percent-row {
   transform: translateY(100%) rotateX(90deg) scale(0.5);
   transition: all 0.3s ease-in;
 }
-.modal-body .form__row {
+.modal-body > form > .form__row {
   border-bottom: 1px solid #cbcbcb;
 }
 form button[type="submit"] {
@@ -1780,14 +1780,14 @@ form button[type="submit"] {
 .entity-filter form button[type="submit"] {
   margin-top: -53px;
 }
-form .form__row > [class^="col-"] {
+form > .form__row > [class^="col-"] {
   position: relative;
   border-right: 1px solid #cbcbcb;
 }
-.modal-body form .form__row > [class^="col-"] {
+.modal-body form > .form__row > [class^="col-"] {
   padding-bottom: 20px;
 }
-.modal-body form .form__row > [class^="col-"]:after {
+.modal-body form > .form__row > [class^="col-"]:after {
   content: "";
   position: absolute;
   top: 0;
@@ -1796,12 +1796,17 @@ form .form__row > [class^="col-"] {
   background-color: #fff;
   height: 47px;
 }
-form .form__row > .col-lg-6:nth-child(2n + 2),
-form .form__row > .col-lg-3:nth-child(4n + 4) {
+.modal-body form > .form__row > [class^="col-"]:last-child:after {
+  display: none;
+}
+
+form > .form__row > .col-lg-6:nth-child(2n + 2),
+form > .form__row > .col-lg-3:nth-child(4n + 4),
+.modal-body form > .form__row > .col-lg-6:last-child {
   border-right: none;
 }
-form .form__row > .col-lg-6:nth-child(2n + 2):after,
-form .form__row > .col-lg-3:nth-child(4n + 4):after {
+form > .form__row > .col-lg-6:nth-child(2n + 2):after,
+form > .form__row > .col-lg-3:nth-child(4n + 4):after {
   display: none;
 }
 

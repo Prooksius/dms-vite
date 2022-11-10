@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React from "react"
 import MainLayout from "@layouts/MainLayout"
 import { DomainsList } from "@components/domains/DomainsList"
 

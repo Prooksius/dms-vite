@@ -5,7 +5,7 @@ interface RknCheckIconProps {
 }
 export const RknCheckIcon: React.FC<RknCheckIconProps> = ({ enabled }) => {
   return (
-    <div title="РКН-статус">
+    <div data-tip="РКН-статус" data-for="for-top">
       <svg
         width="25"
         height="25"

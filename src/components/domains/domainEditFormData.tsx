@@ -219,7 +219,7 @@ export const domainEditFormData: MyFormData = {
       dropdown: "default",
       options: [{ value: "", label: "Не выбрано" }],
       validations: {
-        subdomainsIP: true
+        subdomains: true,
       },
       errorMessage: "",
       dirty: false,

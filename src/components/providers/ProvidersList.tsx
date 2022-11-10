@@ -25,6 +25,8 @@ import {
   setSelected,
   toggleProviderOpen,
   closeProviderPopups,
+  listSort,
+  listSelectedIds,
 } from "@store/slices/providersSlice"
 import PaginationList, { HeaderSlot } from "@components/app/PaginationList"
 import Popuper, { PopupHeaderSlot } from "@components/app/Popuper"
@@ -46,6 +48,8 @@ export const ProvidersList: React.FC = () => {
   const providers = useSelector(listItems)
   const status = useSelector(listStatus)
   const page = useSelector(listPage)
+  const sort = useSelector(listSort)
+  const selectedIds = useSelector(listSelectedIds)
   const itemsInPage = useSelector(listItemsInPage)
   const search = useSelector(listSearch)
   const filterChanges = useSelector(listFilterChanges)
@@ -109,7 +113,9 @@ export const ProvidersList: React.FC = () => {
         rowHeight={62}
         data={providers}
         page={page}
+        sort={sort}
         setPage={changePage}
+        setSort={changeSort}
         setItemsInPage={changeItemsInPage}
         filterChanges={filterChanges}
         reloadPage={() => dispatch(reloadPage())}
@@ -119,6 +125,8 @@ export const ProvidersList: React.FC = () => {
           {
             title: "Название провайдера",
             width: "1 1",
+            sort: "name",
+            sortTitle: "названию",
             getValue: (row) => {
               if (search)
                 return (
@@ -134,6 +142,8 @@ export const ProvidersList: React.FC = () => {
           {
             title: "Url",
             width: "1 1",
+            sort: "url",
+            sortTitle: "URL",
             getValue: (row) => row.url,
           },
           {

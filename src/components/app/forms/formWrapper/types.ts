@@ -49,7 +49,7 @@ export type ValidationsData = {
   email?: boolean
   sameAs?: string
   isIP?: boolean
-  subdomainsIP?: boolean
+  subdomains?: boolean
 }
 
 export type OptionsObject = {
