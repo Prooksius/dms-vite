@@ -91,9 +91,7 @@ export const registratorEditFormData: MyFormData = {
       value: "",
       valueObj: { value: "", label: "Не выбрано" },
       valueArr: [],
-      validations: {
-        required: true,
-      },
+      validations: {},
       errorMessage: "",
       dirty: false,
     },
