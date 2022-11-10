@@ -43,6 +43,12 @@ import { PaginationDataGrid } from "@components/app/PaginationDataGrid"
 import { SslCheckIcon } from "@components/app/icons/SslCheckIcon"
 import { RknCheckIcon } from "@components/app/icons/RknCheckIcon"
 import { DateCheckIcon } from "@components/app/icons/DateCheckIcon"
+import { Success } from "@components/app/icons/Success"
+import { ErrorsIcon } from "@components/app/icons/ErrorsIcon"
+import { DeleteIcon } from "@components/app/icons/DeleteIcon"
+import { MinusIcon } from "@components/app/icons/MinusIcon"
+import { AvailableIcon } from "@components/app/icons/AvailableIcon"
+import { UnavailableIcon } from "@components/app/icons/UnavailableIcon"
 
 interface ConditionNames {
   [key: string]: string
@@ -206,7 +212,7 @@ export const DomainsList: React.FC = () => {
           },
           {
             title: "Состояние",
-            width: "1 1",
+            width: "1.2 1",
             getValue: (row) => (
               <div className="domain-status-line">
                 <span
@@ -220,6 +226,8 @@ export const DomainsList: React.FC = () => {
                 <SslCheckIcon enabled={row.ssl_status} />
                 <RknCheckIcon enabled={row.rkn_status} />
                 <DateCheckIcon enabled={row.expirationtime_status} />
+                {row.available_status && <AvailableIcon />}
+                {!row.available_status && <UnavailableIcon />}
               </div>
             ),
           },
@@ -230,7 +238,7 @@ export const DomainsList: React.FC = () => {
           },
           {
             title: "Сервер",
-            width: "1 1",
+            width: "0.8 1",
             getValue: (row) => row.server_name,
           },
           {
@@ -240,11 +248,11 @@ export const DomainsList: React.FC = () => {
           },
           {
             title: "Код ответа",
-            width: "0.5 1",
+            width: "0.7 1",
             getValue: (row) => (
               <span
                 style={{
-                  color: row.available_condition == "200" ? "green" : "red",
+                  color: row.available_condition === "200" ? "green" : "red",
                   fontWeight: 600,
                 }}
               >
