@@ -1,14 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import type { PayloadAction } from "@reduxjs/toolkit"
-import { toastAlert } from "@config"
+import { errorToastText, toastAlert } from "@config"
 import { axiosInstance, axiosFakeInstance } from "@store/axiosInstance"
 import {
   StatusType,
   OptionsObject,
   Additional,
+  ValidationErrors,
+  ErrorPayloadData,
 } from "@components/app/forms/formWrapper/types"
 import { RootState } from "@store/index"
 import type { ServerGetResponse } from "@store/index"
+import { AxiosError } from "axios"
 
 export type EntityType =
   | "all"
@@ -74,9 +77,9 @@ interface ErrorsState {
   itemsCount: number
   sort: string
   status: StatusType
-  editStatus: string
+  editStatus: StatusType
   loaded: boolean
-  error: string | null
+  error: string
   search: string
   filter: ErrorsFilter
   filterChanges: number
@@ -91,13 +94,16 @@ export const loadErrorOptions = async (
 ) => {
   let items: ErrorsShortRecord[] = []
   try {
+    const query = new URLSearchParams({
+      offset: String((page - 1) * 10),
+      limit: "10",
+      name: inputValue,
+      partial: "true",
+    }).toString()
+
     const response = await axiosInstance.get<
       ServerGetResponse<ErrorsShortRecord>
-    >(
-      `/errors/getNames?offset=${
-        (page - 1) * 10
-      }&limit=10&partial=true&name=${inputValue}`
-    )
+    >(`/errors/getNames?${query}`)
 
     console.log("response.data", response.data)
     items = response.data.data ? response.data.data : []
@@ -125,28 +131,32 @@ export const loadErrorOptions = async (
 
 export const fetchPage = createAsyncThunk(
   "/errors/fetchErrorPage",
-  async (_, { getState }) => {
+  async (_, { getState, rejectWithValue }) => {
     const { errors } = <RootState>getState()
 
-    console.log("errors", errors)
+    const query = new URLSearchParams({
+      offset: String((errors.page - 1) * errors.itemsInPage),
+      limit: String(errors.itemsInPage),
+      entity_type: errors.filter.entity_type,
+      created_at: errors.filter.created_at ? errors.filter.created_at : "",
+      deleted_at: errors.filter.deleted_at ? errors.filter.deleted_at : "",
+    }).toString()
 
-    const response = await axiosInstance.get<ServerGetResponse<ErrorsRecord>>(
-      `/errors/?offset=${(errors.page - 1) * errors.itemsInPage}&limit=${
-        errors.itemsInPage
-      }&entity_type=${errors.filter.entity_type}&created_at=${
-        errors.filter.created_at ? errors.filter.created_at : ""
-      }&deleted_at=${errors.filter.deleted_at ? errors.filter.deleted_at : ""}`
-    )
-    /*
-    const response = await axiosFakeInstance.get(
-      `/errors/?_page=${errors.page}&_limit=${
-        errors.itemsInPage
-      }`
-    )
-    */
+    try {
+      const response = await axiosInstance.get<ServerGetResponse<ErrorsRecord>>(
+        `/errors/?${query}`
+      )
 
-    console.log("errors response.data", response.data)
-    return response.data
+      console.log("errors response.data", response.data)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
@@ -159,7 +169,7 @@ const initialState: ErrorsState = {
   status: "idle",
   editStatus: "idle",
   loaded: false,
-  error: null,
+  error: "",
   search: "",
   filter: {
     created_at: null,
@@ -222,6 +232,7 @@ export const errorsSlice = createSlice({
     builder
       .addCase(fetchPage.pending, (state) => {
         state.status = "loading"
+        state.editStatus = "idle"
       })
       .addCase(fetchPage.fulfilled, (state, { payload }) => {
         state.list = payload.data.map((error) => ({
@@ -230,14 +241,19 @@ export const errorsSlice = createSlice({
         }))
         state.itemsCount = payload.count
         state.status = "succeeded"
+        state.editStatus = "idle"
         state.loaded = true
       })
       .addCase(fetchPage.rejected, (state, action) => {
         state.list = []
         state.itemsCount = 0
         state.status = "failed"
-        state.error = action.error.message
-        toastAlert("Ошибка чтения ошибок: " + action.error.message, "error")
+        state.editStatus = "idle"
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        console.log("action.payload", action.payload)
+        toastAlert("Ошибка чтения ошибок: " + state.error, "error")
       })
   },
 })
@@ -260,6 +276,7 @@ export const listItems = (state: RootState) => state.errors.list
 export const listStatus = (state: RootState) => state.errors.status
 export const listLoaded = (state: RootState) => state.errors.loaded
 export const listPage = (state: RootState) => state.errors.page
+export const listError = (state: RootState) => state.errors.error
 export const listSort = (state: RootState) => state.errors.sort
 export const listSelectedIds = (state: RootState) => state.errors.selectedIds
 export const listItemsInPage = (state: RootState) => state.errors.itemsInPage

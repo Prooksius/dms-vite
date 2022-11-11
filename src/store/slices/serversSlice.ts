@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import type { PayloadAction } from "@reduxjs/toolkit"
-import { toastAlert } from "@config"
+import { errorToastText, toastAlert } from "@config"
 import { axiosInstance, axiosFakeInstance } from "@store/axiosInstance"
 import { RootState } from "@store/store"
 import type { ServerGetResponse } from "@store/index"
@@ -13,7 +13,10 @@ import {
   OptionsObject,
   Additional,
   IPAddr,
+  ErrorPayloadData,
+  ValidationErrors,
 } from "@components/app/forms/formWrapper/types"
+import { AxiosError } from "axios"
 
 export interface ServersRecord {
   id?: number
@@ -58,9 +61,10 @@ interface ServersState {
   itemsCount: number
   sort: string
   status: StatusType
-  editStatus: string
+  editStatus: StatusType
   loaded: boolean
-  error: string | null
+  error: string
+  errorData: ErrorPayloadData | null
   search: string
   filter: ServersFilter
   filterChanges: number
@@ -101,13 +105,16 @@ export const loadServerOptions = async (
 ) => {
   let items: ServersShortRecord[] = []
   try {
+    const query = new URLSearchParams({
+      offset: String((page - 1) * 10),
+      limit: "10",
+      name: inputValue,
+      partial: "true",
+    }).toString()
+
     const response = await axiosInstance.get<
       ServerGetResponse<ServersShortRecord>
-    >(
-      `/servers/getNames?offset=${
-        (page - 1) * 10
-      }&limit=10&partial=true&name=${inputValue}`
-    )
+    >(`/servers/getNames?${query}`)
 
     console.log("response.data", response.data)
     items = response.data.data ? response.data.data : []
@@ -138,8 +145,14 @@ export const getServerIPs = async (param: any): Promise<SelectValue[]> => {
 
   let items: SelectValue[] = []
   try {
+    const query = new URLSearchParams({
+      offset: "0",
+      limit: "99999999999",
+      partial: "true",
+    }).toString()
+
     const response = await axiosInstance.get<ServerGetResponse<ServerIPRecord>>(
-      `/servers/getIps/${param}?offset=0&limit=99999999999&partial=true`
+      `/servers/getIps/${String(param)}?${query}`
     )
 
     console.log("response.data", response.data)
@@ -158,76 +171,120 @@ export const getServerIPs = async (param: any): Promise<SelectValue[]> => {
 
 export const fetchServersPage = createAsyncThunk(
   "/servers/fetchServersPage",
-  async (params, { getState }) => {
+  async (params, { getState, rejectWithValue }) => {
     const { servers } = <RootState>getState()
-    console.log(
-      "servers.filter.registrator_id.value",
-      servers.filter.registrator_id?.value
-    )
 
-    const response = await axiosInstance.get<ServerGetResponse<ServersRecord>>(
-      `/servers/?offset=${(servers.page - 1) * servers.itemsInPage}&limit=${
-        servers.itemsInPage
-      }&name=${servers.search}&provider_id=${
-        servers.filter.provider_id?.value
-          ? servers.filter.provider_id.value
-          : ""
-      }&registrator_id=${
-        servers.filter.registrator_id?.value
-          ? servers.filter.registrator_id.value
-          : ""
-      }&department_name=${
-        servers.filter.department_name?.value
-          ? servers.filter.department_name.value
-          : ""
-      }${
-        servers.filter.active?.value
-          ? "&active=" +
-            (servers.filter.active.value === "1" ? "true" : "false")
-          : ""
-      }`
-    )
+    const queryObj: Record<string, string> = {
+      offset: String((servers.page - 1) * servers.itemsInPage),
+      limit: String(servers.itemsInPage),
+      name: servers.search,
+      provider_id: servers.filter.provider_id?.value
+        ? servers.filter.provider_id.value
+        : "",
+      registrator_id: servers.filter.registrator_id?.value
+        ? servers.filter.registrator_id.value
+        : "",
+      department_name: servers.filter.department_name?.value
+        ? servers.filter.department_name.value
+        : "",
+    }
+    if (servers.filter.active?.value) {
+      queryObj.active = servers.filter.active.value === "1" ? "true" : "false"
+    }
+    const query = new URLSearchParams(queryObj).toString()
 
-    console.log("response.data", response.data)
-    return response.data
+    try {
+      const response = await axiosInstance.get<
+        ServerGetResponse<ServersRecord>
+      >(`/servers/?${query}`)
+
+      console.log("response.data", response.data)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const addServer = createAsyncThunk(
   "servers/addServer",
-  async ({ fields }: MyFormData) => {
+  async ({ fields }: MyFormData, { rejectWithValue }) => {
     const bodyData = fillServerRecord({ fields })
-    const response = await axiosInstance.post("/servers", bodyData)
-    console.log("add server response.data", response.data)
-    return response.data
+    try {
+      const response = await axiosInstance.post("/servers", bodyData)
+      console.log("add server response.data", response.data)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const editServer = createAsyncThunk(
   "servers/editServer",
-  async ({ form, record }: { form: MyFormData; record: ServersRecord }) => {
+  async (
+    { form, record }: { form: MyFormData; record: ServersRecord },
+    { rejectWithValue }
+  ) => {
     const bodyData = fillServerRecord(form)
     bodyData.created_at = record.created_at
     bodyData.deleted_at = record.deleted_at
 
-    const response = await axiosInstance.put(`/servers/${form.id}`, bodyData)
-    return response.data
+    try {
+      const response = await axiosInstance.put(`/servers/${form.id}`, bodyData)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const deleteServer = createAsyncThunk(
   "servers/deleteServer",
-  async (id: number) => {
-    const response = await axiosInstance.delete(`/servers/${id}`)
-    return response.data
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(`/servers/${id}`)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const archiveServer = createAsyncThunk(
   "servers/archiveServer",
-  async (id: number) => {
-    const response = await axiosInstance.put(`/servers/${id}/delete`, {})
-    return response.data
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(`/servers/${id}/delete`, {})
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
@@ -240,7 +297,8 @@ const initialState: ServersState = {
   status: "idle",
   editStatus: "idle",
   loaded: false,
-  error: null,
+  error: "",
+  errorData: null,
   search: "",
   filter: {
     department_name: null,
@@ -314,6 +372,9 @@ export const serversSlice = createSlice({
     builder
       .addCase(fetchServersPage.pending, (state) => {
         state.status = "loading"
+        state.editStatus = "idle"
+        state.error = ""
+        state.errorData = null
       })
       .addCase(fetchServersPage.fulfilled, (state, { payload }) => {
         state.list = payload.data.map((server) => ({
@@ -323,64 +384,101 @@ export const serversSlice = createSlice({
         }))
         state.itemsCount = payload.count
         state.status = "succeeded"
+        state.editStatus = "idle"
+        state.error = ""
+        state.errorData = null
         state.loaded = true
       })
       .addCase(fetchServersPage.rejected, (state, action) => {
         state.status = "failed"
-        state.error = action.error.message
-        toastAlert("Ошибка чтения серверов: " + action.error.message, "error")
+        state.editStatus = "idle"
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка чтения серверов: " + state.error, "error")
       })
       .addCase(addServer.pending, (state) => {
         state.editStatus = "loading"
+        state.error = ""
+        state.errorData = null
       })
       .addCase(
         addServer.fulfilled,
         (state, { payload }: PayloadAction<ServersRecord>) => {
           state.editStatus = "succeeded"
+          state.error = ""
+          state.errorData = null
           state.filterChanges++
           toastAlert("Сервер успешно добавлен", "success")
         }
       )
       .addCase(addServer.rejected, (state, action) => {
         state.editStatus = "failed"
-        state.error = action.error.message
-        toastAlert(
-          "Ошибка добавления сервера: " + action.error.message,
-          "error"
-        )
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка добавления сервера: " + state.error, "error")
       })
       .addCase(editServer.pending, (state) => {
         state.editStatus = "loading"
+        state.error = ""
+        state.errorData = null
       })
       .addCase(
         editServer.fulfilled,
         (state, { payload }: PayloadAction<ServersRecord>) => {
           state.editStatus = "succeeded"
+          state.error = ""
+          state.errorData = null
           state.filterChanges++
           toastAlert("Сервер успешно изменен", "success")
         }
       )
       .addCase(editServer.rejected, (state, action) => {
         state.editStatus = "failed"
-        state.error = action.error.message
-        toastAlert("Ошибка изменения сервера: " + action.error.message, "error")
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка изменения сервера: " + state.error, "error")
       })
       .addCase(archiveServer.fulfilled, (state, action) => {
+        state.error = ""
+        state.errorData = null
         state.filterChanges++
         toastAlert("Сервер успешно архивирован", "success")
       })
       .addCase(archiveServer.rejected, (state, action) => {
         toastAlert(
-          "Ошибка архивирования сервера: " + action.error.message,
+          "Ошибка архивирования сервера: " +
+            (action.payload
+              ? errorToastText(action.payload as ErrorPayloadData)
+              : action.error.message),
           "error"
         )
       })
       .addCase(deleteServer.fulfilled, (state, action) => {
+        state.error = ""
+        state.errorData = null
         state.filterChanges++
         toastAlert("Сервер успешно удален", "success")
       })
       .addCase(deleteServer.rejected, (state, action) => {
-        toastAlert("Ошибка удаления сервера: " + action.error.message, "error")
+        toastAlert(
+          "Ошибка удаления сервера: " +
+            (action.payload
+              ? errorToastText(action.payload as ErrorPayloadData)
+              : action.error.message),
+          "error"
+        )
       })
   },
 })
@@ -403,6 +501,8 @@ export default serversSlice.reducer
 
 export const listServers = (state: RootState) => state.servers.list
 export const listServersStatus = (state: RootState) => state.servers.status
+export const listServersEditStatus = (state: RootState) =>
+  state.servers.editStatus
 export const listServersLoaded = (state: RootState) => state.servers.loaded
 export const listServersPage = (state: RootState) => state.servers.page
 export const listServersSort = (state: RootState) => state.servers.sort
@@ -416,6 +516,9 @@ export const listServersFilter = (state: RootState) => state.servers.filter
 export const listServersFilterChanges = (state: RootState) =>
   state.servers.filterChanges
 export const listServersSearch = (state: RootState) => state.servers.search
+export const listServersError = (state: RootState) => state.servers.error
+export const listServersErrorData = (state: RootState) =>
+  state.servers.errorData
 
 export const selectServerById = (state: RootState, id: number) => {
   return state.servers.list.find((item) => item.id === id)

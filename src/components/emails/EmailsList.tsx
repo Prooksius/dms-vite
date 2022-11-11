@@ -150,9 +150,15 @@ export const EmailsList: React.FC = () => {
             width: "2 1",
             sort: "email_addr",
             sortTitle: "Email адресу",
-            getValue: (row) => {
-              if (search)
-                return (
+            getValue: (row) => (
+              <a
+                className="edit-record-link"
+                onClick={() => {
+                  setEditId(row.id)
+                  setEditOpened(true)
+                }}
+              >
+                {search !== "" && (
                   <span
                     dangerouslySetInnerHTML={{
                       __html: row.email_addr
@@ -160,9 +166,10 @@ export const EmailsList: React.FC = () => {
                         .join(`<b>${search}</b>`),
                     }}
                   ></span>
-                )
-              return row.email_addr
-            },
+                )}
+                {!search && row.email_addr}
+              </a>
+            ),
           },
           {
             title: "Пароль",
@@ -307,7 +314,9 @@ export const EmailsList: React.FC = () => {
         <EmailEditForm
           id={editId}
           onDoneCallback={() => {
-            setEditOpened(false)
+            setTimeout(() => {
+              setEditOpened(false)
+            }, 200)
           }}
         />
       </Popuper>

@@ -4,6 +4,7 @@ import {
   CLEAR_FORM,
   CHECK_FORM,
   CHECK_FIELD,
+  ERROR_FIELD,
   FieldData,
   FieldsData,
   FormField,
@@ -14,6 +15,7 @@ import {
   ArrayValue,
   NS,
   Subdomain,
+  ErrorPayloadData,
 } from "./types"
 import {
   ValidatorProps,
@@ -36,6 +38,7 @@ type FormPayload = {
   field?: string
   value?: string | ArrayValue | SelectValue
   index?: number
+  errorData?: ErrorPayloadData
 }
 
 type FormAction = {
@@ -68,6 +71,7 @@ type FormHandlers = {
   [CLEAR_FORM]: DefaultFunc
   [SET_FIELD]: FieldHandlerFunc
   [CHECK_FIELD]: FieldHandlerFunc
+  [ERROR_FIELD]: FieldHandlerFunc
   DEFAULT: DefaultFunc
 }
 
@@ -227,6 +231,27 @@ const handlers: FormHandlers = {
             return true
           })
         }
+      }
+    }
+    return copyState
+  },
+  [ERROR_FIELD]: (state, { payload }) => {
+    const copyState = Object.assign({}, state)
+
+    if (payload.errorData) {
+      if (typeof payload.errorData.detail !== "string") {
+        payload.errorData.detail.map((error) => {
+          let field_name = "-"
+          if (error.loc.length) {
+            field_name = error.loc[error.loc.length - 1]
+          }
+          if (Object.keys(copyState.fields).includes(field_name)) {
+            const field = copyState.fields[field_name]
+            if (field) {
+              field.errorMessage = error.msg
+            }
+          }
+        })
       }
     }
     return copyState

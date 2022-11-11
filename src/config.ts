@@ -1,6 +1,7 @@
 import Swal from "sweetalert2"
 import { toast } from "react-toastify"
 import withReactContent from "sweetalert2-react-content"
+import { ErrorPayloadData } from "@components/app/forms/formWrapper/types"
 
 // test text
 
@@ -60,6 +61,18 @@ export function pluralName(n: number, lang = "ru-RU"): number {
   } else {
     return 0
   }
+}
+
+export function errorToastText(payload: ErrorPayloadData): string {
+  const errors: string[] = []
+  if (typeof payload.detail !== "string") {
+    payload.detail.map((detail) => {
+      errors.push("где: " + detail.loc.join(", ") + ", " + detail.msg)
+    })
+  } else {
+    errors.push(payload.detail)
+  }
+  return errors.join(", ")
 }
 
 export function toastAlert(title: string, type = "info") {

@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react"
+import React, { ReactElement, useEffect, useState } from "react"
 import FormWrapper from "@components/app/forms/formWrapper/FormWrapper"
 import { toastAlert } from "@config"
 import TextField from "@components/app/forms/formFields/TextField"
@@ -11,6 +11,9 @@ import {
   addDomain,
   editDomain,
   loadDepartmentOptions,
+  listDomainsEditStatus,
+  listDomainsError,
+  listDomainsErrorData,
 } from "@store/slices/domainsSlice"
 import { useSelector, useDispatch } from "react-redux"
 import { FormWrapperState } from "@components/app/forms/formWrapper/FormWrapperState"
@@ -44,11 +47,14 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
 }: DomainEditFormProps): ReactElement => {
   const dispatch = useDispatch()
 
+  const [formFilled, setFormFilled] = useState<boolean>(false)
+
   const filledFormData = Object.assign({}, domainEditFormData)
 
   const domain = useSelector((state: RootState) => selectDomainById(state, id))
-
-  fillDomainForm(filledFormData, domain)
+  const editState = useSelector(listDomainsEditStatus)
+  const editError = useSelector(listDomainsError)
+  const editErrorData = useSelector(listDomainsErrorData)
 
   const submitHandler = (token: string, formData: MyFormData) => {
     if (id) {
@@ -60,69 +66,79 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
 
   const goFurther = () => {
     // дальнейшие действия после успешной отправки формы
-    clearDomainForm(filledFormData)
     if (onDoneCallback) onDoneCallback()
   }
+
+  useEffect(() => {
+    fillDomainForm(filledFormData, domain)
+    setFormFilled(true)
+    // eslint-disable-next-line
+  }, [])
 
   return (
     <FormWrapperState formData={domainEditFormData}>
       <FormWrapper
         title=""
         formCallback={submitHandler}
+        editStatus={editState}
+        editError={editError}
+        editErrorData={editErrorData}
         formBtnText="Сохранить"
         formData={filledFormData}
         goFurther={goFurther}
       >
-        <div className="form__row">
-          <div className="col-lg-3 col-md-6 col-sm-12">
-            <h4>Основное</h4>
-            <TextField name="name" />
-            <SelectAsyncField
-              name={"department_name"}
-              searchCallback={loadDepartmentOptions}
-            />
-            <SelectAsyncField
-              name={"server_id"}
-              searchCallback={loadServerOptions}
-            />
-            <SelectAsyncField
-              name={"provider_id"}
-              searchCallback={loadProviderOptions}
-            />
-            <SelectField
-              name={"registrator_id"}
-              loadCallback={getProviderRegistratorNames}
-            />
-            <TextareaField name="notes" />
+        {formFilled && (
+          <div className="form__row">
+            <div className="col-lg-3 col-md-6 col-sm-12">
+              <h4>Основное</h4>
+              <TextField name="name" />
+              <SelectAsyncField
+                name={"department_name"}
+                searchCallback={loadDepartmentOptions}
+              />
+              <SelectAsyncField
+                name={"server_id"}
+                searchCallback={loadServerOptions}
+              />
+              <SelectAsyncField
+                name={"provider_id"}
+                searchCallback={loadProviderOptions}
+              />
+              <SelectField
+                name={"registrator_id"}
+                loadCallback={getProviderRegistratorNames}
+              />
+              <TextareaField name="notes" />
+            </div>
+            <div className="col-lg-3 col-md-6 col-sm-12">
+              <h4>DNS хостинг</h4>
+              <SelectAsyncField
+                name={"hosting_id"}
+                searchCallback={loadProviderOptions}
+              />
+              <SelectField
+                name={"hosting_acc_id"}
+                loadCallback={getProviderRegistratorNames}
+              />
+              <CheckboxArrayField
+                name="ns"
+                initialLoad={false}
+                loadCallback={getRegistratorNS}
+              />
+              <br />
+              <h4>Мониторинг</h4>
+              <CheckboxField name="whois_status" />
+              <CheckboxField name="available_status" />
+              <CheckboxField name="rkn_status" />
+              <CheckboxField name="ssl_status" />
+              <CheckboxField name="expirationtime_status" />
+            </div>
+            <div className="col-lg-6 col-md-12 col-sm-12">
+              <h4>Поддомены</h4>
+              <SubdomainsField name="subdomains" domainName="name" />
+            </div>
           </div>
-          <div className="col-lg-3 col-md-6 col-sm-12">
-            <h4>DNS хостинг</h4>
-            <SelectAsyncField
-              name={"hosting_id"}
-              searchCallback={loadProviderOptions}
-            />
-            <SelectField
-              name={"hosting_acc_id"}
-              loadCallback={getProviderRegistratorNames}
-            />
-            <CheckboxArrayField
-              name="ns"
-              initialLoad={false}
-              loadCallback={getRegistratorNS}
-            />
-            <br />
-            <h4>Мониторинг</h4>
-            <CheckboxField name="whois_status" />
-            <CheckboxField name="available_status" />
-            <CheckboxField name="rkn_status" />
-            <CheckboxField name="ssl_status" />
-            <CheckboxField name="expirationtime_status" />
-          </div>
-          <div className="col-lg-6 col-md-12 col-sm-12">
-            <h4>Поддомены</h4>
-            <SubdomainsField name="subdomains" domainName="name" />
-          </div>
-        </div>
+        )}
       </FormWrapper>
     </FormWrapperState>
   )

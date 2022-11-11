@@ -27,7 +27,8 @@ const Popuper: React.FC<PopuperProps> = (props) => {
   }
 
   const escPressed = (event: KeyboardEvent) => {
-    if (event.key === "27") {
+    console.log("event", event)
+    if (event.keyCode === 27) {
       props.closeHandler()
     }
   }

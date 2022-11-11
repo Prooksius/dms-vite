@@ -93,12 +93,14 @@ export const DomainsList: React.FC = () => {
     confirmationAlert("Вы уверены?", "Да", "Отмена").then((result) => {
       if (result.isConfirmed) {
         dispatch(deleteDomain(id))
+        dispatch(fetchDomainAll())
       }
     })
   }
 
   const archiveHandler = (id: number) => {
     dispatch(archiveDomain(id))
+    dispatch(fetchDomainAll())
   }
 
   const changePage = (value: number) => {
@@ -123,6 +125,8 @@ export const DomainsList: React.FC = () => {
     const handleClickOutside = () => {
       dispatch(closeDomainPopups())
     }
+
+    dispatch(fetchDomainAll())
 
     document.addEventListener("click", handleClickOutside, true)
     return () => {
@@ -198,17 +202,24 @@ export const DomainsList: React.FC = () => {
           {
             title: "Название",
             width: "1 1",
-            getValue: (row) => {
-              if (search)
-                return (
+            getValue: (row) => (
+              <a
+                className="edit-record-link"
+                onClick={() => {
+                  setEditId(row.id)
+                  setEditOpened(true)
+                }}
+              >
+                {search !== "" && (
                   <span
                     dangerouslySetInnerHTML={{
                       __html: row.name.split(search).join(`<b>${search}</b>`),
                     }}
                   ></span>
-                )
-              return row.name
-            },
+                )}
+                {!search && row.name}
+              </a>
+            ),
           },
           {
             title: "Состояние",
@@ -368,7 +379,10 @@ export const DomainsList: React.FC = () => {
         <DomainEditForm
           id={editId}
           onDoneCallback={() => {
-            setEditOpened(false)
+            setTimeout(() => {
+              setEditOpened(false)
+              dispatch(fetchDomainAll())
+            }, 200)
           }}
         />
       </Popuper>

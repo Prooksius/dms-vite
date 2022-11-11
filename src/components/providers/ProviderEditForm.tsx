@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react"
+import React, { ReactElement, useEffect, useState } from "react"
 import FormWrapper from "@components/app/forms/formWrapper/FormWrapper"
 import { toastAlert } from "@config"
 import TextField from "@components/app/forms/formFields/TextField"
@@ -10,6 +10,9 @@ import {
   selectItemById,
   addProvider,
   editProvider,
+  listEditStatus,
+  listError,
+  listErrorData,
 } from "@store/slices/providersSlice"
 import { useSelector, useDispatch } from "react-redux"
 import { FormWrapperState } from "@components/app/forms/formWrapper/FormWrapperState"
@@ -32,11 +35,14 @@ export const ProviderEditForm: React.FC<ProviderEditFormProps> = ({
 }): ReactElement => {
   const dispatch = useDispatch()
 
+  const [formFilled, setFormFilled] = useState<boolean>(false)
+
   const filledFormData = Object.assign({}, providerEditFormData)
 
   const provider = useSelector((state: RootState) => selectItemById(state, id))
-
-  fillRecordForm(filledFormData, provider)
+  const editState = useSelector(listEditStatus)
+  const editError = useSelector(listError)
+  const editErrorData = useSelector(listErrorData)
 
   const submitHandler = (token: string, formData: MyFormData) => {
     if (id) {
@@ -48,21 +54,33 @@ export const ProviderEditForm: React.FC<ProviderEditFormProps> = ({
 
   const goFurther = () => {
     // дальнейшие действия после успешной отправки формы
-    clearRecordForm(filledFormData)
     if (onDoneCallback) onDoneCallback()
   }
+
+  useEffect(() => {
+    fillRecordForm(filledFormData, provider)
+    setFormFilled(true)
+    // eslint-disable-next-line
+  }, [])
 
   return (
     <FormWrapperState formData={providerEditFormData}>
       <FormWrapper
         title=""
         formCallback={submitHandler}
+        editStatus={editState}
+        editError={editError}
+        editErrorData={editErrorData}
         formBtnText="Сохранить"
         formData={filledFormData}
         goFurther={goFurther}
       >
-        <TextField name="name" />
-        <TextField name="url" />
+        {formFilled && (
+          <>
+            <TextField name="name" />
+            <TextField name="url" />
+          </>
+        )}
       </FormWrapper>
     </FormWrapperState>
   )

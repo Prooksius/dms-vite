@@ -1,7 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import { StatusType } from "@components/app/forms/formWrapper/types"
+import {
+  StatusType,
+  ValidationErrors,
+} from "@components/app/forms/formWrapper/types"
 import { axiosSimpleInstance } from "../axiosInstance"
 import type { RootState } from "@store/index"
+import { AxiosError } from "axios"
+import { toastAlert } from "@config"
 
 interface AuthState {
   logged: boolean
@@ -9,12 +14,26 @@ interface AuthState {
   error: string | null
 }
 
-export const checkToken = createAsyncThunk("/auth/checkToken", async () => {
-  const oldTtoken = localStorage.getItem("token")
-  const response = await axiosSimpleInstance.get(`/token/?token=${oldTtoken}`)
-  console.log("response", response)
-  return response.data
-})
+export const checkToken = createAsyncThunk(
+  "/auth/checkToken",
+  async (_, { rejectWithValue }) => {
+    const oldTtoken = localStorage.getItem("token")
+    try {
+      const response = await axiosSimpleInstance.get(
+        `/token/?token=${oldTtoken}`
+      )
+      console.log("response", response)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
+  }
+)
 
 const initialState: AuthState = {
   logged: false,
@@ -44,6 +63,7 @@ export const authSlice = createSlice({
       .addCase(checkToken.rejected, (state) => {
         state.status = "failed"
         state.logged = false
+        toastAlert("Ошибка авторизации", "error")
       })
   },
 })

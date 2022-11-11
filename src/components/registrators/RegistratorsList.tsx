@@ -108,17 +108,24 @@ export const RegistratorsList: React.FC = () => {
           {
             title: "Название",
             width: "1 1",
-            getValue: (row) => {
-              if (search)
-                return (
+            getValue: (row) => (
+              <a
+                className="edit-record-link"
+                onClick={() => {
+                  setEditId(row.id)
+                  setEditOpened(true)
+                }}
+              >
+                {search !== "" && (
                   <span
                     dangerouslySetInnerHTML={{
                       __html: row.name.split(search).join(`<b>${search}</b>`),
                     }}
                   ></span>
-                )
-              return row.name
-            },
+                )}
+                {!search && row.name}
+              </a>
+            ),
           },
           {
             title: "Провайдер",
@@ -262,7 +269,9 @@ export const RegistratorsList: React.FC = () => {
         <RegistratorEditForm
           id={editId}
           onDoneCallback={() => {
-            setEditOpened(false)
+            setTimeout(() => {
+              setEditOpened(false)
+            }, 200)
           }}
         />
       </Popuper>

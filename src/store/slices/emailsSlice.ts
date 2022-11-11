@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import type { PayloadAction } from "@reduxjs/toolkit"
-import { toastAlert } from "@config"
+import { errorToastText, toastAlert } from "@config"
 import { axiosInstance, axiosFakeInstance } from "@store/axiosInstance"
 import { RootState } from "@store/store"
 import type { ServerGetResponse } from "@store/index"
@@ -12,7 +12,10 @@ import {
   OptionsObject,
   Additional,
   SelectValue,
+  ErrorPayloadData,
+  ValidationErrors,
 } from "@components/app/forms/formWrapper/types"
+import { AxiosError } from "axios"
 
 export interface EmailsRecord {
   id: number
@@ -46,7 +49,8 @@ interface EmailsState {
   status: StatusType
   editStatus: StatusType
   loaded: boolean
-  error: string | null
+  error: string
+  errorData: ErrorPayloadData | null
   search: string
   filter: EmailsFilter
   filterChanges: number
@@ -88,13 +92,15 @@ export const loadEmailOptions = async (
 ) => {
   let items: EmailsShortRecord[] = []
   try {
+    const query = new URLSearchParams({
+      offset: String((page - 1) * 10),
+      limit: "10",
+      name: inputValue,
+    }).toString()
+
     const response = await axiosInstance.get<
       ServerGetResponse<EmailsShortRecord>
-    >(
-      `/emails/getNames/?offset=${
-        (page - 1) * 10
-      }&limit=10&partial=true&name=${inputValue}`
-    )
+    >(`/emails/getNames/?${query}`)
 
     console.log("loadedOptions", loadedOptions)
     console.log("response.data", response.data)
@@ -129,13 +135,16 @@ export const loadEmailOptionsName = async (
 ) => {
   let items: EmailsShortRecord[] = []
   try {
+    const query = new URLSearchParams({
+      offset: String((page - 1) * 10),
+      limit: "10",
+      name: inputValue,
+      partial: "true",
+    }).toString()
+
     const response = await axiosInstance.get<
       ServerGetResponse<EmailsShortRecord>
-    >(
-      `/emails/getNames/?offset=${
-        (page - 1) * 10
-      }&limit=10&partial=true&name=${inputValue}`
-    )
+    >(`/emails/getNames/?${query}`)
 
     console.log("loadedOptions", loadedOptions)
     console.log("response.data", response.data)
@@ -164,63 +173,114 @@ export const loadEmailOptionsName = async (
 
 export const fetchEmailsPage = createAsyncThunk(
   "/emails/fetchEmailsPage",
-  async (params, { getState }) => {
+  async (params, { getState, rejectWithValue }) => {
     const { emails } = <RootState>getState()
 
-    const response = await axiosInstance.get<ServerGetResponse<EmailsRecord>>(
-      `/emails/?offset=${(emails.page - 1) * emails.itemsInPage}&limit=${
-        emails.itemsInPage
-      }&name=${emails.search}&created_at=${
-        emails.filter.created_at
-          ? emails.filter.created_at.split(".").reverse().join("-")
-          : ""
-      }&deleted_at=${
-        emails.filter.deleted_at ? emails.filter.deleted_at : ""
-      }&email_addr=${
-        emails.filter.email_addr ? emails.filter.email_addr.value : ""
-      }`
-    )
+    const query = new URLSearchParams({
+      offset: String((emails.page - 1) * emails.itemsInPage),
+      limit: String(emails.itemsInPage),
+      name: emails.search,
+      created_at: emails.filter.created_at
+        ? emails.filter.created_at.split(".").reverse().join("-")
+        : "",
+      deleted_at: emails.filter.deleted_at ? emails.filter.deleted_at : "",
+      email_addr: emails.filter.email_addr
+        ? emails.filter.email_addr.value
+        : "",
+    }).toString()
 
-    console.log("response.data", response.data)
-    return response.data
+    try {
+      const response = await axiosInstance.get<ServerGetResponse<EmailsRecord>>(
+        `/emails/?${query}`
+      )
+
+      console.log("response.data", response.data)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const addEmail = createAsyncThunk(
   "emails/addEmail",
-  async ({ fields }: MyFormData) => {
+  async ({ fields }: MyFormData, { rejectWithValue }) => {
     const bodyData = fillEmailRecord({ fields })
-    const response = await axiosInstance.post("/emails/", bodyData)
-    console.log("add email response.data", response.data)
-    return response.data
+    try {
+      const response = await axiosInstance.post("/emails/", bodyData)
+      console.log("add email response.data", response.data)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const editEmail = createAsyncThunk(
   "emails/editEmail",
-  async ({ form, record }: { form: MyFormData; record: EmailsRecord }) => {
+  async (
+    { form, record }: { form: MyFormData; record: EmailsRecord },
+    { rejectWithValue }
+  ) => {
     const bodyData = fillEmailRecord(form)
     bodyData.created_at = record.created_at
     bodyData.deleted_at = record.deleted_at
-    const response = await axiosInstance.put(`/emails/${record.id}`, bodyData)
-    console.log("edit email response.data", response.data)
-    return response.data
+    try {
+      const response = await axiosInstance.put(`/emails/${record.id}`, bodyData)
+      console.log("edit email response.data", response.data)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const deleteEmail = createAsyncThunk(
   "emails/deleteEmail",
-  async (id: number) => {
-    const response = await axiosInstance.delete(`/emails/${id}`)
-    return response.data
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(`/emails/${id}`)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const archiveEmail = createAsyncThunk(
   "emails/archiveEmail",
-  async (id: number) => {
-    const response = await axiosInstance.put(`/emails/${id}/delete`, {})
-    return response.data
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(`/emails/${id}/delete`, {})
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
@@ -233,7 +293,8 @@ const initialState: EmailsState = {
   status: "idle",
   editStatus: "idle",
   loaded: false,
-  error: null,
+  error: "",
+  errorData: null,
   search: "",
   filter: {
     email_addr: null,
@@ -307,6 +368,9 @@ export const emailsSlice = createSlice({
     builder
       .addCase(fetchEmailsPage.pending, (state) => {
         state.status = "loading"
+        state.editStatus = "idle"
+        state.error = ""
+        state.errorData = null
       })
       .addCase(fetchEmailsPage.fulfilled, (state, { payload }) => {
         state.list = payload.data.map((email) => ({
@@ -316,61 +380,101 @@ export const emailsSlice = createSlice({
         }))
         state.itemsCount = payload.count
         state.status = "succeeded"
+        state.editStatus = "idle"
+        state.error = ""
+        state.errorData = null
         state.loaded = true
       })
       .addCase(fetchEmailsPage.rejected, (state, action) => {
         state.status = "failed"
-        state.error = action.error.message
-        toastAlert("Ошибка чтения email-ов: " + action.error.message, "error")
+        state.editStatus = "idle"
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка чтения email-ов: " + state.error, "error")
       })
       .addCase(addEmail.pending, (state) => {
         state.editStatus = "loading"
+        state.error = ""
+        state.errorData = null
       })
       .addCase(
         addEmail.fulfilled,
         (state, { payload }: PayloadAction<EmailsRecord>) => {
           state.editStatus = "succeeded"
+          state.error = ""
+          state.errorData = null
           state.filterChanges++
           toastAlert("Email успешно добавлен", "success")
         }
       )
       .addCase(addEmail.rejected, (state, action) => {
         state.editStatus = "failed"
-        state.error = action.error.message
-        toastAlert("Ошибка добавления Email: " + action.error.message, "error")
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка добавления Email: " + state.error, "error")
       })
       .addCase(editEmail.pending, (state) => {
+        state.error = ""
+        state.errorData = null
         state.editStatus = "loading"
       })
       .addCase(
         editEmail.fulfilled,
         (state, { payload }: PayloadAction<EmailsRecord>) => {
           state.editStatus = "succeeded"
+          state.error = ""
+          state.errorData = null
           state.filterChanges++
           toastAlert("Email успешно изменен", "success")
         }
       )
       .addCase(editEmail.rejected, (state, action) => {
         state.editStatus = "failed"
-        state.error = action.error.message
-        toastAlert("Ошибка изменения Email: " + action.error.message, "error")
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка изменения Email: " + state.error, "error")
       })
       .addCase(archiveEmail.fulfilled, (state, action) => {
+        state.error = ""
+        state.errorData = null
         state.filterChanges++
         toastAlert("Email успешно удален", "success")
       })
       .addCase(archiveEmail.rejected, (state, action) => {
         toastAlert(
-          "Ошибка архивирования Email: " + action.error.message,
+          "Ошибка архивирования Email: " +
+            (action.payload
+              ? errorToastText(action.payload as ErrorPayloadData)
+              : action.error.message),
           "error"
         )
       })
       .addCase(deleteEmail.fulfilled, (state, action) => {
+        state.error = ""
+        state.errorData = null
         state.filterChanges++
         toastAlert("Email успешно архивирован", "success")
       })
       .addCase(deleteEmail.rejected, (state, action) => {
-        toastAlert("Ошибка удаления Email: " + action.error.message, "error")
+        toastAlert(
+          "Ошибка удаления Email: " +
+            (action.payload
+              ? errorToastText(action.payload as ErrorPayloadData)
+              : action.error.message),
+          "error"
+        )
       })
   },
 })
@@ -393,6 +497,8 @@ export default emailsSlice.reducer
 
 export const listEmails = (state: RootState) => state.emails.list
 export const listEmailsStatus = (state: RootState) => state.emails.status
+export const listEmailsEditStatus = (state: RootState) =>
+  state.emails.editStatus
 export const listEmailsSort = (state: RootState) => state.emails.sort
 export const listEmailsLoaded = (state: RootState) => state.emails.loaded
 export const listEmailsPage = (state: RootState) => state.emails.page
@@ -406,6 +512,8 @@ export const listEmailsFilter = (state: RootState) => state.emails.filter
 export const listEmailsFilterChanges = (state: RootState) =>
   state.emails.filterChanges
 export const listEmailsSearch = (state: RootState) => state.emails.search
+export const listEmailsError = (state: RootState) => state.emails.error
+export const listEmailsErrorData = (state: RootState) => state.emails.errorData
 
 export const selectEmailById = (state: RootState, id: number) => {
   return state.emails.list.find((item) => item.id === id)

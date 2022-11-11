@@ -13,7 +13,6 @@ import {
 } from "@store/slices/serversSlice"
 import {
   fetchDomainPage,
-  fetchDomainAll,
   listDomainsFilterChanges,
 } from "@store/slices/domainsSlice"
 import {
@@ -80,7 +79,6 @@ const GlobalWrapper: React.FC = ({ children }) => {
   useEffect(() => {
     if (domainsFilterChanges) {
       dispatch(fetchDomainPage())
-      dispatch(fetchDomainAll())
     }
     // eslint-disable-next-line
   }, [domainsFilterChanges])

@@ -92,7 +92,6 @@ export const ProvidersList: React.FC = () => {
   const toggleRecordOpen = (id: number) => {
     dispatch(toggleProviderOpen(id))
   }
-
   useEffect(() => {
     const handleClickOutside = () => {
       dispatch(closeProviderPopups())
@@ -127,17 +126,24 @@ export const ProvidersList: React.FC = () => {
             width: "1 1",
             sort: "name",
             sortTitle: "названию",
-            getValue: (row) => {
-              if (search)
-                return (
+            getValue: (row) => (
+              <a
+                className="edit-record-link"
+                onClick={() => {
+                  setEditId(row.id)
+                  setEditOpened(true)
+                }}
+              >
+                {search !== "" && (
                   <span
                     dangerouslySetInnerHTML={{
                       __html: row.name.split(search).join(`<b>${search}</b>`),
                     }}
                   ></span>
-                )
-              return row.name
-            },
+                )}
+                {!search && row.name}
+              </a>
+            ),
           },
           {
             title: "Url",
@@ -149,6 +155,8 @@ export const ProvidersList: React.FC = () => {
           {
             title: "Добавлен",
             width: "1 1",
+            sort: "created_at",
+            sortTitle: "дате добавления",
             getValue: (row) => formatDateTime(row.created_at, "datetime"),
           },
           {
@@ -242,7 +250,9 @@ export const ProvidersList: React.FC = () => {
         <ProviderEditForm
           id={editId}
           onDoneCallback={() => {
-            setEditOpened(false)
+            setTimeout(() => {
+              setEditOpened(false)
+            }, 200)
           }}
         />
       </Popuper>

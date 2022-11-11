@@ -1,5 +1,5 @@
 import classNames from "classnames"
-import React, { CSSProperties, ReactNode, useEffect } from "react"
+import React, { CSSProperties, ReactNode, useEffect, useState } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import PaginationList, { HeaderSlot } from "@components/app/PaginationList"
 import range from "lodash.range"
@@ -79,7 +79,10 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
 
   const tooltipShow = useSelector(listTooltipShow)
 
+  const [sorting, setSorting] = useState<boolean>(false)
+
   const setSortHandler = (value: string) => {
+    setSorting(true)
     dispatch(setTootipShow(false))
     if (value) query.set("sort", value)
     else query.delete("sort")
@@ -110,6 +113,12 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
   })
 
   useEffect(() => {
+    setTimeout(() => {
+      setSorting(false)
+    }, 100)
+  }, [sort])
+
+  useEffect(() => {
     if (query.get("page") && +query.get("page") !== page) {
       setPage(+query.get("page"))
     } else if (!query.get("page")) {
@@ -124,6 +133,7 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
     }
 
     tooltipOn()
+    setSorting(false)
 
     if (status === "idle" && !filterChanges) reloadPage()
     // eslint-disable-next-line
@@ -199,7 +209,7 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
                     style={{ flex: column.width }}
                   >
                     <span
-                      key={direction}
+                      style={{ pointerEvents: sorting ? "none" : "all" }}
                       data-tip={
                         column.sort &&
                         (direction

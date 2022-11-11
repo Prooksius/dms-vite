@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import type { PayloadAction } from "@reduxjs/toolkit"
-import { toastAlert } from "@config"
+import { errorToastText, toastAlert } from "@config"
 import { axiosInstance, axiosFakeInstance } from "@store/axiosInstance"
 import { RootState } from "@store/store"
 import type { ServerGetResponse } from "@store/index"
@@ -14,7 +14,10 @@ import {
   Additional,
   DefaultSelectValue,
   NS,
+  ErrorPayloadData,
+  ValidationErrors,
 } from "@components/app/forms/formWrapper/types"
+import { AxiosError } from "axios"
 
 export interface RegistratorsRecord {
   id: number
@@ -55,9 +58,10 @@ interface RegistratorsState {
   itemsCount: number
   sort: string
   status: StatusType
-  editStatus: string
+  editStatus: StatusType
   loaded: boolean
-  error: string | null
+  error: string
+  errorData: ErrorPayloadData | null
   search: string
   filter: RegistratorsFilter
   filterChanges: number
@@ -104,14 +108,20 @@ export const getProviderRegistratorNames = async (
   param: any
 ): Promise<DefaultSelectValue[]> => {
   if (!param) return []
-  
+
   let items: RegistratorsShortRecord[] = []
   try {
+    const query = new URLSearchParams({
+      offset: "0",
+      limit: "99999999999",
+      provider_id: String(param),
+      name: "",
+      partial: "true",
+    }).toString()
+
     const response = await axiosInstance.get<
       ServerGetResponse<RegistratorsShortRecord>
-    >(
-      `/registrators/getNames?offset=0&limit=99999999999&provider_id=${param}&name=&partial=true`
-    )
+    >(`/registrators/getNames?${query}`)
 
     console.log("response.data", response.data)
     items = response.data.data ? response.data.data : []
@@ -156,13 +166,16 @@ export const loadRegistratorOptions = async (
 ) => {
   let items: RegistratorsShortRecord[] = []
   try {
+    const query = new URLSearchParams({
+      offset: String((page - 1) * 10),
+      limit: "10",
+      name: inputValue,
+      partial: "true",
+    }).toString()
+
     const response = await axiosInstance.get<
       ServerGetResponse<RegistratorsShortRecord>
-    >(
-      `/registrators/getNames?offset=${
-        (page - 1) * 10
-      }&limit=10&partial=true&name=${inputValue}`
-    )
+    >(`/registrators/getNames?${query}`)
 
     console.log("response.data", response.data)
     items = response.data.data ? response.data.data : []
@@ -190,79 +203,127 @@ export const loadRegistratorOptions = async (
 
 export const fetchRegistratorsPage = createAsyncThunk(
   "/registrators/fetchRegistratorsPage",
-  async (params, { getState }) => {
+  async (params, { getState, rejectWithValue }) => {
     const { registrators } = <RootState>getState()
 
-    const response = await axiosInstance.get<
-      ServerGetResponse<RegistratorsRecord>
-    >(
-      `/registrators/?offset=${
-        (registrators.page - 1) * registrators.itemsInPage
-      }&limit=${registrators.itemsInPage}&name=${
-        registrators.search
-      }&created_at=${
-        registrators.filter.created_at
-          ? registrators.filter.created_at.split(".").reverse().join("-")
-          : ""
-      }&deleted_at=${
-        registrators.filter.deleted_at ? registrators.filter.deleted_at : ""
-      }&email_id=${
-        registrators.filter.email_id ? registrators.filter.email_id.value : ""
-      }&provider_id=${
-        registrators.filter.provider_id
-          ? registrators.filter.provider_id.value
-          : ""
-      }`
-    )
+    const query = new URLSearchParams({
+      offset: String((registrators.page - 1) * registrators.itemsInPage),
+      limit: String(registrators.itemsInPage),
+      name: registrators.search,
+      created_at: registrators.filter.created_at
+        ? registrators.filter.created_at.split(".").reverse().join("-")
+        : "",
+      deleted_at: registrators.filter.deleted_at
+        ? registrators.filter.deleted_at
+        : "",
+      email_id: registrators.filter.email_id
+        ? registrators.filter.email_id.value
+        : "",
+      provider_id: registrators.filter.provider_id
+        ? registrators.filter.provider_id.value
+        : "",
+    }).toString()
 
-    console.log("response.data", response.data)
-    return response.data
+    try {
+      const response = await axiosInstance.get<
+        ServerGetResponse<RegistratorsRecord>
+      >(`/registrators/?${query}`)
+
+      console.log("response.data", response.data)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const addRegistrator = createAsyncThunk(
   "registrators/addRegistrator",
-  async ({ fields }: MyFormData) => {
+  async ({ fields }: MyFormData, { rejectWithValue }) => {
     const bodyData = fillRegistratorRecord({ fields })
-    const response = await axiosInstance.post("/registrators", bodyData)
-    console.log("add registrator response.data", response.data)
-    return response.data
+    try {
+      const response = await axiosInstance.post("/registrators", bodyData)
+      console.log("add registrator response.data", response.data)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const editRegistrator = createAsyncThunk(
   "registrators/editRegistrator",
-  async ({
-    form,
-    record,
-  }: {
-    form: MyFormData
-    record: RegistratorsRecord
-  }) => {
+  async (
+    {
+      form,
+      record,
+    }: {
+      form: MyFormData
+      record: RegistratorsRecord
+    },
+    { rejectWithValue }
+  ) => {
     const bodyData = fillRegistratorRecord(form)
     bodyData.created_at = record.created_at
     bodyData.deleted_at = record.deleted_at
-    const response = await axiosInstance.put(
-      `/registrators/${record.id}`,
-      bodyData
-    )
-    return response.data
+    try {
+      const response = await axiosInstance.put(
+        `/registrators/${record.id}`,
+        bodyData
+      )
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const deleteRegistrator = createAsyncThunk(
   "registrators/deleteRegistrator",
-  async (id: number) => {
-    const response = await axiosInstance.delete(`/registrators/${id}`)
-    return response.data
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(`/registrators/${id}`)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const archiveRegistrator = createAsyncThunk(
   "registrators/archiveRegistrator",
-  async (id: number) => {
-    const response = await axiosInstance.put(`/registrators/${id}/delete`, {})
-    return response.data
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(`/registrators/${id}/delete`, {})
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
@@ -275,7 +336,8 @@ const initialState: RegistratorsState = {
   status: "idle",
   editStatus: "idle",
   loaded: false,
-  error: null,
+  error: "",
+  errorData: null,
   search: "",
   filter: {
     created_at: null,
@@ -349,6 +411,9 @@ export const registratorsSlice = createSlice({
     builder
       .addCase(fetchRegistratorsPage.pending, (state) => {
         state.status = "loading"
+        state.editStatus = "idle"
+        state.error = ""
+        state.errorData = null
       })
       .addCase(fetchRegistratorsPage.fulfilled, (state, { payload }) => {
         state.list = payload.data.map((registrator) => ({
@@ -358,64 +423,101 @@ export const registratorsSlice = createSlice({
         }))
         state.itemsCount = payload.count
         state.status = "succeeded"
+        state.editStatus = "idle"
+        state.error = ""
+        state.errorData = null
         state.loaded = true
       })
       .addCase(fetchRegistratorsPage.rejected, (state, action) => {
         state.status = "failed"
-        state.error = action.error.message
-        toastAlert("Ошибка чтения серверов: " + action.error.message, "error")
+        state.editStatus = "idle"
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка чтения серверов: " + state.error, "error")
       })
       .addCase(addRegistrator.pending, (state) => {
         state.editStatus = "loading"
+        state.error = ""
+        state.errorData = null
       })
       .addCase(
         addRegistrator.fulfilled,
         (state, { payload }: PayloadAction<RegistratorsRecord>) => {
           state.editStatus = "succeeded"
+          state.error = ""
+          state.errorData = null
           state.filterChanges++
           toastAlert("Сервер успешно добавлен", "success")
         }
       )
       .addCase(addRegistrator.rejected, (state, action) => {
         state.editStatus = "failed"
-        state.error = action.error.message
-        toastAlert(
-          "Ошибка добавления сервера: " + action.error.message,
-          "error"
-        )
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка добавления сервера: " + state.error, "error")
       })
       .addCase(editRegistrator.pending, (state) => {
         state.editStatus = "loading"
+        state.error = ""
+        state.errorData = null
       })
       .addCase(
         editRegistrator.fulfilled,
         (state, { payload }: PayloadAction<RegistratorsRecord>) => {
           state.editStatus = "succeeded"
+          state.error = ""
+          state.errorData = null
           state.filterChanges++
           toastAlert("Сервер успешно изменен", "success")
         }
       )
       .addCase(editRegistrator.rejected, (state, action) => {
         state.editStatus = "failed"
-        state.error = action.error.message
-        toastAlert("Ошибка изменения сервера: " + action.error.message, "error")
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка изменения сервера: " + state.error, "error")
       })
       .addCase(archiveRegistrator.fulfilled, (state, action) => {
+        state.error = ""
+        state.errorData = null
         state.filterChanges++
         toastAlert("Сервер успешно удален", "success")
       })
       .addCase(archiveRegistrator.rejected, (state, action) => {
         toastAlert(
-          "Ошибка архивирования сервера: " + action.error.message,
+          "Ошибка архивирования сервера: " +
+            (action.payload
+              ? errorToastText(action.payload as ErrorPayloadData)
+              : action.error.message),
           "error"
         )
       })
       .addCase(deleteRegistrator.fulfilled, (state, action) => {
+        state.error = ""
+        state.errorData = null
         state.filterChanges++
         toastAlert("Сервер успешно архивирован", "success")
       })
       .addCase(deleteRegistrator.rejected, (state, action) => {
-        toastAlert("Ошибка удаления сервера: " + action.error.message, "error")
+        toastAlert(
+          "Ошибка удаления сервера: " +
+            (action.payload
+              ? errorToastText(action.payload as ErrorPayloadData)
+              : action.error.message),
+          "error"
+        )
       })
   },
 })
@@ -439,6 +541,8 @@ export default registratorsSlice.reducer
 export const listRegistrators = (state: RootState) => state.registrators.list
 export const listRegistratorsStatus = (state: RootState) =>
   state.registrators.status
+export const listRegistratorsEditStatus = (state: RootState) =>
+  state.registrators.editStatus
 export const listRegistratorsLoaded = (state: RootState) =>
   state.registrators.loaded
 export const listRegistratorsPage = (state: RootState) =>
@@ -457,7 +561,10 @@ export const listRegistratorsFilterChanges = (state: RootState) =>
   state.registrators.filterChanges
 export const listRegistratorsSearch = (state: RootState) =>
   state.registrators.search
-
+export const listRegistratorsError = (state: RootState) =>
+  state.registrators.error
+export const listRegistratorsErrorData = (state: RootState) =>
+  state.registrators.errorData
 export const selectRegistratorById = (state: RootState, id: number) => {
   return state.registrators.list.find((item) => item.id === id)
 }

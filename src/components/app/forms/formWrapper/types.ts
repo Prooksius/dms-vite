@@ -3,6 +3,7 @@ export const SET_FORM = "SET_FORM"
 export const CLEAR_FORM = "CLEAR_FORM"
 export const CHECK_FORM = "CHECK_FORM"
 export const CHECK_FIELD = "CHECK_FIELD"
+export const ERROR_FIELD = "ERROR_FIELD"
 
 export type StatusType = "idle" | "loading" | "succeeded" | "failed"
 
@@ -12,6 +13,7 @@ export type ActionType =
   | typeof CLEAR_FORM
   | typeof CHECK_FORM
   | typeof CHECK_FIELD
+  | typeof ERROR_FIELD
 
 type DropdownType = "default" | "images"
 type FieldType =
@@ -38,6 +40,22 @@ export type SelectValue = DefaultSelectValue | EmptySelectValue
 export type FieldsDependency = {
   field: string
   type: string
+}
+
+export interface ValidationErrors {
+  errorMessage: string
+  field_errors: Record<string, string>
+}
+
+type ErrorData = {
+  loc: string[]
+  msg: string
+  type: string
+}
+export type ErrorDetailsData = ErrorData[]
+
+export interface ErrorPayloadData {
+  detail: ErrorDetailsData | string
 }
 
 export type ValidationsData = {
@@ -121,12 +139,14 @@ export type FormContextSetFormFunc = (form: MyFormData) => void
 export type FormContextSetFieldFunc = (field: FormFieldData) => void
 export type FormContextCheckFormFunc = () => void
 export type FormContextCheckFieldFunc = (field_id: string) => void
+export type FormContextErrorFieldFunc = (field_errors: ErrorPayloadData) => void
 
 export interface FormContextProps {
   form: MyFormData
   setForm: FormContextSetFormFunc
   checkForm: FormContextCheckFormFunc
   checkField: FormContextCheckFieldFunc
+  errorField: FormContextErrorFieldFunc
   clearForm: FormContextCheckFormFunc
   setFieldValue: FormContextSetFieldFunc
 }

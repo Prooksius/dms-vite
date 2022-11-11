@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import type { PayloadAction } from "@reduxjs/toolkit"
-import { toastAlert } from "@config"
+import { errorToastText, toastAlert } from "@config"
 import { axiosInstance, axiosFakeInstance } from "@store/axiosInstance"
 import { RootState } from "@store/store"
 import type { ServerGetResponse } from "@store/index"
@@ -13,7 +13,10 @@ import {
   Subdomain,
   OptionsObject,
   Additional,
+  ValidationErrors,
+  ErrorPayloadData,
 } from "@components/app/forms/formWrapper/types"
+import { AxiosError } from "axios"
 //import ts from "typescript"
 
 interface SubdomainsRecord {
@@ -118,10 +121,11 @@ interface DomainsState {
   itemsCount: number
   sort: string
   status: StatusType
-  editStatus: string
+  editStatus: StatusType
   allStatus: string
   loaded: boolean
-  error: string | null
+  error: string
+  errorData: ErrorPayloadData | null
   search: string
   filter: DomainsFilter
   filterChanges: number
@@ -209,13 +213,15 @@ export const loadDomainOptions = async (
 ) => {
   let items: DomainsShortRecord[] = []
   try {
+    const query = new URLSearchParams({
+      offset: String((page - 1) * 10),
+      limit: "10",
+      name: inputValue,
+    }).toString()
+
     const response = await axiosInstance.get<
       ServerGetResponse<DomainsShortRecord>
-    >(
-      `/domains/getNames?offset=${
-        (page - 1) * 10
-      }&limit=10&partial=true&name=${inputValue}`
-    )
+    >(`/domains/getNames?${query}`)
 
     console.log("response.data", response.data)
     items = response.data.data ? response.data.data : []
@@ -278,42 +284,41 @@ export const fetchDomainAll = createAsyncThunk(
   async (params, { getState }) => {
     const { domains } = <RootState>getState()
 
+    const queryObj: Record<string, string> = {
+      offset: "0",
+      limit: "999999999999",
+      name: domains.search,
+      active: domains.filter.active?.value
+        ? domains.filter.active.value === "1"
+          ? "true"
+          : "false"
+        : "true",
+      department_name: domains.filter.department_name?.value
+        ? domains.filter.department_name.value
+        : "",
+      provider_id: domains.filter.provider_id?.value
+        ? domains.filter.provider_id.value
+        : "",
+      server_id: domains.filter.server_id?.value
+        ? domains.filter.server_id.value
+        : "",
+      registrator_id: domains.filter.registrator_id?.value
+        ? domains.filter.registrator_id.value
+        : "",
+      registration_date: domains.filter.registration_date
+        ? domains.filter.registration_date.split(".").reverse().join("-")
+        : "",
+      expirationtime_condition: domains.filter.expirationtime_condition
+        ? domains.filter.expirationtime_condition.split(".").reverse().join("-")
+        : "",
+    }
+    if (domains.filter.available_condition?.value) {
+      queryObj.available_condition = domains.filter.available_condition.value
+    }
+    const query = new URLSearchParams(queryObj).toString()
+
     const response = await axiosInstance.get<ServerGetResponse<DomainsRecord>>(
-      `/domains/?offset=0&limit=999999999999&name=${domains.search}${
-        domains.filter.available_condition?.value
-          ? "&available_condition=" + domains.filter.available_condition.value
-          : ""
-      }${
-        domains.filter.active?.value
-          ? "&active=" +
-            (domains.filter.active.value === "1" ? "true" : "false")
-          : "&active=true"
-      }&department_name=${
-        domains.filter.department_name?.value
-          ? domains.filter.department_name.value
-          : ""
-      }&provider_id=${
-        domains.filter.provider_id?.value
-          ? domains.filter.provider_id.value
-          : ""
-      }&server_id=${
-        domains.filter.server_id?.value ? domains.filter.server_id.value : ""
-      }&registrator_id=${
-        domains.filter.registrator_id?.value
-          ? domains.filter.registrator_id.value
-          : ""
-      }&registration_date=${
-        domains.filter.registration_date
-          ? domains.filter.registration_date.split(".").reverse().join("-")
-          : ""
-      }&expirationtime_condition=${
-        domains.filter.expirationtime_condition
-          ? domains.filter.expirationtime_condition
-              .split(".")
-              .reverse()
-              .join("-")
-          : ""
-      }`
+      `/domains/?${query}`
     )
     console.log("response.data", response.data)
     return response.data
@@ -322,87 +327,135 @@ export const fetchDomainAll = createAsyncThunk(
 
 export const fetchDomainPage = createAsyncThunk(
   "/domains/fetchDomainPage",
-  async (params, { getState }) => {
+  async (params, { getState, rejectWithValue }) => {
     const { domains } = <RootState>getState()
 
-    const response = await axiosInstance.get<ServerGetResponse<DomainsRecord>>(
-      `/domains/?offset=${(domains.page - 1) * domains.itemsInPage}&limit=${
-        domains.itemsInPage
-      }&name=${domains.search}${
-        domains.filter.available_condition?.value
-          ? "&available_condition=" + domains.filter.available_condition.value
-          : ""
-      }${
-        domains.filter.active?.value
-          ? "&active=" +
-            (domains.filter.active.value === "1" ? "true" : "false")
-          : "&active=true"
-      }&department_name=${
-        domains.filter.department_name?.value
-          ? domains.filter.department_name.value
-          : ""
-      }&provider_id=${
-        domains.filter.provider_id?.value
-          ? domains.filter.provider_id.value
-          : ""
-      }&server_id=${
-        domains.filter.server_id?.value ? domains.filter.server_id.value : ""
-      }&registrator_id=${
-        domains.filter.registrator_id?.value
-          ? domains.filter.registrator_id.value
-          : ""
-      }&registration_date=${
-        domains.filter.registration_date
-          ? domains.filter.registration_date.split(".").reverse().join("-")
-          : ""
-      }&expirationtime_condition=${
-        domains.filter.expirationtime_condition
-          ? domains.filter.expirationtime_condition
-              .split(".")
-              .reverse()
-              .join("-")
-          : ""
-      }`
-    )
-    console.log("response.data", response.data)
-    return response.data
+    const queryObj: Record<string, string> = {
+      offset: String((domains.page - 1) * domains.itemsInPage),
+      limit: String(domains.itemsInPage),
+      name: domains.search,
+      active: domains.filter.active?.value
+        ? domains.filter.active.value === "1"
+          ? "true"
+          : "false"
+        : "true",
+      department_name: domains.filter.department_name?.value
+        ? domains.filter.department_name.value
+        : "",
+      provider_id: domains.filter.provider_id?.value
+        ? domains.filter.provider_id.value
+        : "",
+      server_id: domains.filter.server_id?.value
+        ? domains.filter.server_id.value
+        : "",
+      registrator_id: domains.filter.registrator_id?.value
+        ? domains.filter.registrator_id.value
+        : "",
+      registration_date: domains.filter.registration_date
+        ? domains.filter.registration_date.split(".").reverse().join("-")
+        : "",
+      expirationtime_condition: domains.filter.expirationtime_condition
+        ? domains.filter.expirationtime_condition.split(".").reverse().join("-")
+        : "",
+    }
+    if (domains.filter.available_condition?.value) {
+      queryObj.available_condition = domains.filter.available_condition.value
+    }
+    const query = new URLSearchParams(queryObj).toString()
+
+    try {
+      const response = await axiosInstance.get<
+        ServerGetResponse<DomainsRecord>
+      >(`/domains/?${query}`)
+      console.log("response.data", response.data)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const addDomain = createAsyncThunk(
   "domains/addDomain",
-  async ({ fields }: MyFormData) => {
+  async ({ fields }: MyFormData, { rejectWithValue }) => {
     const bodyData = fillDomainEditRecord({ fields }, "add")
-    const response = await axiosInstance.post("/domains/", bodyData)
-    console.log("add domain response.data", response.data)
-    return response.data
+    try {
+      const response = await axiosInstance.post("/domains/", bodyData)
+      console.log("add domain response.data", response.data)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const editDomain = createAsyncThunk(
   "domains/editDomain",
-  async ({ form, record }: { form: MyFormData; record: DomainsRecord }) => {
+  async (
+    { form, record }: { form: MyFormData; record: DomainsRecord },
+    { rejectWithValue }
+  ) => {
     const bodyData = fillDomainEditRecord(form, "edit")
     bodyData.created_at = record.created_at
     bodyData.deleted_at = record.deleted_at
-    const response = await axiosInstance.put(`/domains/${record.id}`, bodyData)
-    return response.data
+    try {
+      const response = await axiosInstance.put(
+        `/domains/${record.id}`,
+        bodyData
+      )
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const deleteDomain = createAsyncThunk(
   "domains/deleteDomain",
-  async (id: number) => {
-    const response = await axiosInstance.delete(`/domains/${id}`)
-    return response.data
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(`/domains/${id}`)
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const archiveDomain = createAsyncThunk(
   "domains/archiveDomain",
-  async (id: number) => {
-    const response = await axiosInstance.put(`/domains/${id}/delete`, {})
-    return response.data
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(`/domains/${id}/delete`, {})
+      return response.data
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
@@ -417,7 +470,8 @@ const initialState: DomainsState = {
   editStatus: "idle",
   allStatus: "idle",
   loaded: false,
-  error: null,
+  error: "",
+  errorData: null,
   search: "",
   filter: {
     available_condition: null,
@@ -509,6 +563,9 @@ export const domainsSlice = createSlice({
       })
       .addCase(fetchDomainPage.pending, (state) => {
         state.status = "loading"
+        state.editStatus = "idle"
+        state.error = ""
+        state.errorData = null
       })
       .addCase(fetchDomainPage.fulfilled, (state, { payload }) => {
         state.list = payload.data.map((domain) => ({
@@ -518,37 +575,59 @@ export const domainsSlice = createSlice({
         }))
         state.itemsCount = payload.count
         state.status = "succeeded"
+        state.editStatus = "idle"
+        state.error = ""
+        state.errorData = null
         state.loaded = true
       })
       .addCase(fetchDomainPage.rejected, (state, action) => {
         state.status = "failed"
-        state.error = action.error.message
-        toastAlert("Ошибка чтения доменов: " + action.error.message, "error")
+        state.editStatus = "idle"
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка чтения доменов: " + state.error, "error")
       })
       .addCase(addDomain.pending, (state) => {
         state.editStatus = "loading"
+        state.error = ""
+        state.errorData = null
       })
       .addCase(
         addDomain.fulfilled,
         (state, { payload }: PayloadAction<DomainsRecord>) => {
           state.editStatus = "succeeded"
+          state.error = ""
+          state.errorData = null
           state.filterChanges++
           toastAlert("Домен успешно добавлен", "success")
         }
       )
       .addCase(addDomain.rejected, (state, action) => {
         state.editStatus = "failed"
-        state.error = action.error.message
-        toastAlert("Ошибка добавления домена: " + action.error.message, "error")
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка добавления домена: " + state.error, "error")
       })
       .addCase(editDomain.pending, (state) => {
         state.editStatus = "loading"
+        state.error = ""
+        state.errorData = null
+        state.error = ""
       })
       .addCase(
         editDomain.fulfilled,
         (state, { payload }: PayloadAction<DomainsRecord>) => {
-          //state.list = state.list.map((domain) => domain.id === payload.id)
           state.editStatus = "succeeded"
+          state.error = ""
+          state.errorData = null
           state.filterChanges++
           toastAlert("Домен успешно изменен", "success")
         }
@@ -556,25 +635,42 @@ export const domainsSlice = createSlice({
       .addCase(editDomain.rejected, (state, action) => {
         state.editStatus = "failed"
         state.error = action.error.message
-        toastAlert("Ошибка изменения домена: " + action.error.message, "error")
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка изменения домена: " + state.error, "error")
       })
       .addCase(archiveDomain.fulfilled, (state, action) => {
-        //state.list = state.list.filter((note) => note.id !== +action.payload.id)
+        state.error = ""
+        state.errorData = null
         toastAlert("Домен успешно удален", "success")
       })
       .addCase(archiveDomain.rejected, (state, action) => {
         toastAlert(
-          "Ошибка архивирования домена: " + action.error.message,
+          "Ошибка архивирования домена: " +
+            (action.payload
+              ? errorToastText(action.payload as ErrorPayloadData)
+              : action.error.message),
           "error"
         )
       })
       .addCase(deleteDomain.fulfilled, (state, action) => {
-        //state.list = state.list.filter((note) => note.id !== +action.payload.id)
+        state.error = ""
+        state.errorData = null
         state.filterChanges++
         toastAlert("Домен успешно архивирован", "success")
       })
       .addCase(deleteDomain.rejected, (state, action) => {
-        toastAlert("Ошибка удаления домена: " + action.error.message, "error")
+        toastAlert(
+          "Ошибка удаления домена: " +
+            (action.payload
+              ? errorToastText(action.payload as ErrorPayloadData)
+              : action.error.message),
+          "error"
+        )
       })
   },
 })
@@ -600,6 +696,8 @@ export const listDomainsAllStatus = (state: RootState) =>
   state.domains.allStatus
 export const listDomains = (state: RootState) => state.domains.list
 export const listDomainsStatus = (state: RootState) => state.domains.status
+export const listDomainsEditStatus = (state: RootState) =>
+  state.domains.editStatus
 export const listDomainsSort = (state: RootState) => state.domains.sort
 export const listDomainsLoaded = (state: RootState) => state.domains.loaded
 export const listDomainsPage = (state: RootState) => state.domains.page
@@ -613,6 +711,8 @@ export const listDomainsFilter = (state: RootState) => state.domains.filter
 export const listDomainsFilterChanges = (state: RootState) =>
   state.domains.filterChanges
 export const listDomainsSearch = (state: RootState) => state.domains.search
+export const listDomainsError = (state: RootState) => state.domains.error
+export const listDomainsErrorData = (state: RootState) => state.domains.errorData
 
 export const selectDomainById = (state: RootState, id: number) => {
   return state.domains.list.find((note) => note.id === id)

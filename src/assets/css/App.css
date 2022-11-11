@@ -392,9 +392,14 @@ button.close {
 }
 .btn.pending .loader::before,
 .btn.pending .loader::after {
-  margin-left: -20px;
-  margin-top: -5px;
-  border-width: 5px;
+  border-width: 3.5px;
+  width: 14px;
+  height: 14px;
+}
+
+.edit-record-link {
+  cursor: pointer;
+  color: var(--linkColor);
 }
 
 .flex-right {
@@ -1176,6 +1181,7 @@ form .sixty-percent-row {
 
 .domain-status-line {
   display: flex;
+  align-items: center;
   gap: 7px;
   flex-wrap: wrap;
 }
@@ -1772,7 +1778,8 @@ form .sixty-percent-row {
   border-bottom: 1px solid #cbcbcb;
 }
 form button[type="submit"] {
-  display: block;
+  display: flex;
+  gap: 5px;
   margin-left: auto;
   margin-top: 20px;
   font-size: 18px;

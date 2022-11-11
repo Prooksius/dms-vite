@@ -151,17 +151,24 @@ export const ServersList: React.FC = () => {
           {
             title: "Название",
             width: "2 1",
-            getValue: (row) => {
-              if (search)
-                return (
+            getValue: (row) => (
+              <a
+                className="edit-record-link"
+                onClick={() => {
+                  setEditId(row.id)
+                  setEditOpened(true)
+                }}
+              >
+                {search !== "" && (
                   <span
                     dangerouslySetInnerHTML={{
                       __html: row.name.split(search).join(`<b>${search}</b>`),
                     }}
                   ></span>
-                )
-              return row.name
-            },
+                )}
+                {!search && row.name}
+              </a>
+            ),
           },
           {
             title: "Состояние",
@@ -280,7 +287,9 @@ export const ServersList: React.FC = () => {
         <ServerEditForm
           id={editId}
           onDoneCallback={() => {
-            setEditOpened(false)
+            setTimeout(() => {
+              setEditOpened(false)
+            }, 200)
           }}
         />
       </Popuper>

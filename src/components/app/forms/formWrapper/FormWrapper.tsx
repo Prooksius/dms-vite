@@ -5,7 +5,13 @@ import React, {
   useEffect,
   useState,
 } from "react"
-import { FieldData, MyFormData, FormField } from "./types"
+import {
+  FieldData,
+  MyFormData,
+  FormField,
+  StatusType,
+  ErrorPayloadData,
+} from "./types"
 import { createSlot } from "react-slotify"
 import classnames from "classnames"
 import { Loader } from "@components/app/Loader"
@@ -22,6 +28,9 @@ interface FormWrapperProps {
   title: string
   formBtnText: string
   formCallback: (token: string, form: MyFormData) => void
+  editStatus?: StatusType
+  editError?: string
+  editErrorData?: ErrorPayloadData
   goFurther: () => void
   formData: MyFormData
 }
@@ -31,11 +40,15 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   title,
   formBtnText,
   formCallback,
+  editStatus = null,
+  editError = "",
+  editErrorData = null,
   goFurther,
   formData,
 }): ReactElement => {
   const sitekey = "111111111111111111111111111111111"
-  const { form, setForm, checkForm } = useContext(FormWrapperContext)
+  const { form, setForm, checkForm, errorField } =
+    useContext(FormWrapperContext)
 
   const [submitStatus, setSubmitStatus] = useState("IDLE")
   const [formMessage, setFormMessage] = useState("")
@@ -63,21 +76,57 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
     }
   }
   const submitForm = async (token: string) => {
-    console.log("FormWrapper - doSubmit")
-    try {
-      setSubmitStatus("PENDING")
-      formCallback(token, form)
+    setSubmitStatus("PENDING")
+    formCallback(token, form)
+    if (editStatus === null) {
       setSubmitStatus("OK")
       if (goFurther) goFurther()
-      setTimeout(() => {
-        setSubmitStatus("IDLE")
-      }, 1000)
-    } catch (err) {
-      setSubmitStatus("ERROR")
-      setFormMessage(err.message)
-      console.error(err)
     }
   }
+
+  const getUnusedErrors = (errorsData: ErrorPayloadData): string => {
+    const errors: string[] = []
+    if (errorsData) {
+      if (typeof errorsData.detail !== "string") {
+        errorsData.detail.map((error) => {
+          let field_name = "-"
+          if (error.loc.length) {
+            field_name = error.loc[error.loc.length - 1]
+          }
+          if (!Object.keys(form.fields).includes(field_name)) {
+            const field = form.fields[field_name]
+            if (field) {
+              errors.push(error.msg)
+            }
+          }
+        })
+      } else {
+        errors.push(errorsData.detail)
+      }
+    }
+    return errors.join(", ")
+  }
+
+  useEffect(() => {
+    if (submitStatus === "PENDING") {
+      if (editStatus === "succeeded") {
+        setSubmitStatus("OK")
+        if (goFurther) goFurther()
+      } else if (editStatus === "failed") {
+        console.log("error")
+        setSubmitStatus("ERROR")
+        if (editErrorData) {
+          errorField(editErrorData)
+          const errorForAll = getUnusedErrors(editErrorData)
+          console.log("errorForAll", errorForAll)
+          setFormMessage(errorForAll ? errorForAll : "Форма имеет ошибки")
+        } else {
+          setFormMessage(editError)
+        }
+      }
+    }
+    // eslint-disable-next-line
+  }, [editStatus])
 
   useEffect(() => {
     setForm(formData)

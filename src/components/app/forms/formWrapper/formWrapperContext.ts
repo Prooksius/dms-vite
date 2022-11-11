@@ -8,6 +8,7 @@ const initialState: FormContextProps = {
   setForm: null,
   checkForm: null,
   checkField: null,
+  errorField: null,
   clearForm: null,
   setFieldValue: null,
 }

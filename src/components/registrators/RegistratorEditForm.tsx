@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react"
+import React, { ReactElement, useEffect, useState } from "react"
 import FormWrapper from "@components/app/forms/formWrapper/FormWrapper"
 import { toastAlert } from "@config"
 import TextField from "@components/app/forms/formFields/TextField"
@@ -8,6 +8,9 @@ import {
   selectRegistratorById,
   addRegistrator,
   editRegistrator,
+  listRegistratorsEditStatus,
+  listRegistratorsError,
+  listRegistratorsErrorData,
 } from "@store/slices/registratorsSlice"
 import { useSelector, useDispatch } from "react-redux"
 import { FormWrapperState } from "@components/app/forms/formWrapper/FormWrapperState"
@@ -33,13 +36,16 @@ export const RegistratorEditForm: React.FC<RegistratorEditFormProps> = ({
 }: RegistratorEditFormProps): ReactElement => {
   const dispatch = useDispatch()
 
+  const [formFilled, setFormFilled] = useState<boolean>(false)
+
   const filledFormData = Object.assign({}, registratorEditFormData)
 
   const registrator = useSelector((state: RootState) =>
     selectRegistratorById(state, id)
   )
-
-  fillRegistratorForm(filledFormData, registrator)
+  const editState = useSelector(listRegistratorsEditStatus)
+  const editError = useSelector(listRegistratorsError)
+  const editErrorData = useSelector(listRegistratorsErrorData)
 
   const submitHandler = (token: string, formData: MyFormData) => {
     if (id) {
@@ -51,42 +57,52 @@ export const RegistratorEditForm: React.FC<RegistratorEditFormProps> = ({
 
   const goFurther = () => {
     // дальнейшие действия после успешной отправки формы
-    clearRegistratorForm(filledFormData)
     if (onDoneCallback) onDoneCallback()
   }
+
+  useEffect(() => {
+    fillRegistratorForm(filledFormData, registrator)
+    setFormFilled(true)
+    // eslint-disable-next-line
+  }, [])
 
   return (
     <FormWrapperState formData={registratorEditFormData}>
       <FormWrapper
         title=""
         formCallback={submitHandler}
+        editStatus={editState}
+        editError={editError}
+        editErrorData={editErrorData}
         formBtnText="Сохранить"
         formData={filledFormData}
         goFurther={goFurther}
       >
-        <div className="form__row">
-          <div className="col-lg-6 col-md-6 col-sm-12">
-            <h4>Основное</h4>
-            <TextField name="name" />
-            <TextField name="login_link" />
-            <SelectAsyncField
-              name={"email_id"}
-              searchCallback={loadEmailOptions}
-            />
-            <TextField name="login" />
-            <TextField name="password" />
-            <TextField name="api_key" />
+        {formFilled && (
+          <div className="form__row">
+            <div className="col-lg-6 col-md-6 col-sm-12">
+              <h4>Основное</h4>
+              <TextField name="name" />
+              <TextField name="login_link" />
+              <SelectAsyncField
+                name={"email_id"}
+                searchCallback={loadEmailOptions}
+              />
+              <TextField name="login" />
+              <TextField name="password" />
+              <TextField name="api_key" />
+            </div>
+            <div className="col-lg-6 col-md-6 col-sm-12">
+              <h4>Провайдер</h4>
+              <SelectAsyncField
+                name={"provider_id"}
+                searchCallback={loadProviderOptions}
+              />
+              <h5>NS</h5>
+              <TextArrayField name="ns" />
+            </div>
           </div>
-          <div className="col-lg-6 col-md-6 col-sm-12">
-            <h4>Провайдер</h4>
-            <SelectAsyncField
-              name={"provider_id"}
-              searchCallback={loadProviderOptions}
-            />
-            <h5>NS</h5>
-            <TextArrayField name="ns" />
-          </div>
-        </div>
+        )}
       </FormWrapper>
     </FormWrapperState>
   )
