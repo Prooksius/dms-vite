@@ -217,6 +217,7 @@ export const loadDomainOptions = async (
       offset: String((page - 1) * 10),
       limit: "10",
       name: inputValue,
+      partial: "true",
     }).toString()
 
     const response = await axiosInstance.get<
