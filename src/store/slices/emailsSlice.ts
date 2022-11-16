@@ -92,6 +92,7 @@ export const loadEmailOptions = async (
 ) => {
   let items: EmailsShortRecord[] = []
   try {
+    // get запрос для получения имен
     const query = new URLSearchParams({
       offset: String((page - 1) * 10),
       limit: "10",
@@ -103,7 +104,6 @@ export const loadEmailOptions = async (
       ServerGetResponse<EmailsShortRecord>
     >(`/emails/getNames/?${query}`)
 
-    console.log("loadedOptions", loadedOptions)
     console.log("response.data", response.data)
     items = response.data.data ? response.data.data : []
   } catch (e) {

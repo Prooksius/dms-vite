@@ -111,6 +111,7 @@ export const getProviderRegistratorNames = async (
 
   let items: RegistratorsShortRecord[] = []
   try {
+    // get запрос для получения имен
     const query = new URLSearchParams({
       offset: "0",
       limit: "99999999999",

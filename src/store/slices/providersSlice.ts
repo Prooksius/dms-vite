@@ -88,6 +88,7 @@ export const loadProviderOptions = async (
 ) => {
   let items: ProvidersShortRecord[] = []
   try {
+    // get запрос для получения имен
     const query = new URLSearchParams({
       offset: String((page - 1) * 10),
       limit: "10",
