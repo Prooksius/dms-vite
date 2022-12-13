@@ -134,6 +134,7 @@ export const fetchPage = createAsyncThunk(
     const query = new URLSearchParams({
       offset: String((providers.page - 1) * providers.itemsInPage),
       limit: String(providers.itemsInPage),
+      sort: providers.sort ? providers.sort : "-created_at",
       name: providers.search,
     }).toString()
 
@@ -242,7 +243,7 @@ const initialState: ProvidersState = {
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
-  sort: "",
+  sort: "-created_at",
   status: "idle",
   editStatus: "idle",
   loaded: false,
@@ -267,11 +268,12 @@ export const providersSlice = createSlice({
       state.selectedIds = payload
     },
     setSort: (state, { payload }: PayloadAction<string>) => {
-      if (state.sort !== payload) {
+      const sort = payload ? payload : "-created_at"
+      if (state.sort !== sort) {
         state.page = initialState.page
         state.filterChanges++
       }
-      state.sort = payload
+      state.sort = sort
     },
     setItemsInPage: (state, { payload }: PayloadAction<number>) => {
       if (state.itemsInPage !== payload) {

@@ -196,7 +196,7 @@ export const EmailsList: React.FC = () => {
           {
             title: "Добавлен",
             width: "1 1",
-            sort: "date",
+            sort: "created_at",
             sortTitle: "дате создания",
             getValue: (row) => (
               <>
@@ -242,9 +242,10 @@ export const EmailsList: React.FC = () => {
                     className="btn btn-white"
                     onClick={() => archiveHandler(row.id)}
                   >
-                    В архив
+                    Удалить
                   </button>
                   <button
+                    style={{ display: "none" }}
                     type="button"
                     className="btn btn-white"
                     onClick={() => deleteHandler(row.id)}

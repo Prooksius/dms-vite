@@ -34,6 +34,22 @@ export const filterFormData: MyFormData = {
       errorMessage: "",
       dirty: false,
     },
+    is_activated: {
+      label: "Мониторинг",
+      value: "",
+      valueObj: { value: "", label: "Не выбрано" },
+      valueArr: [],
+      type: "select",
+      dropdown: "default",
+      options: [
+        { value: "", label: "Не выбрано" },
+        { value: "0", label: "Неактивен" },
+        { value: "1", label: "Активен" },
+      ],
+      validations: {},
+      errorMessage: "",
+      dirty: false,
+    },
     server_id: {
       label: "Сервер",
       value: "",

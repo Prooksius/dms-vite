@@ -148,8 +148,6 @@ export const ProvidersList: React.FC = () => {
           {
             title: "Url",
             width: "1 1",
-            sort: "url",
-            sortTitle: "URL",
             getValue: (row) => row.url,
           },
           {
@@ -195,9 +193,10 @@ export const ProvidersList: React.FC = () => {
                     className="btn btn-white"
                     onClick={() => archiveHandler(row.id)}
                   >
-                    В архив
+                    Удалить
                   </button>
                   <button
+                    style={{ display: "none" }}
                     type="button"
                     className="btn btn-white"
                     onClick={() => deleteHandler(row.id)}

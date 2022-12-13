@@ -62,6 +62,8 @@ export interface DomainsRecord {
   registrator_acc_name: string
   server_id: number
   server_name: string
+  ip_addr_id: number
+  ip_addr: string
 
   hosting_id: number
   hosting_name: string
@@ -85,6 +87,15 @@ export interface DomainsRecord {
   geo_status: string[]
   expirationtime_status: boolean
   expirationtime_condition: string
+  is_activated: boolean
+
+  server_status_last_updated: string
+  whois_condition_last_updated: string
+  available_condition_last_updated: string
+  ssl_condition_last_updated: string
+  rkn_condition_last_updated: string
+  pagespeed_condition_last_updated: string
+  expirationtime_condition_last_updated: string
 
   subdomains: SubdomainsRecord[] | null
   monitoring_id: number
@@ -111,6 +122,7 @@ interface DomainsFilter
   registrator_id: SelectValue
   registration_date: string
   active: SelectValue
+  is_activated: SelectValue
 }
 
 interface DomainsState {
@@ -143,6 +155,7 @@ type DomainEditRecord = {
   provider_id: number
   hosting_id: number
   hosting_acc_id: number
+  ip_addr_id: number
 
   ns: string[]
 
@@ -153,6 +166,8 @@ type DomainEditRecord = {
   geo_status: string[]
   expirationtime_status: boolean
   subdomains: SubdomainsEditRecord[]
+
+  is_activated: boolean
 
   notes: string
 }
@@ -194,9 +209,11 @@ const fillDomainEditRecord = (
     hosting_id: Number(fields.hosting_id.valueObj.value),
     hosting_acc_id: Number(fields.hosting_acc_id.valueObj.value),
     server_id: Number(fields.server_id.valueObj.value),
+    ip_addr_id: Number(fields.ip_addr_id.valueObj.value),
     rkn_status: fields.rkn_status.value === "1" ? true : false,
     ssl_status: fields.ssl_status.value === "1" ? true : false,
     whois_status: fields.whois_status.value === "1" ? true : false,
+    is_activated: fields.is_activated.value === "1" ? true : false,
     subdomains: subdomains,
     geo_status: [],
     notes: fields.notes.value,
@@ -289,6 +306,7 @@ export const fetchDomainAll = createAsyncThunk(
     const queryObj: Record<string, string> = {
       offset: "0",
       limit: "999999999999",
+      sort: "-created_at",
       name: domains.search,
       active: domains.filter.active?.value
         ? domains.filter.active.value === "1"
@@ -335,6 +353,7 @@ export const fetchDomainPage = createAsyncThunk(
     const queryObj: Record<string, string> = {
       offset: String((domains.page - 1) * domains.itemsInPage),
       limit: String(domains.itemsInPage),
+      sort: domains.sort ? domains.sort : "-created_at",
       name: domains.search,
       active: domains.filter.active?.value
         ? domains.filter.active.value === "1"
@@ -362,6 +381,10 @@ export const fetchDomainPage = createAsyncThunk(
     }
     if (domains.filter.available_condition?.value) {
       queryObj.available_condition = domains.filter.available_condition.value
+    }
+    if (domains.filter.is_activated?.value) {
+      queryObj.is_activated =
+        domains.filter.is_activated.value === "1" ? "true" : "false"
     }
     const query = new URLSearchParams(queryObj).toString()
 
@@ -461,13 +484,35 @@ export const archiveDomain = createAsyncThunk(
   }
 )
 
+export const switchMonitoringDomain = createAsyncThunk(
+  "domains/switchMonitoringDomain",
+  async (
+    { id, status }: { id: number; status: boolean },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axiosInstance.put(`/domains/${id}/monitoring`, {
+        is_activated: status,
+      })
+      return { ...response.data, id, is_activated: status }
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
+  }
+)
+
 const initialState: DomainsState = {
   list: [],
   listAll: [],
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
-  sort: "",
+  sort: "-created_at",
   status: "idle",
   editStatus: "idle",
   allStatus: "idle",
@@ -484,6 +529,7 @@ const initialState: DomainsState = {
     registrator_id: null,
     registration_date: null,
     active: null,
+    is_activated: null,
   },
   filterChanges: 0,
   selectedIds: [],
@@ -513,11 +559,12 @@ export const domainsSlice = createSlice({
       state.selectedIds = payload
     },
     setSort: (state, { payload }: PayloadAction<string>) => {
-      if (state.sort !== payload) {
+      const sort = payload ? payload : "-created_at"
+      if (state.sort !== sort) {
         state.page = initialState.page
         state.filterChanges++
       }
-      state.sort = payload
+      state.sort = sort
     },
     setItemsInPage: (state, { payload }: PayloadAction<number>) => {
       if (state.itemsInPage !== payload) {
@@ -674,6 +721,31 @@ export const domainsSlice = createSlice({
           "error"
         )
       })
+      .addCase(switchMonitoringDomain.pending, (state) => {
+        state.editStatus = "loading"
+        state.error = ""
+        state.errorData = null
+        state.error = ""
+      })
+      .addCase(switchMonitoringDomain.fulfilled, (state, action) => {
+        state.error = ""
+        state.errorData = null
+        console.log("action.payload", action.payload)
+        const found = state.list.find((item) => item.id == action.payload.id)
+        if (found) {
+          found.is_activated = action.payload.is_activated
+          found.monitoring_id = action.payload.monitoring_id
+        }
+      })
+      .addCase(switchMonitoringDomain.rejected, (state, action) => {
+        toastAlert(
+          "Ошибка изменения статуса мониторинга домена: " +
+            (action.payload
+              ? errorToastText(action.payload as ErrorPayloadData)
+              : action.error.message),
+          "error"
+        )
+      })
   },
 })
 
@@ -714,7 +786,8 @@ export const listDomainsFilterChanges = (state: RootState) =>
   state.domains.filterChanges
 export const listDomainsSearch = (state: RootState) => state.domains.search
 export const listDomainsError = (state: RootState) => state.domains.error
-export const listDomainsErrorData = (state: RootState) => state.domains.errorData
+export const listDomainsErrorData = (state: RootState) =>
+  state.domains.errorData
 
 export const selectDomainById = (state: RootState, id: number) => {
   return state.domains.list.find((note) => note.id === id)

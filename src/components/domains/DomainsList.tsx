@@ -11,8 +11,10 @@ import {
   archiveDomain,
   deleteDomain,
   listDomainsPage,
+  listDomainsSort,
   listDomainsItemsCount,
   listDomainsStatus,
+  listDomainsEditStatus,
   listDomainsAllStatus,
   listDomainsItemsInPage,
   listDomainsFilter,
@@ -21,6 +23,7 @@ import {
   setPage,
   setSearch,
   setFilter,
+  setSort,
   setItemsInPage,
   toggleDomainOpen,
   toggleDomainPopup,
@@ -28,6 +31,7 @@ import {
   reloadPage,
   DomainsRecord,
   fetchDomainAll,
+  switchMonitoringDomain,
 } from "@store/slices/domainsSlice"
 import { CaretIcon } from "@components/app/icons/CaretIcon"
 import { DotsIcon } from "@components/app/icons/DotsIcon"
@@ -49,6 +53,7 @@ import { DeleteIcon } from "@components/app/icons/DeleteIcon"
 import { MinusIcon } from "@components/app/icons/MinusIcon"
 import { AvailableIcon } from "@components/app/icons/AvailableIcon"
 import { UnavailableIcon } from "@components/app/icons/UnavailableIcon"
+import { MonitorIcon } from "@components/app/icons/MonitorIcon"
 
 interface ConditionNames {
   [key: string]: string
@@ -81,7 +86,9 @@ export const DomainsList: React.FC = () => {
   })
 
   const status = useSelector(listDomainsStatus)
+  const editStatus = useSelector(listDomainsEditStatus)
   const statusAll = useSelector(listDomainsAllStatus)
+  const sort = useSelector(listDomainsSort)
   const page = useSelector(listDomainsPage)
   const itemsInPage = useSelector(listDomainsItemsInPage)
   const search = useSelector(listDomainsSearch)
@@ -113,12 +120,23 @@ export const DomainsList: React.FC = () => {
     setEditId(0)
   }
 
+  const changeSort = (value: string) => {
+    console.log("sorting")
+    dispatch(setSort(value))
+    setEditId(0)
+  }
+
   const toggleRecordPopup = (id: number) => {
     dispatch(toggleDomainPopup(id))
   }
 
   const toggleRecordOpen = (id: number) => {
     dispatch(toggleDomainOpen(id))
+  }
+
+  const toggleMonitoring = (id: number, condition: boolean) => {
+    console.log("Toggle monitoring")
+    dispatch(switchMonitoringDomain({ id, status: condition }))
   }
 
   useEffect(() => {
@@ -181,6 +199,8 @@ export const DomainsList: React.FC = () => {
         page={page}
         setPage={changePage}
         setItemsInPage={changeItemsInPage}
+        sort={sort}
+        setSort={changeSort}
         filterChanges={filterChanges}
         reloadPage={() => dispatch(reloadPage())}
         itemsInPage={itemsInPage}
@@ -201,6 +221,8 @@ export const DomainsList: React.FC = () => {
           },
           {
             title: "Название",
+            sort: "name",
+            sortTitle: "названию",
             width: "1 1",
             getValue: (row) => (
               <a
@@ -222,23 +244,31 @@ export const DomainsList: React.FC = () => {
             ),
           },
           {
-            title: "Состояние",
+            title: "Мониторинг",
             width: "1.2 1",
             getValue: (row) => (
               <div className="domain-status-line">
-                <span
-                  style={{
-                    color: row.deleted_at ? "red" : "green",
-                    fontWeight: 600,
-                  }}
-                >
-                  {row.deleted_at ? "Неактивен" : "Активен"}
-                </span>
-                <SslCheckIcon enabled={row.ssl_status} />
-                <RknCheckIcon enabled={row.rkn_status} />
-                <DateCheckIcon enabled={row.expirationtime_status} />
-                {row.available_status && <AvailableIcon />}
-                {!row.available_status && <UnavailableIcon />}
+                <MonitorIcon
+                  active={row.is_activated}
+                  message={row.server_status_last_updated}
+                  doSwitch={(condition) => toggleMonitoring(row.id, condition)}
+                />
+                <SslCheckIcon
+                  enabled={row.ssl_status}
+                  message={row.ssl_condition_last_updated}
+                />
+                <RknCheckIcon
+                  enabled={row.rkn_status}
+                  message={row.rkn_condition_last_updated}
+                />
+                <DateCheckIcon
+                  enabled={row.expirationtime_status}
+                  message={row.expirationtime_condition_last_updated}
+                />
+                <AvailableIcon
+                  active={row.available_status}
+                  message={row.available_condition_last_updated}
+                />
               </div>
             ),
           },
@@ -260,16 +290,25 @@ export const DomainsList: React.FC = () => {
           {
             title: "Код ответа",
             width: "0.7 1",
-            getValue: (row) => (
-              <span
-                style={{
-                  color: row.available_condition === "200" ? "green" : "red",
-                  fontWeight: 600,
-                }}
-              >
-                {row.available_condition}
-              </span>
-            ),
+            getValue: (row) => {
+              const messageText = row.available_condition_last_updated
+                ? new Date(
+                    row.available_condition_last_updated
+                  ).toLocaleString()
+                : "-"
+              return (
+                <span
+                  style={{
+                    color: row.available_condition === "200" ? "green" : "red",
+                    fontWeight: 600,
+                  }}
+                  data-tip={messageText}
+                  data-for="for-monitoring"
+                >
+                  {row.available_condition}
+                </span>
+              )
+            },
           },
           {
             title: "",

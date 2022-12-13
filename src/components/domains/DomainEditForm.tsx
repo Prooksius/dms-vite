@@ -26,7 +26,7 @@ import {
 import { MyFormData } from "@components/app/forms/formWrapper/types"
 import SubdomainsField from "@components/app/forms/formFields/SubdomainsField"
 import SelectAsyncField from "@components/app/forms/formFields/SelectAsyncField"
-import { loadServerOptions } from "@store/slices/serversSlice"
+import { getServerIPs, loadServerOptions } from "@store/slices/serversSlice"
 import {
   getProviderRegistratorNames,
   getRegistratorNS,
@@ -35,6 +35,8 @@ import {
 import { loadProviderOptions } from "@store/slices/providersSlice"
 import TextareaField from "@components/app/forms/formFields/TextareaField"
 import CheckboxArrayField from "@components/app/forms/formFields/CheckboxArrayField"
+import CheckIconField from "@components/app/forms/formFields/CheckIconField"
+import { SwitchIcon } from "@components/app/icons/SwitchIcon"
 
 interface DomainEditFormProps {
   id?: number
@@ -100,6 +102,7 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
                 name={"server_id"}
                 searchCallback={loadServerOptions}
               />
+              <SelectField name={"ip_addr_id"} loadCallback={getServerIPs} />
               <SelectAsyncField
                 name={"provider_id"}
                 searchCallback={loadProviderOptions}
@@ -126,7 +129,16 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
                 loadCallback={getRegistratorNS}
               />
               <br />
-              <h4>Мониторинг</h4>
+              <h4
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                Мониторинг
+                <CheckIconField name="is_activated" Icon={SwitchIcon} />
+              </h4>
               <CheckboxField name="whois_status" />
               <CheckboxField name="available_status" />
               <CheckboxField name="rkn_status" />

@@ -1,19 +1,49 @@
-import React, { useState, useContext } from "react"
+import React, { useState, useContext, useEffect } from "react"
 import classnames from "classnames"
 import { FormWrapperContext } from "../formWrapper/formWrapperContext"
 import { PlusIcon } from "@components/app/icons/PlusIcon"
 import { DeleteIcon } from "@components/app/icons/DeleteIcon"
 import { NS } from "../formWrapper/types"
+import {
+  email,
+  isNumeric,
+  isAlpha,
+  isAlphanumeric,
+  isIP,
+} from "../formWrapper/myValidators"
 
 interface TextArrayFieldProps {
   name: string
 }
 
+type FormValidFunc = (
+  param: boolean | number | string,
+  value: string
+) => string | boolean
+
+type FormValidHandlers = {
+  [key: string]: FormValidFunc
+}
+
+const validateHandlers: FormValidHandlers = {
+  email: (param, value) => email({ value, param }),
+  isNumber: (param, value) => isNumeric({ value, param }),
+  isIP: (param, value) => isIP({ value, param }),
+  isAlpha: (param, value) => isAlpha({ value, param }),
+  isAlphanumeric: (param, value) => isAlphanumeric({ value, param }),
+}
+
 const TextArrayField: React.FC<TextArrayFieldProps> = ({ name }) => {
   const [fieldFocused, setFieldFocused] = useState(false)
+  const [errors, setErrors] = useState<boolean[]>([])
   const { form, setFieldValue } = useContext(FormWrapperContext)
 
   const thisField = form.fields[name]
+
+  useEffect(() => {
+    setErrors(thisField.valueArr.map((item) => false))
+    // eslint-disable-next-line
+  }, [])
 
   if (!thisField) {
     return (
@@ -23,7 +53,30 @@ const TextArrayField: React.FC<TextArrayFieldProps> = ({ name }) => {
     )
   }
 
-  const required = thisField.validations.required || false
+  const required = thisField.validations?.required || false
+
+  const validations: string[] = []
+  if (thisField.validations) {
+    Object.keys(thisField.validations).map((key) => {
+      if (key !== "required" && thisField.validations[key] === false)
+        validations.push(key)
+    })
+  }
+
+  const fieldChange = (value: string, curIndex: number) => {
+    validations.map((item) => {
+      const isInvalid = validateHandlers[item](true, value)
+      setErrors(
+        errors.map((item, index) => {
+          if (index !== curIndex) {
+            return item
+          } else {
+            return isInvalid !== false
+          }
+        })
+      )
+    })
+  }
 
   return (
     <div
@@ -42,7 +95,9 @@ const TextArrayField: React.FC<TextArrayFieldProps> = ({ name }) => {
         <div className="form-field">
           {thisField.valueArr.map((value: NS, index) => (
             <div
-              className="form-field form-fild-array-item"
+              className={classnames("form-field form-fild-array-item", {
+                invalid: errors[index],
+              })}
               key={name + "-" + index}
             >
               <input
@@ -51,7 +106,8 @@ const TextArrayField: React.FC<TextArrayFieldProps> = ({ name }) => {
                 value={value.value || ""}
                 onFocus={() => setFieldFocused(true)}
                 onBlur={() => setFieldFocused(false)}
-                onChange={(e) =>
+                onChange={(e) => {
+                  fieldChange(e.target.value, index)
                   setFieldValue({
                     field: name,
                     value: {
@@ -60,13 +116,18 @@ const TextArrayField: React.FC<TextArrayFieldProps> = ({ name }) => {
                     },
                     index,
                   })
-                }
+                }}
               />
               <span className="form-fild-array__counter">{index + 1}</span>
               <button
                 type="button"
                 className="btn btn-simple btn-simple-big btn-group-right btn-red"
-                onClick={() => setFieldValue({ field: name, index })}
+                onClick={() => {
+                  setErrors(
+                    errors.filter((item, itemIndex) => itemIndex !== index)
+                  )
+                  setFieldValue({ field: name, index })
+                }}
               >
                 <DeleteIcon />
               </button>
@@ -77,13 +138,14 @@ const TextArrayField: React.FC<TextArrayFieldProps> = ({ name }) => {
       <button
         type="button"
         className="btn btn-simple btn-simple-big btn-simple-border"
-        onClick={() =>
+        onClick={() => {
+          setErrors([...errors, true])
           setFieldValue({
             field: name,
             value: { value: "" },
             index: thisField.valueArr.length,
           })
-        }
+        }}
       >
         <PlusIcon />
       </button>

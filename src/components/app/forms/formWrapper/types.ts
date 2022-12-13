@@ -58,7 +58,7 @@ export interface ErrorPayloadData {
   detail: ErrorDetailsData | string
 }
 
-export type ValidationsData = {
+export interface ValidationsData extends Record<string, any> {
   required?: boolean
   minLength?: number
   maxLength?: number

@@ -49,6 +49,24 @@ export const domainEditFormData: MyFormData = {
       errorMessage: "",
       dirty: false,
     },
+    ip_addr_id: {
+      label: "IP адрес",
+      type: "select",
+      value: "",
+      valueObj: { value: "", label: "Не выбрано" },
+      valueArr: [],
+      dropdown: "default",
+      options: [{ value: "", label: "Не выбрано" }],
+      validations: {
+        required: true,
+      },
+      dependency: {
+        field: "server_id",
+        type: "loadOptions",
+      },
+      errorMessage: "",
+      dirty: false,
+    },
     provider_id: {
       label: "Регистратор",
       value: "",
@@ -127,6 +145,16 @@ export const domainEditFormData: MyFormData = {
         field: "hosting_acc_id",
         type: "loadOptions",
       },
+      errorMessage: "",
+      dirty: false,
+    },
+    is_activated: {
+      label: "Мониторинг",
+      type: "checkbox",
+      value: "0",
+      valueObj: { value: "", label: "Не выбрано" },
+      valueArr: [],
+      validations: {},
       errorMessage: "",
       dirty: false,
     },
@@ -251,6 +279,10 @@ export const clearDomainForm = (filledFormData: MyFormData) => {
     value: "",
     label: "Не выбрано",
   }
+  filledFormData.fields.ip_addr_id.valueObj = {
+    value: "",
+    label: "Не выбрано",
+  }
   filledFormData.fields.provider_id.valueObj = {
     value: "",
     label: "Не выбрано",
@@ -276,6 +308,7 @@ export const clearDomainForm = (filledFormData: MyFormData) => {
   filledFormData.fields.ssl_status.value = "0"
   filledFormData.fields.integration_registrator_status.value = "0"
   filledFormData.fields.integration_cloudflare_status.value = "0"
+  filledFormData.fields.is_activated.value = "0"
 }
 
 export const fillDomainForm = (
@@ -329,6 +362,23 @@ export const fillDomainForm = (
       ]
     } else {
       filledFormData.fields.server_id.valueObj = {
+        value: "",
+        label: "Не выбрано",
+      }
+    }
+
+    if (domain.ip_addr_id) {
+      const ip_addr = {
+        value: String(domain.ip_addr_id),
+        label: domain.ip_addr,
+      }
+      filledFormData.fields.ip_addr_id.valueObj = ip_addr
+      filledFormData.fields.ip_addr_id.options = [
+        { value: "", label: "Не выбрано" },
+        ip_addr,
+      ]
+    } else {
+      filledFormData.fields.ip_addr_id.valueObj = {
         value: "",
         label: "Не выбрано",
       }
@@ -418,6 +468,7 @@ export const fillDomainForm = (
       domain.integration_registrator_status ? "1" : "0"
     filledFormData.fields.integration_cloudflare_status.value =
       domain.integration_cloudflare_status ? "1" : "0"
+    filledFormData.fields.is_activated.value = domain.is_activated ? "1" : "0"
   } else {
     clearDomainForm(filledFormData)
   }

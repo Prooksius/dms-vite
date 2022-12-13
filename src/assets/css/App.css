@@ -780,7 +780,8 @@ h5 span.required {
   opacity: 0.54;
   pointer-events: none;
 }
-.form-fild-array-item input:focus {
+.form-fild-array-item input:focus,
+.form-fild-array-item.invalid input {
   z-index: 1;
 }
 .form-fild-array__counter {
@@ -906,6 +907,16 @@ form .two-fields > .form-field {
 form .sixty-percent-row {
   width: 66.66666666666%;
   max-width: 100%;
+}
+
+.icon-tooltip-container {
+  line-height: 0;
+}
+.icon-tooltip-container.pointer {
+  cursor: pointer;
+}
+.transition-figure {
+  transition: all .15s ease-in;
 }
 
 /* checkbox */

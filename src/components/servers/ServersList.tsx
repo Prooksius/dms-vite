@@ -6,6 +6,7 @@ import {
   listServers,
   archiveServer,
   deleteServer,
+  listServersSort,
   listServersPage,
   listServersItemsCount,
   listServersStatus,
@@ -13,6 +14,7 @@ import {
   listServersFilter,
   listServersFilterChanges,
   listServersSearch,
+  setSort,
   setPage,
   setSearch,
   setFilter,
@@ -43,6 +45,7 @@ export const ServersList: React.FC = () => {
   const items = useSelector(listServers)
 
   const status = useSelector(listServersStatus)
+  const sort = useSelector(listServersSort)
   const page = useSelector(listServersPage)
   const itemsInPage = useSelector(listServersItemsInPage)
   const search = useSelector(listServersSearch)
@@ -69,6 +72,11 @@ export const ServersList: React.FC = () => {
 
   const changeItemsInPage = (value: number) => {
     dispatch(setItemsInPage(value))
+    setEditId(0)
+  }
+
+  const changeSort = (value: string) => {
+    dispatch(setSort(value))
     setEditId(0)
   }
 
@@ -128,7 +136,9 @@ export const ServersList: React.FC = () => {
         )}
         data={items}
         page={page}
+        sort={sort}
         setPage={changePage}
+        setSort={changeSort}
         setItemsInPage={changeItemsInPage}
         filterChanges={filterChanges}
         reloadPage={() => dispatch(reloadPage())}
@@ -151,6 +161,8 @@ export const ServersList: React.FC = () => {
           {
             title: "Название",
             width: "2 1",
+            sort: "name",
+            sortTitle: "названию",
             getValue: (row) => (
               <a
                 className="edit-record-link"
@@ -228,9 +240,10 @@ export const ServersList: React.FC = () => {
                     className="btn btn-white"
                     onClick={() => archiveHandler(row.id)}
                   >
-                    В архив
+                    Удалить
                   </button>
                   <button
+                    style={{ display: "none" }}
                     type="button"
                     className="btn btn-white"
                     onClick={() => deleteHandler(row.id)}

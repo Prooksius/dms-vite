@@ -41,6 +41,7 @@ export const serverEditFormData: MyFormData = {
       valueArr: [],
       validations: {
         required: true,
+        isIP: false,
       },
       errorMessage: "",
       dirty: false,

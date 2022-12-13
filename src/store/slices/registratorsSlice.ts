@@ -210,6 +210,7 @@ export const fetchRegistratorsPage = createAsyncThunk(
     const query = new URLSearchParams({
       offset: String((registrators.page - 1) * registrators.itemsInPage),
       limit: String(registrators.itemsInPage),
+      sort: registrators.sort ? registrators.sort : "-created_at",
       name: registrators.search,
       created_at: registrators.filter.created_at
         ? registrators.filter.created_at.split(".").reverse().join("-")
@@ -333,7 +334,7 @@ const initialState: RegistratorsState = {
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
-  sort: "",
+  sort: "-created_at",
   status: "idle",
   editStatus: "idle",
   loaded: false,
@@ -373,11 +374,12 @@ export const registratorsSlice = createSlice({
       state.selectedIds = payload
     },
     setSort: (state, { payload }: PayloadAction<string>) => {
-      if (state.sort !== payload) {
+      const sort = payload ? payload : "-created_at"
+      if (state.sort !== sort) {
         state.page = initialState.page
         state.filterChanges++
       }
-      state.sort = payload
+      state.sort = sort
     },
     setItemsInPage: (state, { payload }: PayloadAction<number>) => {
       if (state.itemsInPage !== payload) {

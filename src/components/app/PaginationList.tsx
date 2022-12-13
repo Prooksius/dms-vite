@@ -69,8 +69,8 @@ const PaginationList: React.FC<PaginationListProps> = ({
         </HeaderSlot.Renderer>
         <SortSlot.Renderer childs={props.children} />
         {props.children}
-        {totalPages > 1 && (
-          <div className="pagination-container">
+        <div className="pagination-container">
+          {totalPages > 1 && (
             <ReactPaginate
               breakLabel="…"
               nextLabel={<CaretRightIcon />}
@@ -93,27 +93,30 @@ const PaginationList: React.FC<PaginationListProps> = ({
               activeClassName="active"
               renderOnZeroPageCount={null}
             />
-            <div
-              className="records-count-select"
-              data-tip="Записей на странице"
-              data-for="for-left"
-            >
-              <Select
-                value={{ label: props.itemsInPage, value: props.itemsInPage }}
-                className="multiselect"
-                classNamePrefix="inner"
-                menuPlacement="top"
-                components={{
-                  IndicatorSeparator: () => null,
-                }}
-                onChange={(selectedOption) =>
-                  props.itemsInPageChangedCallback(selectedOption.value)
-                }
-                options={itemsInPageList.map((i) => ({ label: i, value: i }))}
-              />
-            </div>
+          )}
+          {totalPages == 1 && (
+            <div className="pagination"></div>
+          )}
+          <div
+            className="records-count-select"
+            data-tip="Записей на странице"
+            data-for="for-left"
+          >
+            <Select
+              value={{ label: props.itemsInPage, value: props.itemsInPage }}
+              className="multiselect"
+              classNamePrefix="inner"
+              menuPlacement="top"
+              components={{
+                IndicatorSeparator: () => null,
+              }}
+              onChange={(selectedOption) =>
+                props.itemsInPageChangedCallback(selectedOption.value)
+              }
+              options={itemsInPageList.map((i) => ({ label: i, value: i }))}
+            />
           </div>
-        )}
+        </div>
         <FooterSlot.Renderer childs={props.children} />
       </div>
     </>

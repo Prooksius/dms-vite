@@ -16,7 +16,8 @@ export interface SameValidatorProps {
   fields: FieldsData
 }
 
-export const required = ({ value }: ValidatorProps): string | boolean => {
+export const required = ({ param, value }: ValidatorProps): string | boolean => {
+  if (param === false) return false
   if (
     !value.toString().trim().length ||
     !validator.toBoolean(value.toString().trim())
@@ -61,31 +62,35 @@ export const maxValue = ({
   } else return false
 }
 
-export const email = ({ value }: ValidatorProps): string | boolean => {
+export const email = ({ param, value }: ValidatorProps): string | boolean => {
+  if (param === false) return false
   if (String(value) && !validator.isEmail(String(value))) {
     return `Значение должно быть E-mail`
   } else return false
 }
 
-export const isNumeric = ({ value }: ValidatorProps): string | boolean => {
+export const isNumeric = ({ param, value }: ValidatorProps): string | boolean => {
+  if (param === false) return false
   if (!validator.isNumeric(String(value))) {
     return `Значение должно быть числом`
   } else return false
 }
 
-export const isAlpha = ({ value }: ValidatorProps): string | boolean => {
+export const isAlpha = ({ param, value }: ValidatorProps): string | boolean => {
+  if (param === false) return false
   if (!validator.isAlpha(String(value))) {
     return `Значение должно содержать только буквы`
   } else return false
 }
 
-export const isIP = ({ value }: ValidatorProps): string | boolean => {
+export const isIP = ({ param, value }: ValidatorProps): string | boolean => {
+  if (param === false) return false
   if (!validator.isIP(String(value), 4)) {
     return `Значение должно быть IP-адресом`
   } else return false
 }
 
-export const isAlphanumeric = ({ value }: ValidatorProps): string | boolean => {
+export const isAlphanumeric = ({ param, value }: ValidatorProps): string | boolean => {
   if (!validator.isAlphanumeric(String(value))) {
     return `Значение должно содержать только буквы и цифры`
   } else return false
@@ -118,6 +123,19 @@ export const subdomainsIPCheck = (
   }
   if (foundEmptyIp > 0) {
     return "IP адрес обязателен"
+  }
+  return false
+}
+
+export const IPsCheck = (IPs: string[]): string | boolean => {
+  let retval = ""
+  IPs.map((item) => {
+    if (!validator.isIP(String(item), 4)) {
+      retval = `Значение должно быть IP-адресом`
+    }
+  })
+  if (retval) {
+    return retval
   }
   return false
 }

@@ -285,6 +285,7 @@ const DomainsFilterInner: React.FC = () => {
                 name={"registrator_id"}
                 searchCallback={loadRegistratorOptions}
               />
+              <SelectField name={"is_activated"} />
               <DateTimeField name={"registration_date"} timeFormat={false} />
               <DateTimeField
                 name={"expirationtime_condition"}

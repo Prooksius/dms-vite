@@ -178,6 +178,7 @@ export const fetchServersPage = createAsyncThunk(
     const queryObj: Record<string, string> = {
       offset: String((servers.page - 1) * servers.itemsInPage),
       limit: String(servers.itemsInPage),
+      sort: servers.sort ? servers.sort : "-created_at",
       name: servers.search,
       provider_id: servers.filter.provider_id?.value
         ? servers.filter.provider_id.value
@@ -294,7 +295,7 @@ const initialState: ServersState = {
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
-  sort: "",
+  sort: "-created_at",
   status: "idle",
   editStatus: "idle",
   loaded: false,
@@ -334,11 +335,12 @@ export const serversSlice = createSlice({
       state.selectedIds = payload
     },
     setSort: (state, { payload }: PayloadAction<string>) => {
-      if (state.sort !== payload) {
+      const sort = payload ? payload : "-created_at"
+      if (state.sort !== sort) {
         state.page = initialState.page
         state.filterChanges++
       }
-      state.sort = payload
+      state.sort = sort
     },
     setItemsInPage: (state, { payload }: PayloadAction<number>) => {
       if (state.itemsInPage !== payload) {

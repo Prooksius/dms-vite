@@ -113,6 +113,7 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
   })
 
   useEffect(() => {
+    console.log("soring off")
     setTimeout(() => {
       setSorting(false)
     }, 100)
@@ -360,6 +361,22 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
           <ReactTooltip id="for-top" effect="solid" place="top" />
           <ReactTooltip id="for-left" effect="solid" place="left" />
           <ReactTooltip id="for-sort" effect="solid" place="top" />
+          <ReactTooltip
+            id="for-monitoring"
+            effect="solid"
+            place="top"
+            getContent={(dataTip) => {
+              const data = dataTip ? dataTip.split("###") : []
+              return (
+                <div style={{ textAlign: "center" }}>
+                  {data[1] && <h3>{data[0]}</h3>}
+                  <h4>Последняя проверка</h4>
+                  <br />
+                  <p>{data[1] ? data[1] : data[0]}</p>
+                </div>
+              )
+            }}
+          />
         </>
       )}
     </>

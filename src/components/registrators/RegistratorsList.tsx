@@ -6,6 +6,7 @@ import {
   listRegistrators,
   archiveRegistrator,
   deleteRegistrator,
+  listRegistratorsSort,
   listRegistratorsPage,
   listRegistratorsItemsCount,
   listRegistratorsStatus,
@@ -14,6 +15,7 @@ import {
   listRegistratorsFilterChanges,
   listRegistratorsSearch,
   setPage,
+  setSort,
   setSearch,
   setFilter,
   setItemsInPage,
@@ -41,6 +43,7 @@ export const RegistratorsList: React.FC = () => {
   const items = useSelector(listRegistrators)
 
   const status = useSelector(listRegistratorsStatus)
+  const sort = useSelector(listRegistratorsSort)
   const page = useSelector(listRegistratorsPage)
   const itemsInPage = useSelector(listRegistratorsItemsInPage)
   const search = useSelector(listRegistratorsSearch)
@@ -67,6 +70,11 @@ export const RegistratorsList: React.FC = () => {
 
   const changeItemsInPage = (value: number) => {
     dispatch(setItemsInPage(value))
+    setEditId(0)
+  }
+
+  const changeSort = (value: string) => {
+    dispatch(setSort(value))
     setEditId(0)
   }
 
@@ -98,7 +106,9 @@ export const RegistratorsList: React.FC = () => {
         rowHeight={125}
         data={items}
         page={page}
+        sort={sort}
         setPage={changePage}
+        setSort={changeSort}
         setItemsInPage={changeItemsInPage}
         filterChanges={filterChanges}
         reloadPage={() => dispatch(reloadPage())}
@@ -108,6 +118,8 @@ export const RegistratorsList: React.FC = () => {
           {
             title: "Название",
             width: "1 1",
+            sort: "name",
+            sortTitle: "названию",
             getValue: (row) => (
               <a
                 className="edit-record-link"
@@ -169,6 +181,8 @@ export const RegistratorsList: React.FC = () => {
           {
             title: "Добавлен",
             width: "1 1",
+            sort: "created_at",
+            sortTitle: "дате добавления",
             getValue: (row) => (
               <>
                 {row.created_at &&
@@ -210,9 +224,10 @@ export const RegistratorsList: React.FC = () => {
                     className="btn btn-white"
                     onClick={() => archiveHandler(row.id)}
                   >
-                    В архив
+                    Удалить
                   </button>
                   <button
+                    style={{ display: "none" }}
                     type="button"
                     className="btn btn-white"
                     onClick={() => deleteHandler(row.id)}

@@ -147,9 +147,14 @@ const SubdomainItem: React.FC<SubdomainItemProps> = ({
       <div className="form__row">
         <div className="col-lg-6 col-md-6 col-sm-12">
           <div
-            className={classnames("form-field", {
-              hasValue: subdomain.server_id,
-            })}
+            className={classnames(
+              "form-field",
+              {
+                hasValue: subdomain.server_id,
+              },
+              { invalid: serverError },
+              { valid: !serverError && serverDirty }
+            )}
           >
             <AsyncPaginate
               defaultOptions={[]}
@@ -176,8 +181,8 @@ const SubdomainItem: React.FC<SubdomainItemProps> = ({
                     title: subdomain.title,
                     server_id: Number(selectedOption.value),
                     server_name: selectedOption.label,
-                    ip_addr_id: subdomain.ip_addr_id,
-                    ip_addr: subdomain.ip_addr,
+                    ip_addr_id: 0,
+                    ip_addr: "",
                     type: subdomain.type || "",
                     available_check: subdomain.available_check,
                   },
@@ -203,7 +208,10 @@ const SubdomainItem: React.FC<SubdomainItemProps> = ({
                 page: 1,
               }}
             />
-            <label>Сервер</label>
+            <label>
+              Сервер
+              <span className="required">*</span>
+            </label>
             <small
               className={classnames("error-label", {
                 opened: serverError,

@@ -31,6 +31,7 @@ import {
   isAlphanumeric,
   isIP,
   subdomainsIPCheck,
+  IPsCheck,
 } from "./myValidators"
 
 type FormPayload = {
@@ -82,17 +83,21 @@ const checkSubdomains = (subdomains: Subdomain[]): string | boolean => {
   return subdomainsIPCheck(subdomains)
 }
 
+const checkIPs = (IPs: string[]): string | boolean => {
+  return IPsCheck(IPs)
+}
+
 const validateHandlers: FormValidHandlers = {
-  required: (param, value, fields) => param && required({ value }),
+  required: (param, value, fields) => param && required({ value, param }),
   minLength: (param, value, fields) => minLength({ value, param }),
   maxLength: (param, value, fields) => maxLength({ value, param }),
   minValue: (param, value, fields) => minValue({ value, param }),
   maxValue: (param, value, fields) => maxValue({ value, param }),
-  email: (param, value, fields) => email({ value }),
-  isNumber: (param, value, fields) => isNumeric({ value }),
-  isIP: (param, value, fields) => isIP({ value }),
-  isAlpha: (param, value, fields) => isAlpha({ value }),
-  isAlphanumeric: (param, value, fields) => isAlphanumeric({ value }),
+  email: (param, value, fields) => email({ value, param }),
+  isNumber: (param, value, fields) => isNumeric({ value, param }),
+  isIP: (param, value, fields) => isIP({ value, param }),
+  isAlpha: (param, value, fields) => isAlpha({ value, param }),
+  isAlphanumeric: (param, value, fields) => isAlphanumeric({ value, param }),
   sameAs: (param, value, fields, otherField) =>
     sameAs({ value, param: otherField, fields }),
 }
@@ -162,6 +167,12 @@ const handlers: FormHandlers = {
             }
 
             if (!invalid) {
+              if (key === "isIP" && value === false && field.type === "array") {
+                invalid = checkIPs(field.valueArr.map((ipItem) => ipItem.value))
+              }
+            }
+
+            if (!invalid) {
               if (key === "subdomains") {
                 invalid = checkSubdomains(field.valueArr as Subdomain[])
               }
@@ -216,6 +227,12 @@ const handlers: FormHandlers = {
                 copyState.fields,
                 String(value)
               )
+            }
+
+            if (!invalid) {
+              if (key === "isIP" && value === false && field.type === "array") {
+                invalid = checkIPs(field.valueArr.map((ipItem) => ipItem.value))
+              }
             }
 
             if (!invalid) {
@@ -291,6 +308,12 @@ const handlers: FormHandlers = {
               fields,
               String(value)
             )
+          }
+
+          if (!invalid) {
+            if (key === "isIP" && value === false && field.type === "array") {
+              invalid = checkIPs(field.valueArr.map((ipItem) => ipItem.value))
+            }
           }
 
           if (!invalid) {

@@ -180,6 +180,7 @@ export const fetchEmailsPage = createAsyncThunk(
     const query = new URLSearchParams({
       offset: String((emails.page - 1) * emails.itemsInPage),
       limit: String(emails.itemsInPage),
+      sort: emails.sort ? emails.sort : "-created_at",
       name: emails.search,
       created_at: emails.filter.created_at
         ? emails.filter.created_at.split(".").reverse().join("-")
@@ -290,7 +291,7 @@ const initialState: EmailsState = {
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
-  sort: "",
+  sort: "-created_at",
   status: "idle",
   editStatus: "idle",
   loaded: false,
@@ -330,11 +331,12 @@ export const emailsSlice = createSlice({
       state.selectedIds = payload
     },
     setSort: (state, { payload }: PayloadAction<string>) => {
-      if (state.sort !== payload) {
+      const sort = payload ? payload : "-created_at"
+      if (state.sort !== sort) {
         state.page = initialState.page
         state.filterChanges++
       }
-      state.sort = payload
+      state.sort = sort
     },
     setItemsInPage: (state, { payload }: PayloadAction<number>) => {
       if (state.itemsInPage !== payload) {
