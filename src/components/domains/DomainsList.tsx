@@ -15,6 +15,7 @@ import {
   listDomainsItemsCount,
   listDomainsStatus,
   listDomainsEditStatus,
+  listDomainsEditRowId,
   listDomainsAllStatus,
   listDomainsItemsInPage,
   listDomainsFilter,
@@ -23,6 +24,7 @@ import {
   setPage,
   setSearch,
   setFilter,
+  setEditRowID,
   setSort,
   setItemsInPage,
   toggleDomainOpen,
@@ -87,6 +89,7 @@ export const DomainsList: React.FC = () => {
 
   const status = useSelector(listDomainsStatus)
   const editStatus = useSelector(listDomainsEditStatus)
+  const editRowID = useSelector(listDomainsEditRowId)
   const statusAll = useSelector(listDomainsAllStatus)
   const sort = useSelector(listDomainsSort)
   const page = useSelector(listDomainsPage)
@@ -99,6 +102,7 @@ export const DomainsList: React.FC = () => {
   const deleteHandler = (id: number) => {
     confirmationAlert("Вы уверены?", "Да", "Отмена").then((result) => {
       if (result.isConfirmed) {
+        dispatch(setEditRowID(id))
         dispatch(deleteDomain(id))
         dispatch(fetchDomainAll())
       }
@@ -106,6 +110,7 @@ export const DomainsList: React.FC = () => {
   }
 
   const archiveHandler = (id: number) => {
+    dispatch(setEditRowID(id))
     dispatch(archiveDomain(id))
     dispatch(fetchDomainAll())
   }
@@ -136,6 +141,7 @@ export const DomainsList: React.FC = () => {
 
   const toggleMonitoring = (id: number, condition: boolean) => {
     console.log("Toggle monitoring")
+    dispatch(setEditRowID(id))
     dispatch(switchMonitoringDomain({ id, status: condition }))
   }
 
@@ -157,6 +163,7 @@ export const DomainsList: React.FC = () => {
     <>
       <PaginationDataGrid
         status={status}
+        editRowID={editRowID}
         getExpanded={(row) => (
           <div className="pagination-tablelist__row-down">
             <div className="pagination-tablelist__icons"></div>
@@ -286,6 +293,11 @@ export const DomainsList: React.FC = () => {
             title: "DNS-хостинг",
             width: "1 1",
             getValue: (row) => row.hosting_name,
+          },
+          {
+            title: "created_at",
+            width: "1 1",
+            getValue: (row) => row.created_at,
           },
           {
             title: "Код ответа",

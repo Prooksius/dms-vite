@@ -9,8 +9,11 @@ import { SortIcon } from "./icons/SortIcon"
 import ReactTooltip from "react-tooltip"
 import { listTooltipShow, setTootipShow } from "@store/slices/globalsSlice"
 import { useSelector, useDispatch } from "react-redux"
+import PaginationDataGridRow from "./PaginationDataGridRow"
+import PaginationDataGridHeader from "./PaginationDataGridHeader"
+import PaginationDataGridPHolder from "./PaginationDataGridPHolder"
 
-type ColumnData<T> = {
+export type ColumnData<T> = {
   title: string
   width: string
   sort?: string
@@ -26,6 +29,7 @@ type ColumnData<T> = {
 interface PaginationDataGridProps<T> {
   data: T[]
   status: StatusType
+  editRowID?: number
   filterChanges: number
   page: number
   setPage: (page: number) => void
@@ -54,6 +58,7 @@ const useQuery = () => {
 export const PaginationDataGrid = <T extends Record<string, any>>({
   data,
   status,
+  editRowID = 0,
   filterChanges,
   page = 1,
   setPage,
@@ -158,170 +163,31 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
       >
         <HeaderSlot>{getFilterComponent()}</HeaderSlot>
         <div className="pagination-tablelist">
-          <div className="pagination-tablelist__part pagination-tablelist__thead">
-            <div className="pagination-tablelist__row-th">
-              {selectColumn && (
-                <div className="pagination-tablelist__th select-all-td">
-                  <div
-                    className="checkbox"
-                    style={{ marginBottom: 0, marginLeft: "1px" }}
-                  >
-                    <div className="checkbox-inner">
-                      <input
-                        type="checkbox"
-                        data-tip="Выбрать записи"
-                        data-for="for-sort"
-                        ref={(input) => {
-                          if (input) {
-                            input.indeterminate =
-                              selectedIds.length > 0 &&
-                              data.length > selectedIds.length
-                          }
-                        }}
-                        checked={data.length === selectedIds.length}
-                        onChange={(e) =>
-                          setSelected(
-                            e.target.checked
-                              ? data.map((dataItem) => dataItem.id)
-                              : []
-                          )
-                        }
-                      />
-                      <i></i>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {columns.map((column, index) => {
-                const direction =
-                  sort && sort.replace("-", "") === column.sort
-                    ? Array.from(sort)[0] === "-"
-                      ? ""
-                      : "(убыв)"
-                    : "(возр)"
-                return (
-                  <div
-                    key={index + "-" + column.title}
-                    className={classNames(
-                      "pagination-tablelist__th",
-                      { "button-td": column.width === "unset" },
-                      { "sort-column": column.sort }
-                    )}
-                    style={{ flex: column.width }}
-                  >
-                    <span
-                      style={{ pointerEvents: sorting ? "none" : "all" }}
-                      data-tip={
-                        column.sort &&
-                        (direction
-                          ? "Сортировать по "
-                          : "Отменить сортировку по ") +
-                          column.sortTitle +
-                          " " +
-                          direction
-                      }
-                      data-for="for-sort"
-                      onClick={
-                        column.sort &&
-                        setSort &&
-                        (() =>
-                          setSortHandler(
-                            (sort === "" ||
-                            Array.from(sort)[0] === "-" ||
-                            sort.replace("-", "") !== column.sort
-                              ? ""
-                              : "-") +
-                              (Array.from(sort)[0] === "-" &&
-                              sort.replace("-", "") === column.sort
-                                ? ""
-                                : column.sort)
-                          ))
-                      }
-                    >
-                      {column.title}
-                      {column.sort && sort.replace("-", "") === column.sort && (
-                        <SortIcon
-                          order={Array.from(sort)[0] === "-" ? "DESC" : "ASC"}
-                        />
-                      )}
-                      {column.sort && sort.replace("-", "") !== column.sort && (
-                        <SortIcon />
-                      )}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+          <PaginationDataGridHeader
+            columns={columns}
+            data={data}
+            selectColumn={selectColumn}
+            setSortHandler={setSortHandler}
+            sorting={sorting}
+            setSort={setSort}
+            selectedIds={selectedIds}
+            setSelected={setSelected}
+            sort={sort}
+          />
           <div className="pagination-tablelist__part pagination-tablelist__tbody">
             {status === "succeeded" &&
               data.length > 0 &&
               data.map((item) => (
-                <div
+                <PaginationDataGridRow
+                  columns={columns}
+                  editRowID={editRowID}
+                  item={item}
+                  getExpanded={getExpanded}
+                  selectColumn={selectColumn}
                   key={item.id}
-                  className={classNames(
-                    "pagination-tablelist__row",
-                    { open: item.record_open },
-                    { edited: item.popup_open }
-                  )}
-                >
-                  <div className="pagination-tablelist__row-up">
-                    {selectColumn && (
-                      <div className="pagination-tablelist__td select-all-td">
-                        <div className="checkbox" style={{ marginBottom: 0 }}>
-                          <div className="checkbox-inner">
-                            <input
-                              type="checkbox"
-                              checked={selectedIds.indexOf(item.id) > -1}
-                              onChange={(e) =>
-                                setSelected(
-                                  e.target.checked
-                                    ? [
-                                        ...selectedIds.filter(
-                                          (selectedItem) =>
-                                            selectedItem !== item.id
-                                        ),
-                                        item.id,
-                                      ]
-                                    : selectedIds.filter(
-                                        (selectedItem) =>
-                                          selectedItem !== item.id
-                                      )
-                                )
-                              }
-                            />
-                            <i></i>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {columns.map((column, index) => (
-                      <div
-                        key={index + "-" + column.title + "row" + item.id}
-                        className={classNames("pagination-tablelist__td", {
-                          "button-td": column.width === "unset",
-                        })}
-                        style={{
-                          flex: column.width,
-                          display: column.display ? column.display : "flex",
-                          flexDirection: column.direction
-                            ? column.direction
-                            : "row",
-                          alignItems: column.align ? column.align : "center",
-                          justifyContent: column.justify
-                            ? column.justify
-                            : "flex-start",
-                          gap: column.gap ? column.gap : 0,
-                        }}
-                      >
-                        {column.getValue(item)}
-                      </div>
-                    ))}
-                  </div>
-                  <UnmountClosed isOpened={item.record_open}>
-                    {getExpanded(item)}
-                  </UnmountClosed>
-                </div>
+                  selectedIds={selectedIds}
+                  setSelected={setSelected}
+                />
               ))}
             {status === "succeeded" && data.length === 0 && (
               <div className="pagination-tablelist__row">
@@ -332,25 +198,12 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
             )}
             {status === "loading" &&
               emptyItemsCount.map((emptyItem) => (
-                <div
+                <PaginationDataGridPHolder
                   key={emptyItem}
-                  className="pagination-tablelist__row skeleton-box loading"
-                >
-                  <div
-                    className="pagination-tablelist__row-up"
-                    style={{ height: `${rowHeight || 67}px` }}
-                  >
-                    {columns.map((column, index) => (
-                      <div
-                        key={emptyItem + "-" + index}
-                        className={classNames("pagination-tablelist__td", {
-                          "button-td": column.width === "unset",
-                        })}
-                        style={{ flex: column.width }}
-                      ></div>
-                    ))}
-                  </div>
-                </div>
+                  emptyItem={emptyItem}
+                  columns={columns}
+                  rowHeight={rowHeight}
+                />
               ))}
           </div>
         </div>

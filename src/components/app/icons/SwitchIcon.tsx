@@ -9,7 +9,7 @@ export const SwitchIcon: React.FC<SwitchIconProps> = ({ active, doSwitch }) => {
     <div
       className="icon-tooltip-container pointer"
       onClick={(event) => doSwitch(!active)}
-      title="Выключить"
+      title={"В" + (active ? "ы" : "") + "ключить"}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

@@ -17,6 +17,7 @@ import {
   ErrorPayloadData,
 } from "@components/app/forms/formWrapper/types"
 import { AxiosError } from "axios"
+import { start } from "repl"
 //import ts from "typescript"
 
 interface SubdomainsRecord {
@@ -134,6 +135,7 @@ interface DomainsState {
   sort: string
   status: StatusType
   editStatus: StatusType
+  editRowId: number
   allStatus: string
   loaded: boolean
   error: string
@@ -515,6 +517,7 @@ const initialState: DomainsState = {
   sort: "-created_at",
   status: "idle",
   editStatus: "idle",
+  editRowId: 0,
   allStatus: "idle",
   loaded: false,
   error: "",
@@ -577,6 +580,9 @@ export const domainsSlice = createSlice({
         state.filterChanges++
       }
       state.search = payload
+    },
+    setEditRowID: (state, { payload }: PayloadAction<number>) => {
+      state.editRowId = payload
     },
     reloadPage: (state) => {
       state.filterChanges++
@@ -649,6 +655,7 @@ export const domainsSlice = createSlice({
         addDomain.fulfilled,
         (state, { payload }: PayloadAction<DomainsRecord>) => {
           state.editStatus = "succeeded"
+          state.editRowId = 0
           state.error = ""
           state.errorData = null
           state.filterChanges++
@@ -657,6 +664,7 @@ export const domainsSlice = createSlice({
       )
       .addCase(addDomain.rejected, (state, action) => {
         state.editStatus = "failed"
+        state.editRowId = 0
         state.error = action.payload
           ? errorToastText(action.payload as ErrorPayloadData)
           : action.error.message
@@ -675,6 +683,7 @@ export const domainsSlice = createSlice({
         editDomain.fulfilled,
         (state, { payload }: PayloadAction<DomainsRecord>) => {
           state.editStatus = "succeeded"
+          state.editRowId = 0
           state.error = ""
           state.errorData = null
           state.filterChanges++
@@ -683,6 +692,7 @@ export const domainsSlice = createSlice({
       )
       .addCase(editDomain.rejected, (state, action) => {
         state.editStatus = "failed"
+        state.editRowId = 0
         state.error = action.error.message
         state.error = action.payload
           ? errorToastText(action.payload as ErrorPayloadData)
@@ -694,10 +704,14 @@ export const domainsSlice = createSlice({
       })
       .addCase(archiveDomain.fulfilled, (state, action) => {
         state.error = ""
+        state.editStatus = "succeeded"
+        state.editRowId = 0
         state.errorData = null
         toastAlert("Домен успешно удален", "success")
       })
       .addCase(archiveDomain.rejected, (state, action) => {
+        state.editStatus = "failed"
+        state.editRowId = 0
         toastAlert(
           "Ошибка архивирования домена: " +
             (action.payload
@@ -708,11 +722,14 @@ export const domainsSlice = createSlice({
       })
       .addCase(deleteDomain.fulfilled, (state, action) => {
         state.error = ""
+        state.editStatus = "succeeded"
+        state.editRowId = 0
         state.errorData = null
         state.filterChanges++
         toastAlert("Домен успешно архивирован", "success")
       })
       .addCase(deleteDomain.rejected, (state, action) => {
+        state.editStatus = "failed"
         toastAlert(
           "Ошибка удаления домена: " +
             (action.payload
@@ -729,6 +746,8 @@ export const domainsSlice = createSlice({
       })
       .addCase(switchMonitoringDomain.fulfilled, (state, action) => {
         state.error = ""
+        state.editStatus = "succeeded"
+        state.editRowId = 0
         state.errorData = null
         console.log("action.payload", action.payload)
         const found = state.list.find((item) => item.id == action.payload.id)
@@ -738,6 +757,8 @@ export const domainsSlice = createSlice({
         }
       })
       .addCase(switchMonitoringDomain.rejected, (state, action) => {
+        state.editStatus = "failed"
+        state.editRowId = 0
         toastAlert(
           "Ошибка изменения статуса мониторинга домена: " +
             (action.payload
@@ -755,6 +776,7 @@ export const {
   setSearch,
   setPage,
   setSort,
+  setEditRowID,
   setSelected,
   setItemsInPage,
   toggleDomainOpen,
@@ -772,6 +794,7 @@ export const listDomains = (state: RootState) => state.domains.list
 export const listDomainsStatus = (state: RootState) => state.domains.status
 export const listDomainsEditStatus = (state: RootState) =>
   state.domains.editStatus
+export const listDomainsEditRowId = (state: RootState) => state.domains.editRowId
 export const listDomainsSort = (state: RootState) => state.domains.sort
 export const listDomainsLoaded = (state: RootState) => state.domains.loaded
 export const listDomainsPage = (state: RootState) => state.domains.page

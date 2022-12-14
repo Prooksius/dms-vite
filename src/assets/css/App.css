@@ -1263,6 +1263,13 @@ form .sixty-percent-row {
   position: relative;
   border: 1px solid #cbcbcb;
   border-radius: 12px;
+  pointer-events: all;
+  opacity: 1;
+}
+.pagination-tablelist__row.editing {
+  pointer-events: none;
+  opacity: .5;
+  background-color: rgba(0, 0, 0, .1);
 }
 .pagination-tablelist__row.edited:last-child {
   margin-bottom: 150px;
