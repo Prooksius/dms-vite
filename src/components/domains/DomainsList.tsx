@@ -295,11 +295,6 @@ export const DomainsList: React.FC = () => {
             getValue: (row) => row.hosting_name,
           },
           {
-            title: "created_at",
-            width: "1 1",
-            getValue: (row) => row.created_at,
-          },
-          {
             title: "Код ответа",
             width: "0.7 1",
             getValue: (row) => {
