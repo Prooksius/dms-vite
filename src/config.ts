@@ -8,10 +8,10 @@ import { ErrorPayloadData } from "@components/app/forms/formWrapper/types"
 const MySwal = withReactContent(Swal)
 
 export const APP_TITLE = "DMS"
-//export const REACT_APP_DB_URL = process.env.REACT_APP_DB_URL
-//export const REACT_APP_SSO_URL = process.env.REACT_APP_SSO_URL
-export const REACT_APP_DB_URL = "https://dev.seodms.com/api/v1.0"
-export const REACT_APP_SSO_URL = "https://sso.seoreserved.ru/auth?service=dms_local"
+export const REACT_APP_DB_URL = process.env.REACT_APP_DB_URL
+export const REACT_APP_SSO_URL = process.env.REACT_APP_SSO_URL
+//export const REACT_APP_DB_URL = "https://dev.seodms.com/api/v1.0"
+//export const REACT_APP_SSO_URL = "https://sso.seoreserved.ru/auth?service=dms_local"
 
 let lastId = 0
 
