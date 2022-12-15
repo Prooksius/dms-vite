@@ -514,7 +514,7 @@ const initialState: DomainsState = {
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
-  sort: "-created_at",
+  sort: "",
   status: "idle",
   editStatus: "idle",
   editRowId: 0,

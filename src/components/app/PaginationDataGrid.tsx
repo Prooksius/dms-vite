@@ -119,10 +119,10 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
 
   useEffect(() => {
     console.log("soring off")
-    query.set("sort", "-created_at")
     setTimeout(() => {
       setSorting(false)
     }, 100)
+    // eslint-disable-next-line
   }, [sort])
 
   useEffect(() => {
@@ -132,10 +132,10 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
       setPage(1)
     }
     if (setSort) {
-      if (query.get("sort") && query.get("sort") !== sort) {
+      if (query.get("sort") && String(query.get("sort")) !== sort) {
         setSortHandler(query.get("sort"))
       } else if (!query.get("sort")) {
-        setSortHandler("")
+        //setSortHandler("")
       }
     }
 

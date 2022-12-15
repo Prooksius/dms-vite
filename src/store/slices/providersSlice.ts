@@ -243,7 +243,7 @@ const initialState: ProvidersState = {
   page: 1,
   itemsInPage: 10,
   itemsCount: 0,
-  sort: "-created_at",
+  sort: "",
   status: "idle",
   editStatus: "idle",
   loaded: false,
