@@ -119,6 +119,7 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
 
   useEffect(() => {
     console.log("soring off")
+    query.set("sort", "-created_at")
     setTimeout(() => {
       setSorting(false)
     }, 100)

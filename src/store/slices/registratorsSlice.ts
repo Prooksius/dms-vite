@@ -374,12 +374,11 @@ export const registratorsSlice = createSlice({
       state.selectedIds = payload
     },
     setSort: (state, { payload }: PayloadAction<string>) => {
-      const sort = payload ? payload : "-created_at"
-      if (state.sort !== sort) {
+      if (state.sort !== payload) {
         state.page = initialState.page
         state.filterChanges++
       }
-      state.sort = sort
+      state.sort = payload
     },
     setItemsInPage: (state, { payload }: PayloadAction<number>) => {
       if (state.itemsInPage !== payload) {
