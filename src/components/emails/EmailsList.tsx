@@ -1,7 +1,7 @@
 import classNames from "classnames"
 import React, { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { confirmationAlert, formatDateTime, toastAlert } from "@config"
+import { askConfirm, formatDateTime, toastAlert } from "@config"
 import {
   listEmails,
   archiveEmail,
@@ -36,10 +36,13 @@ import { SearchEntity } from "@components/app/SearchEntity"
 import { EyeIcon } from "@components/app/icons/EyeIcon"
 import { PaginationDataGrid } from "@components/app/PaginationDataGrid"
 import { MinusIcon } from "@components/app/icons/MinusIcon"
+import { useConfirm } from "@components/app/hooks/useConfirm"
 
 export const EmailsList: React.FC = () => {
   const [editId, setEditId] = useState(0)
   const [editOpened, setEditOpened] = useState(false)
+
+  const { ask } = useConfirm()
 
   const dispatch = useDispatch()
 
@@ -55,11 +58,12 @@ export const EmailsList: React.FC = () => {
   const itemsCount = useSelector(listEmailsItemsCount)
   const selectedIds = useSelector(listEmailsSelectedIds)
 
-  const deleteHandler = async (id: number) => {
-    const answer = await confirmationAlert("Вы уверены?", "Да", "Отмена")
-    if (answer.isConfirmed) {
-      dispatch(deleteEmail(id))
-    }
+  const deleteHandler = (id: number) => {
+    ask("", askConfirm).then((result) => {
+      if (result === true) {
+        dispatch(deleteEmail(id))
+      }
+    })
   }
 
   /*
@@ -84,7 +88,11 @@ export const EmailsList: React.FC = () => {
   */
 
   const archiveHandler = async (id: number) => {
-    dispatch(archiveEmail(id))
+    ask("", askConfirm).then((result) => {
+      if (result === true) {
+        dispatch(archiveEmail(id))
+      }
+    })
   }
 
   const changePage = (value: number) => {

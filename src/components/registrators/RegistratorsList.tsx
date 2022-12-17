@@ -1,7 +1,7 @@
 import classNames from "classnames"
 import React, { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { confirmationAlert, formatDateTime, toastAlert } from "@config"
+import { askConfirm, formatDateTime, toastAlert } from "@config"
 import {
   listRegistrators,
   archiveRegistrator,
@@ -33,10 +33,13 @@ import { RegistratorEditForm } from "./RegistratorEditForm"
 import { SearchEntity } from "@components/app/SearchEntity"
 import { EyeIcon } from "@components/app/icons/EyeIcon"
 import { PaginationDataGrid } from "@components/app/PaginationDataGrid"
+import { useConfirm } from "@components/app/hooks/useConfirm"
 
 export const RegistratorsList: React.FC = () => {
   const [editId, setEditId] = useState(0)
   const [editOpened, setEditOpened] = useState(false)
+
+  const { ask } = useConfirm()
 
   const dispatch = useDispatch()
 
@@ -52,15 +55,19 @@ export const RegistratorsList: React.FC = () => {
   const itemsCount = useSelector(listRegistratorsItemsCount)
 
   const deleteHandler = async (id: number) => {
-    confirmationAlert("Вы уверены?", "Да", "Отмена").then(async (result) => {
-      if (result.isConfirmed) {
+    ask("", askConfirm).then((result) => {
+      if (result === true) {
         dispatch(deleteRegistrator(id))
       }
     })
   }
 
   const archiveHandler = async (id: number) => {
-    dispatch(archiveRegistrator(id))
+    ask("", askConfirm).then((result) => {
+      if (result === true) {
+        dispatch(archiveRegistrator(id))
+      }
+    })
   }
 
   const changePage = (value: number) => {

@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useLocation, useSearchParams } from "react-router-dom"
 import { TransitionGroup, CSSTransition } from "react-transition-group"
-import { toastAlert, formatDateTime, confirmationAlert } from "@config"
+import { toastAlert, formatDateTime, askConfirm } from "@config"
 import {
   listItems,
   listPage,
@@ -36,12 +36,15 @@ import { PaginationDataGrid } from "@components/app/PaginationDataGrid"
 import { PlusIcon } from "@components/app/icons/PlusIcon"
 import { DotsIcon } from "@components/app/icons/DotsIcon"
 import { ProviderEditForm } from "./ProviderEditForm"
+import { useConfirm } from "@components/app/hooks/useConfirm"
 
 export const ProvidersList: React.FC = () => {
   const [editId, setEditId] = useState(0)
   const [editOpened, setEditOpened] = useState(false)
 
   const [searchParams, setSearchParams] = useSearchParams()
+
+  const { ask } = useConfirm()
 
   const dispatch = useDispatch()
 
@@ -65,15 +68,20 @@ export const ProvidersList: React.FC = () => {
     setEditId(0)
   }
 
-  const deleteHandler = async (id: number) => {
-    const answer = await confirmationAlert("Вы уверены?", "Да", "Отмена")
-    if (answer.isConfirmed) {
-      dispatch(deleteProvider(id))
-    }
+  const deleteHandler = (id: number) => {
+    ask("", askConfirm).then((result) => {
+      if (result === true) {
+        dispatch(deleteProvider(id))
+      }
+    })
   }
 
   const archiveHandler = async (id: number) => {
-    dispatch(archiveProvider(id))
+    ask("", askConfirm).then((result) => {
+      if (result === true) {
+        dispatch(archiveProvider(id))
+      }
+    })
   }
 
   const changeSort = (value: string) => {

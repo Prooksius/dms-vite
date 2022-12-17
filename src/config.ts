@@ -1,11 +1,7 @@
-import Swal from "sweetalert2"
 import { toast } from "react-toastify"
-import withReactContent from "sweetalert2-react-content"
 import { ErrorPayloadData } from "@components/app/forms/formWrapper/types"
 
 // test text
-
-const MySwal = withReactContent(Swal)
 
 export const APP_TITLE = "DMS"
 export const REACT_APP_DB_URL = process.env.REACT_APP_DB_URL
@@ -63,6 +59,13 @@ export function pluralName(n: number, lang = "ru-RU"): number {
   }
 }
 
+export const askConfirm = {
+  title: "Вы уверены?",
+  subtitle: "",
+  btnConfirm: "Да",
+  btnCancel: "Отмена",
+}
+
 export function errorToastText(payload: ErrorPayloadData): string {
   const errors: string[] = []
   if (typeof payload.detail !== "string") {
@@ -85,35 +88,4 @@ export function toastAlert(title: string, type = "info") {
   } else if (type === "success") {
     toast.success(title)
   }
-
-  /*
-  MySwal.fire({
-    toast: true,
-    position: "top-right",
-    iconColor: "white",
-    customClass: {
-      popup: "colored-toast",
-    },
-    showConfirmButton: false,
-    timer: 5000,
-    timerProgressBar: true,
-    icon: type,
-    title: title,
-  });
-  */
-}
-export function confirmationAlert(
-  title: string,
-  confirmButtonText: string,
-  cancelButtonText: string
-) {
-  return MySwal.fire({
-    title,
-    icon: "warning",
-    showCloseButton: true,
-    showCancelButton: true,
-    focusConfirm: false,
-    confirmButtonText,
-    cancelButtonText,
-  })
 }

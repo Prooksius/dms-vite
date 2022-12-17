@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useLocation, useSearchParams } from "react-router-dom"
 import { TransitionGroup, CSSTransition } from "react-transition-group"
-import { confirmationAlert, formatDateTime, toastAlert } from "@config"
+import { askConfirm, formatDateTime, toastAlert } from "@config"
 import { CSVLink, CSVDownload } from "react-csv"
 import {
   listDomains,
@@ -56,6 +56,7 @@ import { MinusIcon } from "@components/app/icons/MinusIcon"
 import { AvailableIcon } from "@components/app/icons/AvailableIcon"
 import { UnavailableIcon } from "@components/app/icons/UnavailableIcon"
 import { MonitorIcon } from "@components/app/icons/MonitorIcon"
+import { useConfirm } from "@components/app/hooks/useConfirm"
 
 interface ConditionNames {
   [key: string]: string
@@ -71,6 +72,8 @@ export const DomainsList: React.FC = () => {
 
   const dispatch = useDispatch()
   const [searchParams, setSearchParams] = useSearchParams()
+
+  const { ask } = useConfirm()
 
   const items = useSelector(listDomains)
   const itemsAll = useSelector(listDomainsAll)
@@ -100,8 +103,8 @@ export const DomainsList: React.FC = () => {
   const itemsCount = useSelector(listDomainsItemsCount)
 
   const deleteHandler = (id: number) => {
-    confirmationAlert("Вы уверены?", "Да", "Отмена").then((result) => {
-      if (result.isConfirmed) {
+    ask("", askConfirm).then((result) => {
+      if (result === true) {
         dispatch(setEditRowID(id))
         dispatch(deleteDomain(id))
         dispatch(fetchDomainAll())
@@ -110,9 +113,13 @@ export const DomainsList: React.FC = () => {
   }
 
   const archiveHandler = (id: number) => {
-    dispatch(setEditRowID(id))
-    dispatch(archiveDomain(id))
-    dispatch(fetchDomainAll())
+    ask("", askConfirm).then((result) => {
+      if (result === true) {
+        dispatch(setEditRowID(id))
+        dispatch(archiveDomain(id))
+        dispatch(fetchDomainAll())
+      }
+    })
   }
 
   const changePage = (value: number) => {
