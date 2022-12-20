@@ -100,7 +100,7 @@ export const domainEditFormData: MyFormData = {
       dirty: false,
     },
     hosting_id: {
-      label: "Хостинг",
+      label: "Провайдер",
       value: "",
       valueObj: { value: "", label: "Не выбрано" },
       valueArr: [],
@@ -114,7 +114,7 @@ export const domainEditFormData: MyFormData = {
       dirty: false,
     },
     hosting_acc_id: {
-      label: "Аккаунт хостинга",
+      label: "Аккаунт провайдера",
       type: "select",
       value: "",
       valueObj: { value: "", label: "Не выбрано" },
