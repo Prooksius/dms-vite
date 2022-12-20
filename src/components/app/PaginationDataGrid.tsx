@@ -222,11 +222,14 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
             getContent={(dataTip) => {
               const data = dataTip ? dataTip.split("###") : []
               return (
-                <div style={{ textAlign: "center" }}>
-                  {data[1] && <h3>{data[0]}</h3>}
-                  <h4>Последняя проверка</h4>
-                  <br />
-                  <p>{data[1] ? data[1] : data[0]}</p>
+                <div>
+                  <h3>{data[0]}</h3>
+                  <p>
+                    Состояние: <b>{data[1]}</b>
+                  </p>
+                  <p>
+                    Последняя проверка: <b>{data[2]}</b>
+                  </p>
                 </div>
               )
             }}

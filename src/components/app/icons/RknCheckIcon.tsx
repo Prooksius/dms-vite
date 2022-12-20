@@ -2,18 +2,28 @@ import React from "react"
 
 interface RknCheckIconProps {
   enabled: boolean
-  message: string
+  condition: string
+  lastUpdate: string
 }
 export const RknCheckIcon: React.FC<RknCheckIconProps> = ({
   enabled,
-  message,
+  condition,
+  lastUpdate,
 }) => {
-  const messageText = message ? new Date(message).toLocaleString() : "-"
+  const lastUpdateText = lastUpdate
+    ? new Date(lastUpdate).toLocaleString()
+    : "-"
 
   return (
     <div
       className="icon-tooltip-container"
-      data-tip={"Проверка РКН" + "###" + messageText}
+      data-tip={
+        "Проверка РКН" +
+        "###" +
+        (condition ? condition : "-") +
+        "###" +
+        lastUpdateText
+      }
       data-for="for-monitoring"
     >
       <svg

@@ -2,20 +2,30 @@ import React from "react"
 
 interface AvailableIconProps {
   active: boolean
-  message: string
+  condition: string
+  lastUpdate: string
 }
 
 export const AvailableIcon: React.FC<AvailableIconProps> = ({
   active,
-  message,
+  condition,
+  lastUpdate,
 }) => {
-  const messageText = message ? new Date(message).toLocaleString() : "-"
+  const lastUpdateText = lastUpdate
+    ? new Date(lastUpdate).toLocaleString()
+    : "-"
 
   if (active) {
     return (
       <div
         className="icon-tooltip-container"
-        data-tip={"Проверка доступности" + "###" + messageText}
+        data-tip={
+          "Проверка доступности" +
+          "###" +
+          (condition ? condition : "-") +
+          "###" +
+          lastUpdateText
+        }
         data-for="for-monitoring"
       >
         <svg
@@ -40,7 +50,13 @@ export const AvailableIcon: React.FC<AvailableIconProps> = ({
   return (
     <div
       className="icon-tooltip-container"
-      data-tip={"Проверка доступности" + "###" + messageText}
+      data-tip={
+        "Проверка доступности" +
+        "###" +
+        (condition ? condition : "-") +
+        "###" +
+        lastUpdateText
+      }
       data-for="for-monitoring"
     >
       <svg

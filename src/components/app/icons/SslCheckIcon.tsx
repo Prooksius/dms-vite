@@ -2,15 +2,24 @@ import React from "react"
 
 interface SslCheckIconProps {
   enabled: boolean
-  message: string
+  condition: string
+  lastUpdate: string
 }
-export const SslCheckIcon: React.FC<SslCheckIconProps> = ({ enabled, message }) => {
-  const messageText = message ? new Date(message).toLocaleString() : "-"
+export const SslCheckIcon: React.FC<SslCheckIconProps> = ({
+  enabled,
+  condition,
+  lastUpdate,
+}) => {
+  const lastUpdateText = lastUpdate
+    ? new Date(lastUpdate).toLocaleString()
+    : "-"
+
+  const conditionText = condition ? new Date(condition).toLocaleString() : "-"
 
   return (
     <div
       className="icon-tooltip-container"
-      data-tip={"Проверка SSL" + "###" + messageText}
+      data-tip={"Проверка SSL" + "###" + conditionText + "###" + lastUpdateText}
       data-for="for-monitoring"
     >
       <svg

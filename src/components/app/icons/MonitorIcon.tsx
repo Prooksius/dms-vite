@@ -2,21 +2,15 @@ import React from "react"
 
 interface MonitorIconProps {
   active: boolean
-  message: string
   doSwitch: (condition: boolean) => void
 }
 export const MonitorIcon: React.FC<MonitorIconProps> = ({
   active,
-  message,
   doSwitch,
 }) => {
-  const messageText = message ? new Date(message).toLocaleString() : "-"
-
   return (
     <div
       className="icon-tooltip-container pointer"
-      data-tip={"Статус сервера" + "###" + messageText}
-      data-for="for-monitoring"
       onClick={(event) => doSwitch(!active)}
     >
       <svg

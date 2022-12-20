@@ -264,24 +264,27 @@ export const DomainsList: React.FC = () => {
               <div className="domain-status-line">
                 <MonitorIcon
                   active={row.is_activated}
-                  message={row.server_status_last_updated}
                   doSwitch={(condition) => toggleMonitoring(row.id, condition)}
                 />
                 <SslCheckIcon
                   enabled={row.ssl_status}
-                  message={row.ssl_condition_last_updated}
+                  condition={row.ssl_condition}
+                  lastUpdate={row.ssl_condition_last_updated}
                 />
                 <RknCheckIcon
                   enabled={row.rkn_status}
-                  message={row.rkn_condition_last_updated}
+                  condition={row.rkn_condition}
+                  lastUpdate={row.rkn_condition_last_updated}
                 />
                 <DateCheckIcon
                   enabled={row.expirationtime_status}
-                  message={row.expirationtime_condition_last_updated}
+                  condition={row.expirationtime_condition}
+                  lastUpdate={row.expirationtime_condition_last_updated}
                 />
                 <AvailableIcon
                   active={row.available_status}
-                  message={row.available_condition_last_updated}
+                  condition={row.available_condition}
+                  lastUpdate={row.available_condition_last_updated}
                 />
               </div>
             ),
@@ -316,7 +319,13 @@ export const DomainsList: React.FC = () => {
                     color: row.available_condition === "200" ? "green" : "red",
                     fontWeight: 600,
                   }}
-                  data-tip={messageText}
+                  data-tip={
+                    "Проверка доступности" +
+                    "###" +
+                    row.available_condition +
+                    "###" +
+                    messageText
+                  }
                   data-for="for-monitoring"
                 >
                   {row.available_condition}

@@ -2,15 +2,26 @@ import React from "react"
 
 interface DateCheckIconProps {
   enabled: boolean
-  message: string
+  condition: string
+  lastUpdate: string
 }
-export const DateCheckIcon: React.FC<DateCheckIconProps> = ({ enabled, message }) => {
-  const messageText = message ? new Date(message).toLocaleString() : "-"
+export const DateCheckIcon: React.FC<DateCheckIconProps> = ({
+  enabled,
+  condition,
+  lastUpdate,
+}) => {
+  const lastUpdateText = lastUpdate
+    ? new Date(lastUpdate).toLocaleString()
+    : "-"
+
+  const conditionText = condition ? new Date(condition).toLocaleString() : "-"
 
   return (
     <div
       className="icon-tooltip-container"
-      data-tip={"Срок регистрации" + "###" + messageText}
+      data-tip={
+        "Срок регистрации" + "###" + conditionText + "###" + lastUpdateText
+      }
       data-for="for-monitoring"
     >
       <svg
