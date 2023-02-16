@@ -1,6 +1,7 @@
 import {
   MyFormData,
   NS,
+  SelectValue,
   Subdomain,
 } from "@components/app/forms/formWrapper/types"
 import type { DomainsRecord } from "@store/slices/domainsSlice"
@@ -148,6 +149,18 @@ export const domainEditFormData: MyFormData = {
       errorMessage: "",
       dirty: false,
     },
+    /*
+    tags: {
+      label: "Тэги",
+      type: "array",
+      value: "",
+      valueObj: { value: "", label: "Не выбрано" },
+      valueArr: [],
+      validations: {},
+      errorMessage: "",
+      dirty: false,
+    },
+    */
     is_activated: {
       label: "Мониторинг",
       type: "checkbox",
@@ -264,6 +277,22 @@ export const domainEditFormData: MyFormData = {
       errorMessage: "",
       dirty: false,
     },
+    expirationtime_condition: {
+      label: "Дата окончания регистрации",
+      type: "text",
+      value: "",
+      valueObj: { value: "", label: "Не выбрано" },
+      valueArr: [],
+      dropdown: "default",
+      options: [{ value: "", label: "Не выбрано" }],
+      validations: {},
+      dependency: {
+        field: "expirationtime_status",
+        type: "disable",
+      },
+      errorMessage: "",
+      dirty: false,
+    },
   },
 }
 
@@ -330,6 +359,7 @@ export const fillDomainForm = (
         ip_addr: subdomain.ip_addr,
         type: "A",
         available_check: subdomain.available_status,
+        ssl_check: subdomain.ssl_status,
         monitoring_id: subdomain.monitoring_id,
       } as Subdomain
     })
@@ -342,6 +372,16 @@ export const fillDomainForm = (
         checked: true,
       } as NS
     })
+
+    /*
+    const recordTags = domain.tags || []
+    const tags = recordTags.map((item) => {
+      return {
+        value: item,
+        checked: true,
+      } as NS
+    })
+    */
 
     filledFormData.fields.name.value = domain.name
     filledFormData.fields.notes.value = domain.notes
@@ -452,6 +492,7 @@ export const fillDomainForm = (
 
     filledFormData.fields.subdomains.valueArr = subdomains
     filledFormData.fields.ns.valueArr = ns
+    //filledFormData.fields.tags.valueArr = tags
 
     filledFormData.fields.whois_status.value = domain.whois_status ? "1" : "0"
     filledFormData.fields.available_status.value = domain.available_status
@@ -462,6 +503,10 @@ export const fillDomainForm = (
       : "0"
     filledFormData.fields.expirationtime_status.value =
       domain.expirationtime_status ? "1" : "0"
+    filledFormData.fields.expirationtime_condition.value =
+      domain.expirationtime_condition
+        ? new Date(domain.expirationtime_condition).toLocaleDateString("ru-RU")
+        : ""
     filledFormData.fields.rkn_status.value = domain.rkn_status ? "1" : "0"
     filledFormData.fields.ssl_status.value = domain.ssl_status ? "1" : "0"
     filledFormData.fields.integration_registrator_status.value =

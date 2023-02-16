@@ -419,7 +419,25 @@ button.close {
 }
 
 .rdtPicker {
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 5px;
+}
+
+.calendar-left-bottom .rdtPicker {
+  top: 100%;
+  left: 0;
+}
+.calendar-right-bottom .rdtPicker {
+  top: 100%;
+  right: 0;
+}
+.calendar-left-top .rdtPicker {
+  bottom: calc(100% + 3px);
+  left: 0;
+}
+.calendar-right-top .rdtPicker {
+  bottom: calc(100% + 3px);
+  right: 0;
 }
 
 .form-field {
@@ -446,6 +464,10 @@ button.close {
 }
 .form-field > textarea {
   resize: vertical;
+}
+.form-field > input:disabled,
+.form-field > textarea:disabled {
+  background: #ddd;
 }
 .form-field.hasValue > input,
 .form-field.hasValue > textarea {
@@ -916,7 +938,7 @@ form .sixty-percent-row {
   cursor: pointer;
 }
 .transition-figure {
-  transition: all .15s ease-in;
+  transition: all 0.15s ease-in;
 }
 
 /* checkbox */
@@ -1268,8 +1290,8 @@ form .sixty-percent-row {
 }
 .pagination-tablelist__row.editing {
   pointer-events: none;
-  opacity: .5;
-  background-color: rgba(0, 0, 0, .1);
+  opacity: 0.5;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 .pagination-tablelist__row.edited:last-child {
   margin-bottom: 150px;

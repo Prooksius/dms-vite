@@ -33,6 +33,8 @@ interface SubdomainsRecord {
   cname: string
   available_status: boolean
   available_condition: string
+  ssl_status: boolean
+  ssl_condition: string
   monitoring_id?: number
   domain_id?: number
 }
@@ -46,6 +48,7 @@ interface SubdomainsEditRecord {
   a: string
   cname: string
   available_status: boolean
+  ssl_status: boolean
   monitoring_id?: number
   domain_id?: number
 }
@@ -74,6 +77,7 @@ export interface DomainsRecord {
   integration_registrator_status: boolean
 
   ns: string[]
+  //tags: string[]
 
   whois_status: boolean
   whois_condition: string
@@ -160,6 +164,7 @@ type DomainEditRecord = {
   ip_addr_id: number
 
   ns: string[]
+  //  tags: string[]
 
   whois_status: boolean
   available_status: boolean
@@ -167,6 +172,7 @@ type DomainEditRecord = {
   ssl_status: boolean
   geo_status: string[]
   expirationtime_status: boolean
+  expirationtime_condition?: string
   subdomains: SubdomainsEditRecord[]
 
   is_activated: boolean
@@ -189,12 +195,19 @@ const fillDomainEditRecord = (
       a: "",
       cname: "",
       available_status: subdomain.available_check,
+      ssl_status: subdomain.ssl_check,
     }
     if (subdomain.id) ret.id = subdomain.id
     if (subdomain.monitoring_id) ret.monitoring_id = subdomain.monitoring_id
     return ret
   })
 
+  let expirationtime_condition = ""
+  if (fields.expirationtime_condition.value) {
+    expirationtime_condition = new Date(
+      fields.expirationtime_condition.value.split(".").reverse().join("-")
+    ).toISOString()
+  }
   const bodyData: DomainEditRecord = {
     created_at: new Date().toISOString(),
     deleted_at: null,
@@ -204,6 +217,10 @@ const fillDomainEditRecord = (
     ns: fields.ns.valueArr
       .filter((ns_rec) => ns_rec.checked)
       .map((item) => item.value),
+    /*
+    tags: fields.tags.valueArr
+      .map((item) => item.value),
+    */
     expirationtime_status:
       fields.expirationtime_status.value === "1" ? true : false,
     provider_id: Number(fields.provider_id.valueObj.value),
@@ -219,6 +236,10 @@ const fillDomainEditRecord = (
     subdomains: subdomains,
     geo_status: [],
     notes: fields.notes.value,
+  }
+
+  if (expirationtime_condition) {
+    bodyData.expirationtime_condition = expirationtime_condition
   }
 
   return bodyData
@@ -435,6 +456,7 @@ export const editDomain = createAsyncThunk(
     const bodyData = fillDomainEditRecord(form, "edit")
     bodyData.created_at = record.created_at
     bodyData.deleted_at = record.deleted_at
+    console.log("bodyData", bodyData)
     try {
       const response = await axiosInstance.put(
         `/domains/${record.id}`,
@@ -793,7 +815,8 @@ export const listDomains = (state: RootState) => state.domains.list
 export const listDomainsStatus = (state: RootState) => state.domains.status
 export const listDomainsEditStatus = (state: RootState) =>
   state.domains.editStatus
-export const listDomainsEditRowId = (state: RootState) => state.domains.editRowId
+export const listDomainsEditRowId = (state: RootState) =>
+  state.domains.editRowId
 export const listDomainsSort = (state: RootState) => state.domains.sort
 export const listDomainsLoaded = (state: RootState) => state.domains.loaded
 export const listDomainsPage = (state: RootState) => state.domains.page

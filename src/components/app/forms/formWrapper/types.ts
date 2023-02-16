@@ -81,7 +81,8 @@ export type Additional = {
 
 export type NS = {
   value: string
-  checked: boolean
+  label?: string
+  checked?: boolean
 }
 export type IPAddr = {
   ip_addr: string
@@ -99,6 +100,7 @@ export type Subdomain = {
   server_id: number
   server_name: string
   available_check: boolean
+  ssl_check: boolean
   monitoring_id: number
   checked?: boolean
 }

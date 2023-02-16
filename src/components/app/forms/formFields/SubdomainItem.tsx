@@ -95,6 +95,7 @@ const SubdomainItem: React.FC<SubdomainItemProps> = ({
                 ip_addr: subdomain.ip_addr,
                 type: subdomain.type || "",
                 available_check: subdomain.available_check,
+                ssl_check: subdomain.ssl_check,
               },
               index,
             })
@@ -132,6 +133,7 @@ const SubdomainItem: React.FC<SubdomainItemProps> = ({
                       ip_addr: subdomain.ip_addr,
                       type: typeItem,
                       available_check: subdomain.available_check,
+                      ssl_check: subdomain.ssl_check,
                     },
                     index,
                   })
@@ -185,6 +187,7 @@ const SubdomainItem: React.FC<SubdomainItemProps> = ({
                     ip_addr: "",
                     type: subdomain.type || "",
                     available_check: subdomain.available_check,
+                    ssl_check: subdomain.ssl_check,
                   },
                   index,
                 })
@@ -256,6 +259,7 @@ const SubdomainItem: React.FC<SubdomainItemProps> = ({
                     server_name: subdomain.server_name,
                     type: subdomain.type || "",
                     available_check: subdomain.available_check,
+                    ssl_check: subdomain.ssl_check,
                   },
                   index,
                 })
@@ -277,33 +281,71 @@ const SubdomainItem: React.FC<SubdomainItemProps> = ({
           </div>
         </div>
       </div>
-      <div className="checkbox">
-        <div className="checkbox-inner">
-          <input
-            id={newID + "-" + index}
-            type="checkbox"
-            checked={subdomain.available_check}
-            onChange={(e) =>
-              setFieldValue({
-                field: name,
-                value: {
-                  id: subdomain.id,
-                  monitoring_id: subdomain.monitoring_id,
-                  title: subdomain.title,
-                  ip_addr_id: subdomain.ip_addr_id,
-                  ip_addr: subdomain.ip_addr,
-                  server_id: subdomain.server_id,
-                  server_name: subdomain.server_name,
-                  type: subdomain.type || "",
-                  available_check: e.target.checked,
-                },
-                index,
-              })
-            }
-          />
-          <i></i>
+      <div className="form__row">
+        <div className="col-lg-6 col-md-6 col-sm-12">
+          <div className="checkbox">
+            <div className="checkbox-inner">
+              <input
+                id={newID + "-aval-" + index}
+                type="checkbox"
+                checked={subdomain.available_check}
+                onChange={(e) =>
+                  setFieldValue({
+                    field: name,
+                    value: {
+                      id: subdomain.id,
+                      monitoring_id: subdomain.monitoring_id,
+                      title: subdomain.title,
+                      ip_addr_id: subdomain.ip_addr_id,
+                      ip_addr: subdomain.ip_addr,
+                      server_id: subdomain.server_id,
+                      server_name: subdomain.server_name,
+                      type: subdomain.type || "",
+                      available_check: e.target.checked,
+                      ssl_check: subdomain.ssl_check,
+                    },
+                    index,
+                  })
+                }
+              />
+              <i></i>
+            </div>
+            <label htmlFor={newID + "-aval-" + index}>
+              Проверка доступности
+            </label>
+          </div>
         </div>
-        <label htmlFor={newID + "-" + index}>Проверка доступности</label>
+        <div className="col-lg-6 col-md-6 col-sm-12">
+          <div className="checkbox">
+            <div className="checkbox-inner">
+              <input
+                id={newID + "-ssl-" + index}
+                type="checkbox"
+                checked={subdomain.ssl_check}
+                onChange={(e) =>
+                  setFieldValue({
+                    field: name,
+                    value: {
+                      id: subdomain.id,
+                      monitoring_id: subdomain.monitoring_id,
+                      title: subdomain.title,
+                      ip_addr_id: subdomain.ip_addr_id,
+                      ip_addr: subdomain.ip_addr,
+                      server_id: subdomain.server_id,
+                      server_name: subdomain.server_name,
+                      type: subdomain.type || "",
+                      available_check: subdomain.available_check,
+                      ssl_check: e.target.checked,
+                    },
+                    index,
+                  })
+                }
+              />
+              <i></i>
+            </div>
+            <label htmlFor={newID + "-ssl-" + index}>Проверка SSL</label>
+          </div>
+        </div>
       </div>
     </div>
   )

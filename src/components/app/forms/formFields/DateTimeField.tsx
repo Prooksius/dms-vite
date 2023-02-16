@@ -1,20 +1,61 @@
-import React, { useContext } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import classnames from "classnames"
 import Datetime from "react-datetime"
 import "moment/locale/ru"
 import { FormWrapperContext } from "../formWrapper/formWrapperContext"
 import { CalendarIcon } from "@components/app/icons/CalendarIcon"
 import "react-datetime/css/react-datetime.css"
+import { FieldData } from "../formWrapper/types"
+
+type CalendarPlace = "left-top" | "left-bottom" | "right-top" | "right-bottom"
 
 interface DateTimeFieldProps {
   name: string
   timeFormat: boolean
+  calendar?: CalendarPlace
 }
 
-const DateTimeField: React.FC<DateTimeFieldProps> = ({ name, timeFormat }) => {
+const DateTimeField: React.FC<DateTimeFieldProps> = ({
+  name,
+  timeFormat,
+  calendar = "left-bottom",
+}) => {
   const { form, setFieldValue } = useContext(FormWrapperContext)
+  const [depValue, setDepValue] = useState(true)
+  const [disabled, setDisabled] = useState(false)
 
   const thisField = form.fields[name]
+  const dependField = form.fields[thisField.dependency?.field]
+
+  const getDepFieldValue = (thisField: FieldData): boolean => {
+    if (thisField.dependency) {
+      if (["checkbox"].includes(dependField.type)) {
+        return dependField.value === "1" ? true : false
+      }
+    }
+    return true
+  }
+
+  useEffect(() => {
+    const setDeps = async () => {
+      const val = getDepFieldValue(thisField)
+      if (dependField && depValue != val) {
+        if (thisField.dependency?.type === "disable") {
+          if (depValue) {
+            setDisabled(true)
+            setFieldValue({
+              field: name,
+              value: "",
+            })
+          } else {
+            setDisabled(false)
+          }
+          setDepValue(val)
+        }
+      }
+    }
+    setDeps()
+  })
 
   if (!thisField) {
     return (
@@ -31,6 +72,8 @@ const DateTimeField: React.FC<DateTimeFieldProps> = ({ name, timeFormat }) => {
       className={classnames(
         "form-field",
         "date-time-field",
+        "calendar-" + calendar,
+        { disabled },
         { hasValue: thisField.value },
         { invalid: thisField.errorMessage },
         { valid: !thisField.errorMessage && thisField.dirty }
@@ -40,7 +83,7 @@ const DateTimeField: React.FC<DateTimeFieldProps> = ({ name, timeFormat }) => {
         locale={"ru"}
         className="form-field"
         value={thisField.value || ""}
-        inputProps={{ value: thisField.value || "" }}
+        inputProps={{ value: thisField.value || "", disabled }}
         timeFormat={timeFormat}
         closeOnSelect={true}
         onChange={(value) =>

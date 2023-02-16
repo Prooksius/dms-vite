@@ -184,6 +184,9 @@ const handlers: FormHandlers = {
             }
             return true
           })
+        } else {
+          field.errorMessage = ""
+          field.dirty = true
         }
       }
     }

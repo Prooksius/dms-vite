@@ -37,6 +37,8 @@ import TextareaField from "@components/app/forms/formFields/TextareaField"
 import CheckboxArrayField from "@components/app/forms/formFields/CheckboxArrayField"
 import CheckIconField from "@components/app/forms/formFields/CheckIconField"
 import { SwitchIcon } from "@components/app/icons/SwitchIcon"
+import TagsField from "@components/app/forms/formFields/TagsField"
+import DateTimeField from "@components/app/forms/formFields/DateTimeField"
 
 interface DomainEditFormProps {
   id?: number
@@ -60,6 +62,7 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
 
   const submitHandler = (token: string, formData: MyFormData) => {
     if (id) {
+      console.log("edit start")
       dispatch(editDomain({ form: formData, record: domain }))
     } else {
       dispatch(addDomain(formData))
@@ -144,6 +147,11 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
               <CheckboxField name="rkn_status" />
               <CheckboxField name="ssl_status" />
               <CheckboxField name="expirationtime_status" />
+              <DateTimeField
+                name={"expirationtime_condition"}
+                timeFormat={false}
+                calendar="right-top"
+              />
             </div>
             <div className="col-lg-6 col-md-12 col-sm-12">
               <h4>Поддомены</h4>
