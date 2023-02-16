@@ -14,6 +14,7 @@ import {
   listServersFilter,
   listServersFilterChanges,
   listServersSearch,
+  listServersLoaded,
   setSort,
   setPage,
   setSearch,
@@ -48,6 +49,7 @@ export const ServersList: React.FC = () => {
   const items = useSelector(listServers)
 
   const status = useSelector(listServersStatus)
+  const loaded = useSelector(listServersLoaded)
   const sort = useSelector(listServersSort)
   const page = useSelector(listServersPage)
   const itemsInPage = useSelector(listServersItemsInPage)
@@ -98,6 +100,10 @@ export const ServersList: React.FC = () => {
   useEffect(() => {
     const handleClickOutside = () => {
       dispatch(closeServerPopups())
+    }
+
+    if (!loaded) {
+      dispatch(reloadPage())
     }
 
     document.addEventListener("click", handleClickOutside, true)

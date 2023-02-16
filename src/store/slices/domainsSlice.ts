@@ -428,6 +428,35 @@ export const fetchDomainPage = createAsyncThunk(
   }
 )
 
+export const fetchDomainByErrorId = createAsyncThunk(
+  "/domains/fetchDomainByErrorId",
+  async (
+    { id, entity_type }: { id: number; entity_type: string },
+    { rejectWithValue }
+  ) => {
+    const queryObj: Record<string, string> = { entity_type }
+    const query = new URLSearchParams(queryObj).toString()
+
+    try {
+      const response = await axiosInstance.get<DomainsRecord>(
+        `/entities/getByErrorId/${id}/?${query}`
+      )
+      console.log("response.data", response.data)
+      return {
+        count: 1,
+        data: [response.data],
+      }
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
+  }
+)
+
 export const addDomain = createAsyncThunk(
   "domains/addDomain",
   async ({ fields }: MyFormData, { rejectWithValue }) => {
@@ -621,6 +650,15 @@ export const domainsSlice = createSlice({
         item.popup_open = false
       })
     },
+    clearDomains: (state) => {
+      state.list = []
+      state.loaded = false
+      state.itemsCount = 0
+      state.status = "idle"
+      state.editStatus = "idle"
+      state.error = ""
+      state.errorData = null
+    },
   },
   extraReducers(builder) {
     builder
@@ -666,6 +704,36 @@ export const domainsSlice = createSlice({
           ? (action.payload as ErrorPayloadData)
           : null
         toastAlert("Ошибка чтения доменов: " + state.error, "error")
+      })
+      .addCase(fetchDomainByErrorId.pending, (state) => {
+        state.status = "loading"
+        state.editStatus = "idle"
+        state.error = ""
+        state.errorData = null
+      })
+      .addCase(fetchDomainByErrorId.fulfilled, (state, { payload }) => {
+        state.list = payload.data.map((domain) => ({
+          ...domain,
+          record_open: false,
+          popup_open: false,
+        }))
+        state.itemsCount = payload.count
+        state.status = "succeeded"
+        state.editStatus = "idle"
+        state.error = ""
+        state.errorData = null
+        state.loaded = true
+      })
+      .addCase(fetchDomainByErrorId.rejected, (state, action) => {
+        state.status = "failed"
+        state.editStatus = "idle"
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка чтения домена: " + state.error, "error")
       })
       .addCase(addDomain.pending, (state) => {
         state.editStatus = "loading"
@@ -804,6 +872,7 @@ export const {
   toggleDomainPopup,
   closeDomainPopups,
   reloadPage,
+  clearDomains,
 } = domainsSlice.actions
 
 export default domainsSlice.reducer

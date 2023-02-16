@@ -213,6 +213,31 @@ export const fetchServersPage = createAsyncThunk(
   }
 )
 
+export const fetchServerByErrorId = createAsyncThunk(
+  "/servers/fetchServerByErrorId",
+  async (id: number, { getState, rejectWithValue }) => {
+    const { servers } = <RootState>getState()
+
+    try {
+      const response = await axiosInstance.get<ServersRecord>(
+        `/entities/getByErrorId/${id}/?entity_type=server`
+      )
+      console.log("response.data", response.data)
+      return {
+        count: 1,
+        data: [response.data],
+      }
+    } catch (err) {
+      const error: AxiosError<ValidationErrors> = err // cast the error for access
+      if (!error.response) {
+        throw err
+      }
+      // We got validation errors, let's return those so we can reference in our component and set form errors
+      return rejectWithValue(error.response.data)
+    }
+  }
+)
+
 export const addServer = createAsyncThunk(
   "servers/addServer",
   async ({ fields }: MyFormData, { rejectWithValue }) => {
@@ -369,6 +394,15 @@ export const serversSlice = createSlice({
         item.popup_open = false
       })
     },
+    clearServers: (state) => {
+      state.list = []
+      state.loaded = false
+      state.itemsCount = 0
+      state.status = "idle"
+      state.editStatus = "idle"
+      state.error = ""
+      state.errorData = null
+    },
   },
   extraReducers(builder) {
     builder
@@ -401,6 +435,36 @@ export const serversSlice = createSlice({
           ? (action.payload as ErrorPayloadData)
           : null
         toastAlert("Ошибка чтения серверов: " + state.error, "error")
+      })
+      .addCase(fetchServerByErrorId.pending, (state) => {
+        state.status = "loading"
+        state.editStatus = "idle"
+        state.error = ""
+        state.errorData = null
+      })
+      .addCase(fetchServerByErrorId.fulfilled, (state, { payload }) => {
+        state.list = payload.data.map((server) => ({
+          ...server,
+          record_open: false,
+          popup_open: false,
+        }))
+        state.itemsCount = payload.count
+        state.status = "succeeded"
+        state.editStatus = "idle"
+        state.error = ""
+        state.errorData = null
+        state.loaded = true
+      })
+      .addCase(fetchServerByErrorId.rejected, (state, action) => {
+        state.status = "failed"
+        state.editStatus = "idle"
+        state.error = action.payload
+          ? errorToastText(action.payload as ErrorPayloadData)
+          : action.error.message
+        state.errorData = action.payload
+          ? (action.payload as ErrorPayloadData)
+          : null
+        toastAlert("Ошибка чтения сервера: " + state.error, "error")
       })
       .addCase(addServer.pending, (state) => {
         state.editStatus = "loading"
@@ -497,6 +561,7 @@ export const {
   toggleServerPopup,
   closeServerPopups,
   reloadPage,
+  clearServers,
 } = serversSlice.actions
 
 export default serversSlice.reducer

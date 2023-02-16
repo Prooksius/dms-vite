@@ -43,18 +43,6 @@ export const ErrorsFilter: React.FC = () => {
           type="button"
           className={classNames([
             "btn btn-radio",
-            {
-              active: filter.entity_type === "all",
-            },
-          ])}
-          onClick={() => chooseTypeHandler("all")}
-        >
-          Общие ошибки
-        </button>
-        <button
-          type="button"
-          className={classNames([
-            "btn btn-radio",
             { active: filter.entity_type === "subdomain" },
           ])}
           onClick={() => chooseTypeHandler("subdomain")}
@@ -71,61 +59,6 @@ export const ErrorsFilter: React.FC = () => {
         >
           Ошибки серверов
         </button>
-        <button
-          style={{ display: "none" }}
-          type="button"
-          className={classNames([
-            "btn btn-radio",
-            {
-              active: filter.entity_type === "email",
-            },
-          ])}
-          onClick={() => chooseTypeHandler("email")}
-        >
-          Ошибки Email
-        </button>
-        <button
-          style={{ display: "none" }}
-          type="button"
-          className={classNames([
-            "btn btn-radio",
-            {
-              active: filter.entity_type === "provider",
-            },
-          ])}
-          onClick={() => chooseTypeHandler("provider")}
-        >
-          Ошибки провайдеров
-        </button>
-        <button
-          type="button"
-          style={{ display: "none" }}
-          className={classNames([
-            "btn btn-radio",
-            {
-              active: filter.entity_type === "registrator",
-            },
-          ])}
-          onClick={() => chooseTypeHandler("registrator")}
-        >
-          Ошибки регистраторов
-        </button>
-      </div>
-      <div className="filter-container__part date-select">
-        <Datetime
-          locale={"ru"}
-          className="form-field"
-          inputProps={{ placeholder: "Выберите дату" }}
-          value={filter.created_at}
-          timeFormat={false}
-          closeOnSelect={true}
-          onChange={(value) =>
-            chooseDateHandler(
-              typeof value === "string" ? value : value.format("DD.MM.YYYY")
-            )
-          }
-        />
-        <CalendarIcon />
       </div>
     </div>
   )

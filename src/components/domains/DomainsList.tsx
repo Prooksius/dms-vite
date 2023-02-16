@@ -21,6 +21,7 @@ import {
   listDomainsFilter,
   listDomainsFilterChanges,
   listDomainsSearch,
+  listDomainsLoaded,
   setPage,
   setSearch,
   setFilter,
@@ -33,6 +34,7 @@ import {
   reloadPage,
   DomainsRecord,
   fetchDomainAll,
+  clearDomains,
   switchMonitoringDomain,
 } from "@store/slices/domainsSlice"
 import { CaretIcon } from "@components/app/icons/CaretIcon"
@@ -91,6 +93,7 @@ export const DomainsList: React.FC = () => {
   })
 
   const status = useSelector(listDomainsStatus)
+  const loaded = useSelector(listDomainsLoaded)
   const editStatus = useSelector(listDomainsEditStatus)
   const editRowID = useSelector(listDomainsEditRowId)
   const statusAll = useSelector(listDomainsAllStatus)
@@ -156,7 +159,9 @@ export const DomainsList: React.FC = () => {
     const handleClickOutside = () => {
       dispatch(closeDomainPopups())
     }
-
+    if (!loaded) {
+      dispatch(reloadPage())
+    }
     dispatch(fetchDomainAll())
 
     document.addEventListener("click", handleClickOutside, true)
@@ -319,6 +324,7 @@ export const DomainsList: React.FC = () => {
                     color: row.available_condition === "200" ? "green" : "red",
                     fontWeight: 600,
                   }}
+                  className="local-link"
                   data-tip={
                     "Проверка доступности" +
                     "###" +

@@ -234,6 +234,25 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
               )
             }}
           />
+          <ReactTooltip
+            id="for-error-dates"
+            effect="solid"
+            place="top"
+            getContent={(dataTip) => {
+              const data = dataTip ? dataTip.split("###") : []
+              return (
+                <div>
+                  <h3>{data[0]}</h3>
+                  <p>
+                    Дата создания: <b>{data[1]}</b>
+                  </p>
+                  <p>
+                    Длительность: <b>{data[2]}</b>
+                  </p>
+                </div>
+              )
+            }}
+          />
         </>
       )}
     </>

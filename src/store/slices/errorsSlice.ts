@@ -14,7 +14,6 @@ import type { ServerGetResponse } from "@store/index"
 import { AxiosError } from "axios"
 
 export type EntityType =
-  | "all"
   | "domain"
   | "subdomain"
   | "server"
@@ -27,29 +26,13 @@ export interface ErrorsRecord {
   created_at?: string
   deleted_at?: string
   name: string
-  department_name: string
-  registrator_id: number
-  server_id: number
-  provider_id: number
-  integration_cloudflare_status: boolean
-  integration_registrator_status: boolean
-  ns: string[]
-  whois_status: boolean
-  whois_condition: string
-  available_status: boolean
-  available_condition?: string
-  rkn_status: boolean
-  rkn_condition?: string
-  ssl_status: boolean
-  ssl_condition?: string
-  pagespeed_status: boolean
-  pagespeed_condition?: string
-  geo_status: string[]
-  geo_condition: []
-  expirationtime_status: boolean
-  monitoring_id: number
-  registration_date?: string
-  expirationtime_condition: string
+  checker_name: string
+  checker_result: string
+  last_updated: string
+  status: string
+  delayed_to: string
+  error_duration: string
+  ip_addr?: string
   record_open?: boolean
 }
 
@@ -138,14 +121,11 @@ export const fetchPage = createAsyncThunk(
     const query = new URLSearchParams({
       offset: String((errors.page - 1) * errors.itemsInPage),
       limit: String(errors.itemsInPage),
-      entity_type: errors.filter.entity_type,
-      created_at: errors.filter.created_at ? errors.filter.created_at : "",
-      deleted_at: errors.filter.deleted_at ? errors.filter.deleted_at : "",
     }).toString()
 
     try {
       const response = await axiosInstance.get<ServerGetResponse<ErrorsRecord>>(
-        `/errors/?${query}`
+        `/errors/${errors.filter.entity_type}/?${query}`
       )
 
       console.log("errors response.data", response.data)

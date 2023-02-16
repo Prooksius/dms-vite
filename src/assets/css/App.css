@@ -409,6 +409,10 @@ button.close {
   gap: 15px;
 }
 
+.local-link {
+  text-decoration: underline dashed;
+}
+
 .navbar,
 .navbar ul {
   display: flex;

@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useLocation, useSearchParams } from "react-router-dom"
 import { TransitionGroup, CSSTransition } from "react-transition-group"
-import { toastAlert } from "@config"
+import { formatDateTime, toastAlert } from "@config"
 import {
   listItems,
   listPage,
@@ -19,21 +19,43 @@ import {
   toggleOpen,
   reloadPage,
 } from "@store/slices/errorsSlice"
+import {
+  listDomains,
+  listDomainsItemsCount,
+  fetchDomainByErrorId,
+  clearDomains,
+} from "@store/slices/domainsSlice"
+import {
+  listServers,
+  listServersItemsCount,
+  fetchServerByErrorId,
+  clearServers,
+} from "@store/slices/serversSlice"
 import type { ErrorsRecord } from "@store/slices/errorsSlice"
 import { CaretIcon } from "@components/app/icons/CaretIcon"
 import PaginationList, { HeaderSlot } from "@components/app/PaginationList"
-import Popuper from "@components/app/Popuper"
+import Popuper, { PopupHeaderSlot } from "@components/app/Popuper"
 import { ErrorsFilter } from "./ErrorsFilter"
+import { DomainEditForm } from "../domains/DomainEditForm"
+import { ServerEditForm } from "../servers/ServerEditForm"
 import { DataGrid } from "@components/app/DataGrid"
 import { PaginationDataGrid } from "@components/app/PaginationDataGrid"
 
 export const ErrorsList: React.FC = () => {
   const [editId, setEditId] = useState(0)
+  const [entityEditId, setEntityEditId] = useState(0)
+  const [entityOpen, setEntityOpen] = useState(false)
   const [editOpened, setEditOpened] = useState(false)
 
   const [searchParams, setSearchParams] = useSearchParams()
 
   const dispatch = useDispatch()
+
+  const domains = useSelector(listDomains)
+  const domainsCount = useSelector(listDomainsItemsCount)
+
+  const servers = useSelector(listServers)
+  const serversCount = useSelector(listServersItemsCount)
 
   const errors = useSelector(listItems)
   const status = useSelector(listStatus)
@@ -57,10 +79,47 @@ export const ErrorsList: React.FC = () => {
     dispatch(toggleOpen(id))
   }
 
+  const doRecordFetch = (id: number) => {
+    setEntityEditId(id)
+    setEntityOpen(true)
+    if (filter.entity_type === "domain" || filter.entity_type === "subdomain") {
+      dispatch(clearDomains())
+      dispatch(fetchDomainByErrorId({ id, entity_type: filter.entity_type }))
+    } else if (filter.entity_type === "server") {
+      dispatch(clearServers())
+      dispatch(fetchServerByErrorId(id))
+    }
+  }
+
+  useEffect(() => {
+    // dispatch(clearDomains())
+    // dispatch(clearServers())
+    // eslint-disable-next-line
+  }, [])
+
+  useEffect(() => {
+    if (entityOpen && domainsCount > 0) {
+      console.log("domainsCount > 0")
+      setEditId(domains[0].id)
+      setEditOpened(true)
+    }
+    // eslint-disable-next-line
+  }, [domainsCount])
+
+  useEffect(() => {
+    if (entityOpen && serversCount > 0) {
+      console.log("serversCount > 0")
+      setEditId(servers[0].id)
+      setEditOpened(true)
+    }
+    // eslint-disable-next-line
+  }, [serversCount])
+
   return (
     <>
       <PaginationDataGrid
         status={status}
+        editRowID={entityEditId}
         getExpanded={() => (
           <div className="pagination-tablelist__row-down with-button-td">
             <div className="pagination-tablelist__info">
@@ -113,36 +172,103 @@ export const ErrorsList: React.FC = () => {
           },
           {
             title: "Название",
-            width: "2 1",
-            getValue: (row) => row.name,
-          },
-          {
-            title: "Состояние",
-            width: "0.5 1",
-            getValue: (row) => row.available_condition,
-          },
-          {
-            title: "Отдел",
             width: "1 1",
-            getValue: (row) => row.department_name,
+            getValue: (row) => (
+              <a
+                className="edit-record-link"
+                onClick={() => doRecordFetch(row.id)}
+              >
+                {row.name}
+              </a>
+            ),
           },
           {
-            title: "Код ответа",
+            title: "Автотест",
             width: "0.5 1",
-            getValue: (row) => row.monitoring_id,
+            getValue: (row) => row.checker_name,
+          },
+          {
+            title: "Результат",
+            width: "2 1",
+            getValue: (row) => row.checker_result,
+          },
+          {
+            title: "Дата",
+            width: "0.75 1",
+            getValue: (row) => (
+              <span
+                className="local-link"
+                data-tip={
+                  "Доп. информация" +
+                  "###" +
+                  formatDateTime(row.created_at, "datetime") +
+                  "###" +
+                  row.error_duration
+                }
+                data-for="for-error-dates"
+              >
+                {formatDateTime(row.last_updated, "datetime")}
+              </span>
+            ),
           },
         ]}
         getFilterComponent={() => <ErrorsFilter />}
       />
       <Popuper
         opened={editOpened}
-        closeHandler={() => setEditOpened(false)}
+        closeHandler={() => {
+          if (
+            filter.entity_type === "domain" ||
+            filter.entity_type === "subdomain"
+          ) {
+            dispatch(clearDomains())
+          } else if (filter.entity_type === "server") {
+            dispatch(clearServers())
+          }
+          setEntityEditId(0)
+          setEntityOpen(false)
+          setEditOpened(false)
+        }}
         unmountHandler={() => setEditId(0)}
-        width={"800px"}
+        width={filter.entity_type === "server" ? "850px" : "1400px"}
         height={undefined}
         contentType={undefined}
       >
-        <h3>Изменение</h3>
+        <PopupHeaderSlot>
+          <h3>
+            Изменить&nbsp;
+            {filter.entity_type === "domain" && "домен"}
+            {filter.entity_type === "subdomain" && "домен"}
+            {filter.entity_type === "server" && "сервер"}
+          </h3>
+        </PopupHeaderSlot>
+        {(filter.entity_type === "domain" ||
+          filter.entity_type === "subdomain") && (
+          <DomainEditForm
+            id={editId}
+            onDoneCallback={() => {
+              setTimeout(() => {
+                dispatch(clearDomains())
+                setEntityEditId(0)
+                setEntityOpen(false)
+                setEditOpened(false)
+              }, 200)
+            }}
+          />
+        )}
+        {filter.entity_type === "server" && (
+          <ServerEditForm
+            id={editId}
+            onDoneCallback={() => {
+              setTimeout(() => {
+                dispatch(clearServers())
+                setEntityEditId(0)
+                setEntityOpen(false)
+                setEditOpened(false)
+              }, 200)
+            }}
+          />
+        )}
       </Popuper>
     </>
   )
