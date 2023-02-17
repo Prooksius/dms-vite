@@ -58,21 +58,36 @@ export const minValue = ({
   } else return false
 }
 
-export const dateFuture = ({
-  param,
-  value,
-}: ValidatorProps): string | boolean => {
+export const dateInFuture = ({ param, value }: ValidatorProps): string | boolean => {
   const yesterday = moment().subtract(1, "day")
   const current = moment(value.toString().split(".").reverse().join("-"))
-  console.log("value.toString().length", value.toString().length)
-  const currentValid =
-    value.toString().length === 0 ||
-    (moment(value.toString().split(".").reverse().join("-")).isValid() &&
-      current.isAfter(yesterday))
 
-  if (!currentValid) {
-    return `Дата должна быть в будущем`
-  } else return false
+  const currentEmpty = value.toString().length === 0
+
+  const currentValid = moment(
+    value.toString().split(".").reverse().join("-")
+  ).isValid()
+
+  const currentFuture = current.isAfter(yesterday)
+
+  if (!currentEmpty) {
+    if (currentValid && !currentFuture) return `Дата должна быть в будущем`
+  }
+
+  return false
+}
+export const isDate = ({ param, value }: ValidatorProps): string | boolean => {
+  const currentEmpty = value.toString().length === 0
+
+  const currentValid = moment(
+    value.toString().split(".").reverse().join("-")
+  ).isValid()
+
+  if (!currentEmpty) {
+    if (!currentValid) return `Неверная дата`
+  }
+
+  return false
 }
 
 export const maxValue = ({

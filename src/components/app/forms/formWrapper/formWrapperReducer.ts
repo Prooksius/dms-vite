@@ -28,11 +28,12 @@ import {
   sameAs,
   isNumeric,
   isAlpha,
+  isDate,
   isAlphanumeric,
   isIP,
   subdomainsIPCheck,
   IPsCheck,
-  dateFuture,
+  dateInFuture,
 } from "./myValidators"
 
 type FormPayload = {
@@ -98,8 +99,9 @@ const validateHandlers: FormValidHandlers = {
   isNumber: (param, value, fields) => isNumeric({ value, param }),
   isIP: (param, value, fields) => isIP({ value, param }),
   isAlpha: (param, value, fields) => isAlpha({ value, param }),
+  isDate: (param, value, fields) => isDate({ value, param }),
   isAlphanumeric: (param, value, fields) => isAlphanumeric({ value, param }),
-  dateFuture: (param, value, fields) => dateFuture({ value, param }),
+  dateInFuture: (param, value, fields) => dateInFuture({ value, param }),
   sameAs: (param, value, fields, otherField) =>
     sameAs({ value, param: otherField, fields }),
 }
