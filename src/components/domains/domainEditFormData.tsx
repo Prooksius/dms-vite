@@ -149,7 +149,6 @@ export const domainEditFormData: MyFormData = {
       errorMessage: "",
       dirty: false,
     },
-    /*
     tags: {
       label: "Тэги",
       type: "array",
@@ -160,7 +159,6 @@ export const domainEditFormData: MyFormData = {
       errorMessage: "",
       dirty: false,
     },
-    */
     is_activated: {
       label: "Мониторинг",
       type: "checkbox",
@@ -329,6 +327,7 @@ export const clearDomainForm = (filledFormData: MyFormData) => {
     label: "Не выбрано",
   }
   filledFormData.fields.ns.valueArr = []
+  filledFormData.fields.tags.valueArr = []
   filledFormData.fields.subdomains.valueArr = []
   filledFormData.fields.whois_status.value = "0"
   filledFormData.fields.available_status.value = "0"
@@ -373,15 +372,14 @@ export const fillDomainForm = (
       } as NS
     })
 
-    /*
     const recordTags = domain.tags || []
     const tags = recordTags.map((item) => {
       return {
         value: item,
+        label: item,
         checked: true,
       } as NS
     })
-    */
 
     filledFormData.fields.name.value = domain.name
     filledFormData.fields.notes.value = domain.notes
@@ -492,7 +490,7 @@ export const fillDomainForm = (
 
     filledFormData.fields.subdomains.valueArr = subdomains
     filledFormData.fields.ns.valueArr = ns
-    //filledFormData.fields.tags.valueArr = tags
+    filledFormData.fields.tags.valueArr = tags
 
     filledFormData.fields.whois_status.value = domain.whois_status ? "1" : "0"
     filledFormData.fields.available_status.value = domain.available_status

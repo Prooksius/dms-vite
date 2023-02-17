@@ -124,6 +124,8 @@ const handlers: FormHandlers = {
             field.valueArr = field.valueArr.filter(
               (_, index) => index !== payload.index
             )
+          } else if (typeof payload.index === "undefined") {
+            field.valueArr = []
           }
         }
 

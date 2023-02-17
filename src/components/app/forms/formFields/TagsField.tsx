@@ -11,7 +11,6 @@ import { FieldData, SelectValue } from "../formWrapper/types"
 
 interface TagsFieldProps {
   name: string
-  loadCallback?: (param: string) => Promise<SelectValue[]>
 }
 
 const createOption = (label: string) => ({
@@ -19,12 +18,11 @@ const createOption = (label: string) => ({
   value: label,
 })
 
-const TagsField: React.FC<TagsFieldProps> = ({ name, loadCallback = null }) => {
+const TagsField: React.FC<TagsFieldProps> = ({ name }) => {
   const { form, setFieldValue } = useContext(FormWrapperContext)
 
   const thisField = form.fields[name]
 
-  const [options, setOptions] = useState(thisField.valueArr)
   const [inputValue, setInputValue] = useState("")
 
   if (!thisField) {
@@ -36,15 +34,17 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, loadCallback = null }) => {
   }
 
   const handleKeyDown: KeyboardEventHandler = (event) => {
+    console.log("keydown")
     if (!inputValue) return
     switch (event.key) {
       case "Tab":
-        options.map((option, index) => {
+        thisField.valueArr.map((option, index) => {
           setFieldValue({
             field: name,
             value: {
               value: option.value,
               label: option.value,
+              checked: true,
             },
             index,
           })
@@ -54,8 +54,9 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, loadCallback = null }) => {
           value: {
             value: inputValue,
             label: inputValue,
+            checked: true,
           },
-          index: options.length,
+          index: thisField.valueArr.length,
         })
         setInputValue("")
         event.preventDefault()
@@ -75,7 +76,7 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, loadCallback = null }) => {
       )}
     >
       <CreatableSelect
-        value={options}
+        value={thisField.valueArr}
         inputValue={inputValue}
         placeholder="Тэги не добавлены"
         isClearable
@@ -89,17 +90,22 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, loadCallback = null }) => {
         }}
         onInputChange={(newValue) => setInputValue(newValue)}
         onKeyDown={handleKeyDown}
-        onChange={(selectedOption) => {
-          selectedOption.map((selValue, index) =>
-            setFieldValue({
-              field: name,
-              value: {
-                value: selValue.value,
-                checked: true,
-              },
-              index,
+        onChange={(options) => {
+          setFieldValue({ field: name }) // удаляем все теги
+          if (options.length) {
+            options.map((selValue, index) => {
+              console.log("insert value " + selValue.value)
+              setFieldValue({
+                field: name,
+                value: {
+                  value: selValue.value,
+                  label: selValue.value,
+                  checked: true,
+                },
+                index,
+              })
             })
-          )
+          }
         }}
       />
       <label>

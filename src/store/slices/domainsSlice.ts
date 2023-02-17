@@ -77,7 +77,7 @@ export interface DomainsRecord {
   integration_registrator_status: boolean
 
   ns: string[]
-  //tags: string[]
+  tags: string[]
 
   whois_status: boolean
   whois_condition: string
@@ -164,7 +164,7 @@ type DomainEditRecord = {
   ip_addr_id: number
 
   ns: string[]
-  //  tags: string[]
+  tags: string[]
 
   whois_status: boolean
   available_status: boolean
@@ -217,10 +217,8 @@ const fillDomainEditRecord = (
     ns: fields.ns.valueArr
       .filter((ns_rec) => ns_rec.checked)
       .map((item) => item.value),
-    /*
     tags: fields.tags.valueArr
       .map((item) => item.value),
-    */
     expirationtime_status:
       fields.expirationtime_status.value === "1" ? true : false,
     provider_id: Number(fields.provider_id.valueObj.value),

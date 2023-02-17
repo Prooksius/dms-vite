@@ -93,71 +93,80 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
         goFurther={goFurther}
       >
         {formFilled && (
-          <div className="form__row">
-            <div className="col-lg-3 col-md-6 col-sm-12">
-              <h4>Основное</h4>
-              <TextField name="name" />
-              <SelectAsyncField
-                name={"department_name"}
-                searchCallback={loadDepartmentOptions}
-              />
-              <SelectAsyncField
-                name={"server_id"}
-                searchCallback={loadServerOptions}
-              />
-              <SelectField name={"ip_addr_id"} loadCallback={getServerIPs} />
-              <SelectAsyncField
-                name={"provider_id"}
-                searchCallback={loadProviderOptions}
-              />
-              <SelectField
-                name={"registrator_id"}
-                loadCallback={getProviderRegistratorNames}
-              />
-              <TextareaField name="notes" />
+          <>
+            {/*}
+            <div className="form__row">
+              <div className="col-sm-12">
+                <TagsField name="tags" />
+              </div>
             </div>
-            <div className="col-lg-3 col-md-6 col-sm-12">
-              <h4>DNS хостинг</h4>
-              <SelectAsyncField
-                name={"hosting_id"}
-                searchCallback={loadProviderOptions}
-              />
-              <SelectField
-                name={"hosting_acc_id"}
-                loadCallback={getProviderRegistratorNames}
-              />
-              <CheckboxArrayField
-                name="ns"
-                initialLoad={false}
-                loadCallback={getRegistratorNS}
-              />
-              <br />
-              <h4
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                Мониторинг
-                <CheckIconField name="is_activated" Icon={SwitchIcon} />
-              </h4>
-              <CheckboxField name="whois_status" />
-              <CheckboxField name="available_status" />
-              <CheckboxField name="rkn_status" />
-              <CheckboxField name="ssl_status" />
-              <CheckboxField name="expirationtime_status" />
-              <DateTimeField
-                name={"expirationtime_condition"}
-                timeFormat={false}
-                calendar="right-top"
-              />
+            {*/}
+            <div className="form__row .second-data-row">
+              <div className="col-lg-3 col-md-6 col-sm-12">
+                <h4>Основное</h4>
+                <TextField name="name" />
+                <SelectAsyncField
+                  name={"department_name"}
+                  searchCallback={loadDepartmentOptions}
+                />
+                <SelectAsyncField
+                  name={"server_id"}
+                  searchCallback={loadServerOptions}
+                />
+                <SelectField name={"ip_addr_id"} loadCallback={getServerIPs} />
+                <SelectAsyncField
+                  name={"provider_id"}
+                  searchCallback={loadProviderOptions}
+                />
+                <SelectField
+                  name={"registrator_id"}
+                  loadCallback={getProviderRegistratorNames}
+                />
+                <TextareaField name="notes" />
+              </div>
+              <div className="col-lg-3 col-md-6 col-sm-12">
+                <h4>DNS хостинг</h4>
+                <SelectAsyncField
+                  name={"hosting_id"}
+                  searchCallback={loadProviderOptions}
+                />
+                <SelectField
+                  name={"hosting_acc_id"}
+                  loadCallback={getProviderRegistratorNames}
+                />
+                <CheckboxArrayField
+                  name="ns"
+                  initialLoad={false}
+                  loadCallback={getRegistratorNS}
+                />
+                <br />
+                <h4
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  Мониторинг
+                  <CheckIconField name="is_activated" Icon={SwitchIcon} />
+                </h4>
+                <CheckboxField name="whois_status" />
+                <CheckboxField name="available_status" />
+                <CheckboxField name="rkn_status" />
+                <CheckboxField name="ssl_status" />
+                <CheckboxField name="expirationtime_status" />
+                <DateTimeField
+                  name={"expirationtime_condition"}
+                  timeFormat={false}
+                  calendar="right-top"
+                />
+              </div>
+              <div className="col-lg-6 col-md-12 col-sm-12">
+                <h4>Поддомены</h4>
+                <SubdomainsField name="subdomains" domainName="name" />
+              </div>
             </div>
-            <div className="col-lg-6 col-md-12 col-sm-12">
-              <h4>Поддомены</h4>
-              <SubdomainsField name="subdomains" domainName="name" />
-            </div>
-          </div>
+          </>
         )}
       </FormWrapper>
     </FormWrapperState>
