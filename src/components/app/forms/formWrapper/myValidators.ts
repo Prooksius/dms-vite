@@ -59,7 +59,7 @@ export const minValue = ({
 }
 
 export const dateInFuture = ({ param, value }: ValidatorProps): string | boolean => {
-  const yesterday = moment().subtract(1, "day")
+  const today = moment()
   const current = moment(value.toString().split(".").reverse().join("-"))
 
   const currentEmpty = value.toString().length === 0
@@ -68,7 +68,7 @@ export const dateInFuture = ({ param, value }: ValidatorProps): string | boolean
     value.toString().split(".").reverse().join("-")
   ).isValid()
 
-  const currentFuture = current.isAfter(yesterday)
+  const currentFuture = current.isAfter(today)
 
   if (!currentEmpty) {
     if (currentValid && !currentFuture) return `Дата должна быть в будущем`

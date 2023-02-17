@@ -30,9 +30,9 @@ const DateTimeField: React.FC<DateTimeFieldProps> = ({
   const thisField = form.fields[name]
   const dependField = form.fields[thisField.dependency?.field]
 
-  const yesterday = moment().subtract(1, "day")
+  const today = moment()
   const valid = function (current: moment.Moment) {
-    return future ? current.isAfter(yesterday) : true
+    return future ? current.isAfter(today) : true
   }
 
   const getDepFieldValue = (thisField: FieldData): boolean => {
