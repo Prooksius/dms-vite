@@ -1,6 +1,7 @@
 import validator from "validator"
 import { FieldsData, SelectValue, Subdomain } from "./types"
 import { pluralName } from "@config"
+import moment from "moment"
 
 const characterNames = ["символа", "символов", "символов"]
 
@@ -16,7 +17,10 @@ export interface SameValidatorProps {
   fields: FieldsData
 }
 
-export const required = ({ param, value }: ValidatorProps): string | boolean => {
+export const required = ({
+  param,
+  value,
+}: ValidatorProps): string | boolean => {
   if (param === false) return false
   if (
     !value.toString().trim().length ||
@@ -53,6 +57,24 @@ export const minValue = ({
     return `Значение должно быть больше ${param}`
   } else return false
 }
+
+export const dateFuture = ({
+  param,
+  value,
+}: ValidatorProps): string | boolean => {
+  const yesterday = moment().subtract(1, "day")
+  const current = moment(value.toString().split(".").reverse().join("-"))
+  console.log("value.toString().length", value.toString().length)
+  const currentValid =
+    value.toString().length === 0 ||
+    (moment(value.toString().split(".").reverse().join("-")).isValid() &&
+      current.isAfter(yesterday))
+
+  if (!currentValid) {
+    return `Дата должна быть в будущем`
+  } else return false
+}
+
 export const maxValue = ({
   param,
   value,
@@ -69,7 +91,10 @@ export const email = ({ param, value }: ValidatorProps): string | boolean => {
   } else return false
 }
 
-export const isNumeric = ({ param, value }: ValidatorProps): string | boolean => {
+export const isNumeric = ({
+  param,
+  value,
+}: ValidatorProps): string | boolean => {
   if (param === false) return false
   if (!validator.isNumeric(String(value))) {
     return `Значение должно быть числом`
@@ -90,7 +115,10 @@ export const isIP = ({ param, value }: ValidatorProps): string | boolean => {
   } else return false
 }
 
-export const isAlphanumeric = ({ param, value }: ValidatorProps): string | boolean => {
+export const isAlphanumeric = ({
+  param,
+  value,
+}: ValidatorProps): string | boolean => {
   if (!validator.isAlphanumeric(String(value))) {
     return `Значение должно содержать только буквы и цифры`
   } else return false

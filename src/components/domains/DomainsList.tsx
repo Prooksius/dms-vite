@@ -324,7 +324,6 @@ export const DomainsList: React.FC = () => {
                     color: row.available_condition === "200" ? "green" : "red",
                     fontWeight: 600,
                   }}
-                  className="local-link"
                   data-tip={
                     "Проверка доступности" +
                     "###" +

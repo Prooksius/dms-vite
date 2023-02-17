@@ -159,6 +159,7 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
                   name={"expirationtime_condition"}
                   timeFormat={false}
                   calendar="right-top"
+                  future
                 />
               </div>
               <div className="col-lg-6 col-md-12 col-sm-12">

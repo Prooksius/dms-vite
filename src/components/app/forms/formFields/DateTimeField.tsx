@@ -6,18 +6,21 @@ import { FormWrapperContext } from "../formWrapper/formWrapperContext"
 import { CalendarIcon } from "@components/app/icons/CalendarIcon"
 import "react-datetime/css/react-datetime.css"
 import { FieldData } from "../formWrapper/types"
+import moment from "moment"
 
 type CalendarPlace = "left-top" | "left-bottom" | "right-top" | "right-bottom"
 
 interface DateTimeFieldProps {
   name: string
   timeFormat: boolean
+  future?: boolean
   calendar?: CalendarPlace
 }
 
 const DateTimeField: React.FC<DateTimeFieldProps> = ({
   name,
   timeFormat,
+  future = false,
   calendar = "left-bottom",
 }) => {
   const { form, setFieldValue } = useContext(FormWrapperContext)
@@ -26,6 +29,11 @@ const DateTimeField: React.FC<DateTimeFieldProps> = ({
 
   const thisField = form.fields[name]
   const dependField = form.fields[thisField.dependency?.field]
+
+  const yesterday = moment().subtract(1, "day")
+  const valid = function (current: moment.Moment) {
+    return future ? current.isAfter(yesterday) : true
+  }
 
   const getDepFieldValue = (thisField: FieldData): boolean => {
     if (thisField.dependency) {
@@ -86,6 +94,7 @@ const DateTimeField: React.FC<DateTimeFieldProps> = ({
         inputProps={{ value: thisField.value || "", disabled }}
         timeFormat={timeFormat}
         closeOnSelect={true}
+        isValidDate={valid}
         onChange={(value) =>
           setFieldValue({
             field: name,

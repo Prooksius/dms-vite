@@ -197,7 +197,6 @@ export const ErrorsList: React.FC = () => {
             width: "0.75 1",
             getValue: (row) => (
               <span
-                className="local-link"
                 data-tip={
                   "Доп. информация" +
                   "###" +

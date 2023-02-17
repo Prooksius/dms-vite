@@ -283,7 +283,9 @@ export const domainEditFormData: MyFormData = {
       valueArr: [],
       dropdown: "default",
       options: [{ value: "", label: "Не выбрано" }],
-      validations: {},
+      validations: {
+        dateFuture: true,
+      },
       dependency: {
         field: "expirationtime_status",
         type: "disable",

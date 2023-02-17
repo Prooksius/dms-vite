@@ -61,7 +61,8 @@ const SubdomainsField: React.FC<SubdomainsFieldProps> = ({
               title: "",
               value: "",
               type: "A",
-              available_check: false,
+              available_check: true,
+              ssl_check: true,
             },
             index: thisField.valueArr.length,
           })
