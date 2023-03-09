@@ -45,7 +45,11 @@ const Popuper: React.FC<PopuperProps> = (props) => {
     // eslint-disable-next-line
   }, [])
   useEffect(() => {
-    if (props.opened) document.querySelector("body").classList.add("noscroll")
+    if (props.opened) {
+      document.querySelector("body").classList.add("noscroll")
+    } else {
+      document.querySelector("body").classList.remove("noscroll")
+    }
   }, [props.opened])
 
   return (

@@ -7,10 +7,132 @@ import React, {
 import classnames from "classnames"
 import { FormWrapperContext } from "../formWrapper/formWrapperContext"
 import CreatableSelect from "react-select/creatable"
-import { FieldData, SelectValue } from "../formWrapper/types"
+import Select, { components } from "react-select"
+import type { StylesConfig } from "react-select"
+import { FieldData, NS, SelectValue } from "../formWrapper/types"
+
+const { SingleValue, MultiValue, Option } = components
+
+const colourStyles: StylesConfig<NS, true> = {
+  control: (styles) => styles,
+  option: (styles, { data, isDisabled, isFocused, isSelected }) => {
+    return {
+      ...styles,
+      color: data.color ? data.color : "#222",
+      backgroundColor: isDisabled
+        ? undefined
+        : isSelected
+        ? data.color
+        : isFocused
+        ? data.color + "40"
+        : undefined,
+    }
+  },
+  multiValue: (styles, { data }) => {
+    console.log("data", data)
+    return {
+      ...styles,
+      backgroundColor: data.color ? data.color + "40" : "var(--linkColor)",
+    }
+  },
+  multiValueLabel: (styles, { data }) => {
+    return {
+      ...styles,
+      color: data.color ? data.color : "#222",
+    }
+  },
+  multiValueRemove: (styles, { data }) => ({
+    ...styles,
+    color: data.color,
+    ":hover": {
+      backgroundColor: data.color,
+      color: "white",
+    },
+  }),
+}
+
+const IconSingleValue = (props: any) => (
+  <SingleValue {...props}>
+    {props.data.image && (
+      <img
+        src={props.data.image}
+        alt=""
+        style={{
+          height: "30px",
+          width: "30px",
+          borderRadius: "30px",
+          marginRight: "10px",
+          objectFit: "contain",
+          verticalAlign: "middle",
+        }}
+      />
+    )}
+    {props.data.label}
+  </SingleValue>
+)
+
+const IconMultiValue = (props: any) => (
+  <>
+    {console.log("props", props)}
+    <MultiValue {...props}>
+      {props.data.image && (
+        <img
+          src={props.data.image}
+          alt=""
+          style={{
+            height: "30px",
+            width: "30px",
+            borderRadius: "30px",
+            marginRight: "10px",
+            objectFit: "contain",
+            verticalAlign: "middle",
+          }}
+        />
+      )}
+      {props.data.label}
+    </MultiValue>
+  </>
+)
+
+const IconOption = (props: any) => (
+  <Option {...props}>
+    {props.data.image && (
+      <img
+        src={props.data.image}
+        alt=""
+        style={{
+          height: "30px",
+          width: "30px",
+          borderRadius: "30px",
+          marginRight: "10px",
+          objectFit: "contain",
+          verticalAlign: "middle",
+        }}
+      />
+    )}
+    {props.data.label}
+  </Option>
+)
+
+// Step 3
+const customStyles = {
+  option: (provided: any) => ({
+    ...provided,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  }),
+  singleValue: (provided: any) => ({
+    ...provided,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  }),
+}
 
 interface TagsFieldProps {
   name: string
+  creatable: boolean
 }
 
 const createOption = (label: string) => ({
@@ -18,7 +140,7 @@ const createOption = (label: string) => ({
   value: label,
 })
 
-const TagsField: React.FC<TagsFieldProps> = ({ name }) => {
+const TagsField: React.FC<TagsFieldProps> = ({ name, creatable }) => {
   const { form, setFieldValue } = useContext(FormWrapperContext)
 
   const thisField = form.fields[name]
@@ -75,39 +197,115 @@ const TagsField: React.FC<TagsFieldProps> = ({ name }) => {
         { valid: !thisField.errorMessage && thisField.dirty }
       )}
     >
-      <CreatableSelect
-        value={thisField.valueArr}
-        inputValue={inputValue}
-        placeholder="Тэги не добавлены"
-        isClearable
-        isMulti
-        menuIsOpen={false}
-        className="multiselect"
-        classNamePrefix="inner"
-        components={{
-          IndicatorSeparator: () => null,
-          DropdownIndicator: () => null,
-        }}
-        onInputChange={(newValue) => setInputValue(newValue)}
-        onKeyDown={handleKeyDown}
-        onChange={(options) => {
-          setFieldValue({ field: name }) // удаляем все теги
-          if (options.length) {
-            options.map((selValue, index) => {
-              console.log("insert value " + selValue.value)
-              setFieldValue({
-                field: name,
-                value: {
-                  value: selValue.value,
-                  label: selValue.value,
-                  checked: true,
-                },
-                index,
+      {creatable && (
+        <CreatableSelect
+          value={thisField.valueArr}
+          inputValue={inputValue}
+          placeholder="Тэги не добавлены"
+          isClearable
+          isMulti
+          menuIsOpen={false}
+          className="multiselect"
+          classNamePrefix="inner"
+          components={{
+            IndicatorSeparator: () => null,
+            DropdownIndicator: () => null,
+          }}
+          onInputChange={(newValue) => setInputValue(newValue)}
+          onKeyDown={handleKeyDown}
+          onChange={(options) => {
+            setFieldValue({ field: name }) // удаляем все теги
+            if (options.length) {
+              options.map((selValue, index) => {
+                console.log("insert value " + selValue.value)
+                setFieldValue({
+                  field: name,
+                  value: {
+                    value: selValue.value,
+                    label: selValue.value,
+                    checked: true,
+                  },
+                  index,
+                })
               })
-            })
-          }
-        }}
-      />
+            }
+          }}
+        />
+      )}
+      {!creatable && dropdownType === "images" && (
+        <Select
+          value={thisField.valueArr}
+          inputValue={inputValue}
+          placeholder="Тэги не добавлены"
+          isClearable
+          isMulti
+          closeMenuOnSelect={false}
+          styles={colourStyles}
+          className="multiselect"
+          classNamePrefix="inner"
+          components={{
+            SingleValue: IconSingleValue,
+            MultiValue: IconMultiValue,
+            Option: IconOption,
+            IndicatorSeparator: () => null,
+          }}
+          options={thisField.options}
+          onInputChange={(newValue) => setInputValue(newValue)}
+          onChange={(selectedOptions) => {
+            console.log("selectedOptions", selectedOptions)
+            setFieldValue({ field: name }) // удаляем все теги
+            if (selectedOptions.length) {
+              selectedOptions.map((selValue: NS, index) => {
+                console.log("insert value " + selValue.value)
+                setFieldValue({
+                  field: name,
+                  value: {
+                    value: selValue.value,
+                    label: selValue.label,
+                    image: selValue.image,
+                    color: selValue.color,
+                    checked: true,
+                  },
+                  index,
+                })
+              })
+            }
+          }}
+        />
+      )}
+      {!creatable && dropdownType !== "images" && (
+        <Select
+          value={thisField.valueArr}
+          inputValue={inputValue}
+          placeholder="Тэги не добавлены"
+          isClearable
+          isMulti
+          className="multiselect"
+          classNamePrefix="inner"
+          components={{
+            IndicatorSeparator: () => null,
+          }}
+          options={thisField.options}
+          onInputChange={(newValue) => setInputValue(newValue)}
+          onChange={(selectedOptions) => {
+            setFieldValue({ field: name }) // удаляем все теги
+            if (selectedOptions.length) {
+              selectedOptions.map((selValue, index) => {
+                console.log("insert value " + selValue.value)
+                setFieldValue({
+                  field: name,
+                  value: {
+                    value: selValue.value,
+                    label: selValue.value,
+                    checked: true,
+                  },
+                  index,
+                })
+              })
+            }
+          }}
+        />
+      )}
       <label>
         {thisField.label}
         {required && <span className="required">*</span>}

@@ -97,7 +97,7 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
             {/*}
             <div className="form__row">
               <div className="col-sm-12">
-                <TagsField name="tags" />
+                <TagsField name="tags" creatable={false} />
               </div>
             </div>
             {*/}

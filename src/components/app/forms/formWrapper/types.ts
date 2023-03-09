@@ -33,6 +33,7 @@ export type DefaultSelectValue = {
   value: string
   label?: string
   image?: string
+  color?: string
 }
 type EmptySelectValue = { value: ""; label: "Не выбрано"; image?: "" }
 export type SelectValue = DefaultSelectValue | EmptySelectValue
@@ -82,6 +83,8 @@ export type Additional = {
 export type NS = {
   value: string
   label?: string
+  image?: string
+  color?: string
   checked?: boolean
 }
 export type IPAddr = {

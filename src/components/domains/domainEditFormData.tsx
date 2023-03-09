@@ -155,6 +155,27 @@ export const domainEditFormData: MyFormData = {
       value: "",
       valueObj: { value: "", label: "Не выбрано" },
       valueArr: [],
+      options: [
+        {
+          value: "111",
+          label: "111",
+          image: "https://copy-trade.ru/upload/image/avatars/partner45.jpg",
+          color: "#1923ae",
+        },
+        {
+          value: "222",
+          label: "222",
+          image: "https://copy-trade.ru/upload/image/avatars/partner46.jpg",
+          color: "#309f37",
+        },
+        {
+          value: "333",
+          label: "333",
+          image: "https://copy-trade.ru/upload/image/avatars/petrov12.jpg",
+          color: "#c1216c",
+        },
+      ],
+      dropdown: "images",
       validations: {},
       errorMessage: "",
       dirty: false,
