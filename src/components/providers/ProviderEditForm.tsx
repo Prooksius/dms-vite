@@ -1,11 +1,6 @@
 import React, { ReactElement, useEffect, useState } from "react"
 import FormWrapper from "@components/app/forms/formWrapper/FormWrapper"
-import { toastAlert } from "@config"
 import TextField from "@components/app/forms/formFields/TextField"
-import SelectField from "@components/app/forms/formFields/SelectField"
-import TextArrayField from "@components/app/forms/formFields/TextArrayField"
-import CheckboxField from "@components/app/forms/formFields/CheckboxField"
-import RadioField from "@components/app/forms/formFields/RadioField"
 import {
   selectItemById,
   addProvider,
@@ -16,12 +11,8 @@ import {
 } from "@store/slices/providersSlice"
 import { useSelector, useDispatch } from "react-redux"
 import { FormWrapperState } from "@components/app/forms/formWrapper/FormWrapperState"
-import type { RootState } from "@store/store"
-import {
-  clearRecordForm,
-  providerEditFormData,
-  fillRecordForm,
-} from "./providerEditFormData"
+import type { AppDispatch, RootState } from "@store/store"
+import { providerEditFormData, fillRecordForm } from "./providerEditFormData"
 import { MyFormData } from "@components/app/forms/formWrapper/types"
 
 interface ProviderEditFormProps {
@@ -33,7 +24,7 @@ export const ProviderEditForm: React.FC<ProviderEditFormProps> = ({
   id,
   onDoneCallback,
 }): ReactElement => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const [formFilled, setFormFilled] = useState<boolean>(false)
 

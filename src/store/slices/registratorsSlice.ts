@@ -18,6 +18,7 @@ import {
   ValidationErrors,
 } from "@components/app/forms/formWrapper/types"
 import { AxiosError } from "axios"
+import isEqual from "lodash/isEqual"
 
 export interface RegistratorsRecord {
   id: number
@@ -51,7 +52,7 @@ interface RegistratorsFilter extends Record<string, string | SelectValue> {
   provider_id: SelectValue
 }
 
-interface RegistratorsState {
+export interface RegistratorsState {
   list: RegistratorsRecord[]
   page: number
   itemsInPage: number
@@ -329,6 +330,13 @@ export const archiveRegistrator = createAsyncThunk(
   }
 )
 
+const defFilter: RegistratorsFilter = {
+  created_at: null,
+  deleted_at: null,
+  email_id: null,
+  provider_id: null,
+}
+
 const initialState: RegistratorsState = {
   list: [],
   page: 1,
@@ -341,12 +349,7 @@ const initialState: RegistratorsState = {
   error: "",
   errorData: null,
   search: "",
-  filter: {
-    created_at: null,
-    deleted_at: null,
-    email_id: null,
-    provider_id: null,
-  },
+  filter: defFilter,
   filterChanges: 0,
   selectedIds: [],
 }
@@ -355,14 +358,26 @@ export const registratorsSlice = createSlice({
   name: "registrators",
   initialState,
   reducers: {
-    setFilter: (state, { payload }: PayloadAction<FieldsData>) => {
-      Object.keys(payload).map((key) => {
+    setFilter: (
+      state,
+      {
+        payload: { fields, silent = false },
+      }: PayloadAction<{ fields: FieldsData; silent?: boolean }>
+    ) => {
+      Object.keys(fields).map((key) => {
         state.filter[key] =
-          payload[key].type === "select"
-            ? payload[key].valueObj
-            : payload[key].value
+          fields[key].type === "select"
+            ? fields[key].valueObj
+            : fields[key].value
       })
-      state.filterChanges++
+      state.page = 1
+      if (!silent) state.filterChanges++
+    },
+    clearFilter: (state) => {
+      if (!isEqual(state.filter, defFilter)) {
+        state.filter = defFilter
+        state.filterChanges++
+      }
     },
     setPage: (state, { payload }: PayloadAction<number>) => {
       if (state.page !== payload) {
@@ -527,6 +542,7 @@ export const registratorsSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
   setFilter,
+  clearFilter,
   setSearch,
   setPage,
   setSort,

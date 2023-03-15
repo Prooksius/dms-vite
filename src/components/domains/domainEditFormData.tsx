@@ -155,27 +155,8 @@ export const domainEditFormData: MyFormData = {
       value: "",
       valueObj: { value: "", label: "Не выбрано" },
       valueArr: [],
-      options: [
-        {
-          value: "111",
-          label: "111",
-          image: "https://copy-trade.ru/upload/image/avatars/partner45.jpg",
-          color: "#1923ae",
-        },
-        {
-          value: "222",
-          label: "222",
-          image: "https://copy-trade.ru/upload/image/avatars/partner46.jpg",
-          color: "#309f37",
-        },
-        {
-          value: "333",
-          label: "333",
-          image: "https://copy-trade.ru/upload/image/avatars/petrov12.jpg",
-          color: "#c1216c",
-        },
-      ],
-      dropdown: "images",
+      options: [],
+      dropdown: "default",
       validations: {},
       errorMessage: "",
       dirty: false,
@@ -399,8 +380,8 @@ export const fillDomainForm = (
     const recordTags = domain.tags || []
     const tags = recordTags.map((item) => {
       return {
-        value: item,
-        label: item,
+        value: item.id.toString(),
+        label: item.name,
         checked: true,
       } as NS
     })

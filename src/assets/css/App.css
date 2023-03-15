@@ -1267,6 +1267,12 @@ form .sixty-percent-row {
   transform: translateY(0);
   z-index: 100;
 }
+.entity-filter .domain-tags-row {
+  margin-bottom: 15px;
+}
+form > .form__row.domain-tags-row > [class^="col-"] {
+  border-right: none;
+}
 .entity-filter__values {
   display: flex;
   flex-wrap: wrap;
@@ -1843,6 +1849,9 @@ form .sixty-percent-row {
 }
 .modal-body > form > .form__row {
   border-bottom: 1px solid #cbcbcb;
+}
+.modal-body > form > .form__row.second-data-row {
+  padding-top: 10px;
 }
 form button[type="submit"] {
   display: flex;

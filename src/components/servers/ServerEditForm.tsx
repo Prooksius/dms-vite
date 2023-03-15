@@ -13,12 +13,8 @@ import {
 } from "@store/slices/serversSlice"
 import { useSelector, useDispatch } from "react-redux"
 import { FormWrapperState } from "@components/app/forms/formWrapper/FormWrapperState"
-import type { RootState } from "@store/store"
-import {
-  clearServerForm,
-  serverEditFormData,
-  fillServerForm,
-} from "./serverEditFormData"
+import type { AppDispatch, RootState } from "@store/store"
+import { serverEditFormData, fillServerForm } from "./serverEditFormData"
 import { MyFormData } from "@components/app/forms/formWrapper/types"
 import SelectAsyncField from "@components/app/forms/formFields/SelectAsyncField"
 import { getProviderRegistratorNames } from "@store/slices/registratorsSlice"
@@ -34,7 +30,7 @@ export const ServerEditForm: React.FC<ServerEditFormProps> = ({
   id,
   onDoneCallback,
 }): ReactElement => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const [formFilled, setFormFilled] = useState<boolean>(false)
 

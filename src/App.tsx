@@ -5,15 +5,11 @@ import {
   Navigate,
   Route,
   Routes,
-  useLocation,
 } from "react-router-dom"
-import { Navbar } from "@components/app/Navbar"
 import loadReCaptcha from "./components/app/forms/recaptcha/loadReCaptcha"
 import { ToastContainer } from "react-toastify"
-import { TransitionGroup, CSSTransition } from "react-transition-group"
 import { routes } from "@router/routes"
 import { Helmet, HelmetProvider } from "react-helmet-async"
-import Home from "@pages/Home"
 import GlobalWrapper from "@layouts/GlobalWrapper"
 import { useSelector } from "react-redux"
 import { isLogged } from "@store/slices/authSlice"

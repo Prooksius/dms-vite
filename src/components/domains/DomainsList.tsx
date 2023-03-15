@@ -59,6 +59,8 @@ import { AvailableIcon } from "@components/app/icons/AvailableIcon"
 import { UnavailableIcon } from "@components/app/icons/UnavailableIcon"
 import { MonitorIcon } from "@components/app/icons/MonitorIcon"
 import { useConfirm } from "@components/app/hooks/useConfirm"
+import { DomainExpand } from "./DomainExpand"
+import { AppDispatch } from "@store/store"
 
 interface ConditionNames {
   [key: string]: string
@@ -68,11 +70,20 @@ const codeNames: ConditionNames = {
   unavailable: "404",
 }
 
+const ResonseCodeColor = (code: string): string => {
+  const codeNumber = parseInt(code)
+  if (codeNumber) {
+    if (codeNumber < 300) return "green"
+    if (codeNumber < 500) return "orange"
+  }
+  return "red"
+}
+
 export const DomainsList: React.FC = () => {
   const [editId, setEditId] = useState(0)
   const [editOpened, setEditOpened] = useState(false)
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const { ask } = useConfirm()
@@ -176,43 +187,7 @@ export const DomainsList: React.FC = () => {
       <PaginationDataGrid
         status={status}
         editRowID={editRowID}
-        getExpanded={(row) => (
-          <div className="pagination-tablelist__row-down">
-            <div className="pagination-tablelist__icons"></div>
-            <div className="pagination-tablelist__info">
-              <span className="title">Имя регистратора</span>
-              <span className="value">{row.registrator_name}</span>
-            </div>
-            <div className="pagination-tablelist__info">
-              <span className="title">Аккаунт регистратора</span>
-              <span className="value">{row.registrator_acc_name}</span>
-            </div>
-            <div className="pagination-tablelist__info">
-              <span className="title">NS Записи</span>
-              <span className="value">
-                {row.ns &&
-                  row.ns.map((nsItem) => (
-                    <span key={nsItem}>
-                      {nsItem}
-                      <br />
-                    </span>
-                  ))}
-              </span>
-            </div>
-            <div className="pagination-tablelist__info">
-              <span className="title">Дата регистрации</span>
-              <span className="value">
-                {formatDateTime(row.registration_date, "date")}
-              </span>
-            </div>
-            <div className="pagination-tablelist__info">
-              <span className="title">Дата окончания</span>
-              <span className="value">
-                {formatDateTime(row.expirationtime_condition, "date")}
-              </span>
-            </div>
-          </div>
-        )}
+        getExpanded={(row) => <DomainExpand row={row} />}
         rowHeight={71}
         data={items}
         page={page}
@@ -321,7 +296,7 @@ export const DomainsList: React.FC = () => {
               return (
                 <span
                   style={{
-                    color: row.available_condition === "200" ? "green" : "red",
+                    color: ResonseCodeColor(row.available_condition),
                     fontWeight: 600,
                   }}
                   data-tip={

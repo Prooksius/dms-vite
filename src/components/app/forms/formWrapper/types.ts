@@ -30,7 +30,7 @@ export type SubdomainType = "A" | "CNAME" | ""
 export type ServerStatus = "up" | "down"
 
 export type DefaultSelectValue = {
-  value: string
+  value?: string
   label?: string
   image?: string
   color?: string
@@ -81,7 +81,7 @@ export type Additional = {
 }
 
 export type NS = {
-  value: string
+  value?: string
   label?: string
   image?: string
   color?: string
@@ -97,6 +97,7 @@ export type Subdomain = {
   id: number
   title: string
   value?: string
+  label?: string
   type: SubdomainType
   ip_addr_id: number
   ip_addr: string
@@ -126,7 +127,7 @@ export interface FieldData extends Record<string, any> {
 
 export type FormFieldData = {
   field: string
-  value?: string | ArrayValue | SelectValue
+  value?: string | ArrayValue | SelectValue | SelectValue[]
   index?: number
 }
 export type FormField = [key: string, value: FieldData]

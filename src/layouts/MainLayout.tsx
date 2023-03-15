@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { Navbar } from "@components/app/Navbar"
 import { APP_TITLE } from "@config"
 import { Helmet } from "react-helmet-async"
@@ -6,7 +6,7 @@ import classNames from "classnames"
 import { SignOut } from "@components/app/icons/SignOut"
 import { useDispatch, useSelector } from "react-redux"
 import { isLogged, logout } from "@store/slices/authSlice"
-
+import { AppDispatch } from "@store/store"
 
 interface MainLayoutProps {
   title: string
@@ -14,13 +14,18 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, title, h1 }) => {
-  const dispatch = useDispatch()
-  const [sidebarWidth, setSidebarWidth] = useState(true)
+  const dispatch = useDispatch<AppDispatch>()
+
+  const [sidebarWidth, setSidebarWidth] = useState<boolean>(
+    localStorage.getItem("sidebarWidth") === "1" ? true : false
+  )
 
   const logged = useSelector(isLogged)
 
   const toggleSidebar = () => {
     const wide = !sidebarWidth
+
+    localStorage.setItem("sidebarWidth", wide ? "1" : "0")
 
     setSidebarWidth(wide)
   }

@@ -28,7 +28,7 @@ const DateTimeField: React.FC<DateTimeFieldProps> = ({
   const [disabled, setDisabled] = useState(false)
 
   const thisField = form.fields[name]
-  const dependField = form.fields[thisField.dependency?.field]
+  const dependField = form.fields[thisField?.dependency?.field]
 
   const today = moment()
   const valid = function (current: moment.Moment) {

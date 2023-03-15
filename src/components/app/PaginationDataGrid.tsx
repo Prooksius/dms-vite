@@ -12,6 +12,7 @@ import { useSelector, useDispatch } from "react-redux"
 import PaginationDataGridRow from "./PaginationDataGridRow"
 import PaginationDataGridHeader from "./PaginationDataGridHeader"
 import PaginationDataGridPHolder from "./PaginationDataGridPHolder"
+import { AppDispatch } from "@store/store"
 
 export type ColumnData<T> = {
   title: string
@@ -80,7 +81,7 @@ export const PaginationDataGrid = <T extends Record<string, any>>({
 
   const { route, query } = useQuery()
   const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const tooltipShow = useSelector(listTooltipShow)
 

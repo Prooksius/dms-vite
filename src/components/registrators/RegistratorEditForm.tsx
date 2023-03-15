@@ -1,8 +1,6 @@
 import React, { ReactElement, useEffect, useState } from "react"
 import FormWrapper from "@components/app/forms/formWrapper/FormWrapper"
-import { toastAlert } from "@config"
 import TextField from "@components/app/forms/formFields/TextField"
-import SelectField from "@components/app/forms/formFields/SelectField"
 import TextArrayField from "@components/app/forms/formFields/TextArrayField"
 import {
   selectRegistratorById,
@@ -14,13 +12,12 @@ import {
 } from "@store/slices/registratorsSlice"
 import { useSelector, useDispatch } from "react-redux"
 import { FormWrapperState } from "@components/app/forms/formWrapper/FormWrapperState"
-import type { RootState } from "@store/store"
+import type { AppDispatch, RootState } from "@store/store"
 import {
-  clearRegistratorForm,
   registratorEditFormData,
   fillRegistratorForm,
 } from "./registratorEditFormData"
-import { MyFormData, NS } from "@components/app/forms/formWrapper/types"
+import { MyFormData } from "@components/app/forms/formWrapper/types"
 import SelectAsyncField from "@components/app/forms/formFields/SelectAsyncField"
 import { loadEmailOptions } from "@store/slices/emailsSlice"
 import { loadProviderOptions } from "@store/slices/providersSlice"
@@ -34,7 +31,7 @@ export const RegistratorEditForm: React.FC<RegistratorEditFormProps> = ({
   id,
   onDoneCallback,
 }: RegistratorEditFormProps): ReactElement => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const [formFilled, setFormFilled] = useState<boolean>(false)
 

@@ -1,9 +1,6 @@
-import classNames from "classnames"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useLocation, useSearchParams } from "react-router-dom"
-import { TransitionGroup, CSSTransition } from "react-transition-group"
-import { formatDateTime, toastAlert } from "@config"
+import { formatDateTime } from "@config"
 import {
   listItems,
   listPage,
@@ -12,9 +9,7 @@ import {
   listItemsInPage,
   listFilter,
   listFilterChanges,
-  fetchPage,
   setPage,
-  setFilter,
   setItemsInPage,
   toggleOpen,
   reloadPage,
@@ -31,15 +26,14 @@ import {
   fetchServerByErrorId,
   clearServers,
 } from "@store/slices/serversSlice"
-import type { ErrorsRecord } from "@store/slices/errorsSlice"
 import { CaretIcon } from "@components/app/icons/CaretIcon"
-import PaginationList, { HeaderSlot } from "@components/app/PaginationList"
 import Popuper, { PopupHeaderSlot } from "@components/app/Popuper"
 import { ErrorsFilter } from "./ErrorsFilter"
 import { DomainEditForm } from "../domains/DomainEditForm"
 import { ServerEditForm } from "../servers/ServerEditForm"
-import { DataGrid } from "@components/app/DataGrid"
 import { PaginationDataGrid } from "@components/app/PaginationDataGrid"
+import { ErrorsExpand } from "./ErrorsExpand"
+import { AppDispatch } from "@store/store"
 
 export const ErrorsList: React.FC = () => {
   const [editId, setEditId] = useState(0)
@@ -47,9 +41,7 @@ export const ErrorsList: React.FC = () => {
   const [entityOpen, setEntityOpen] = useState(false)
   const [editOpened, setEditOpened] = useState(false)
 
-  const [searchParams, setSearchParams] = useSearchParams()
-
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const domains = useSelector(listDomains)
   const domainsCount = useSelector(listDomainsItemsCount)
@@ -120,33 +112,7 @@ export const ErrorsList: React.FC = () => {
       <PaginationDataGrid
         status={status}
         editRowID={entityEditId}
-        getExpanded={() => (
-          <div className="pagination-tablelist__row-down with-button-td">
-            <div className="pagination-tablelist__info">
-              <span className="title">Какой-то заголовок</span>
-              <span className="value">Какой-то текст</span>
-            </div>
-            <div className="pagination-tablelist__info">
-              <span className="title">Какой-то заголовок</span>
-              <span className="value">Какой-то текст</span>
-            </div>
-            <div className="pagination-tablelist__info">
-              <span className="title">Какой-то заголовок</span>
-              <span className="value">
-                Какой-то текст
-                <br />
-                Какой-то текст
-                <br />
-                Какой-то текст <br />
-                Какой-то текст
-              </span>
-            </div>
-            <div className="pagination-tablelist__info">
-              <span className="title">Какой-то заголовок</span>
-              <span className="value">Какой-то текст</span>
-            </div>
-          </div>
-        )}
+        getExpanded={(row) => <ErrorsExpand row={row} />}
         rowHeight={62}
         data={errors}
         page={page}

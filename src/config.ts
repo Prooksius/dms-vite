@@ -1,5 +1,10 @@
 import { toast } from "react-toastify"
-import { ErrorPayloadData } from "@components/app/forms/formWrapper/types"
+import {
+  ArrayValue,
+  ErrorPayloadData,
+  MyFormData,
+  SelectValue,
+} from "@components/app/forms/formWrapper/types"
 
 // test text
 
@@ -64,6 +69,117 @@ export const askConfirm = {
   subtitle: "",
   btnConfirm: "Да",
   btnCancel: "Отмена",
+}
+
+export const getSelectFromQuery = (param: string): SelectValue => {
+  const arr = param.split(";")
+  return {
+    value: arr[0],
+    label: arr[1],
+  }
+}
+export const getArrayFromQuery = (param: string): ArrayValue[] => {
+  const arr = param.split(";")
+  const values = arr[0].split(",")
+  const labels = arr[1].split(",")
+  return values.map((item, key) => {
+    return {
+      value: values[key],
+      label: labels[key],
+    }
+  })
+}
+
+export const fillFilterForm = (
+  filledFormData: MyFormData,
+  query: URLSearchParams
+): boolean => {
+  let filled = false
+  Object.keys(filledFormData.fields).map((fieldName) => {
+    const field = filledFormData.fields[fieldName]
+    if (query.has(fieldName)) {
+      filled = true
+      if (field.type === "select") {
+        field.valueObj = getSelectFromQuery(query.get(fieldName))
+      } else if (field.type === "array") {
+        field.valueArr = getArrayFromQuery(query.get(fieldName))
+      } else if (field.type === "text") {
+        field.value = query.get(fieldName)
+      }
+    }
+  })
+
+  return filled
+}
+
+export const fillQuery = (
+  filledFormData: MyFormData,
+  query: URLSearchParams
+): boolean => {
+  let filled = false
+  Object.keys(filledFormData.fields).map((fieldName) => {
+    const field = filledFormData.fields[fieldName]
+    let query_value = query.get(fieldName)
+    if (!query_value) query_value = ""
+    let field_value = field.value
+    let field_real_value = field.value
+    if (field.type === "select") {
+      field_value =
+        field.valueObj.value !== ""
+          ? field.valueObj.value + ";" + field.valueObj.label
+          : ""
+      field_real_value = field.valueObj.value
+    } else if (field.type === "array") {
+      field_value = field.valueArr.length
+        ? field.valueArr.map((item) => item.value).join(",") +
+          ";" +
+          field.valueArr.map((item) => item.label).join(",")
+        : ""
+      field_real_value = field.valueArr.map((item) => item.value).join(",")
+    }
+
+    if (query_value !== field_value) {
+      filled = true
+      if (field_real_value !== "") {
+        query.set(fieldName, field_value)
+      } else {
+        query.delete(fieldName)
+      }
+    }
+  })
+  if (query.has("page")) {
+    filled = true
+    query.delete("page")
+  }
+
+  return filled
+}
+
+export const clearQuery = (
+  filledFormData: MyFormData,
+  query: URLSearchParams,
+  fieldName = ""
+): boolean => {
+  let changed = false
+  if (!fieldName) {
+    Object.keys(filledFormData.fields).map((field) => {
+      if (query.has(field)) {
+        changed = true
+        query.delete(field)
+      }
+    })
+  } else {
+    if (query.has(fieldName)) {
+      changed = true
+      query.delete(fieldName)
+    }
+  }
+  if (query.has("page")) {
+    changed = true
+    query.delete("page")
+  }
+
+  return changed
 }
 
 export function errorToastText(payload: ErrorPayloadData): string {

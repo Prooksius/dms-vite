@@ -17,7 +17,7 @@ import {
 } from "@store/slices/domainsSlice"
 import { useSelector, useDispatch } from "react-redux"
 import { FormWrapperState } from "@components/app/forms/formWrapper/FormWrapperState"
-import type { RootState } from "@store/store"
+import type { AppDispatch, RootState } from "@store/store"
 import {
   clearDomainForm,
   domainEditFormData,
@@ -49,7 +49,7 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
   id,
   onDoneCallback,
 }: DomainEditFormProps): ReactElement => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const [formFilled, setFormFilled] = useState<boolean>(false)
 
@@ -94,14 +94,12 @@ export const DomainEditForm: React.FC<DomainEditFormProps> = ({
       >
         {formFilled && (
           <>
-            {/*}
-            <div className="form__row">
+            <div className="form__row domain-tags-row">
               <div className="col-sm-12">
                 <TagsField name="tags" creatable={false} />
               </div>
             </div>
-            {*/}
-            <div className="form__row .second-data-row">
+            <div className="form__row second-data-row">
               <div className="col-lg-3 col-md-6 col-sm-12">
                 <h4>Основное</h4>
                 <TextField name="name" />

@@ -1,5 +1,5 @@
 import classNames from "classnames"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { askConfirm, formatDateTime, toastAlert } from "@config"
 import {
@@ -17,13 +17,11 @@ import {
   setPage,
   setSort,
   setSearch,
-  setFilter,
   setItemsInPage,
   toggleRegistratorOpen,
   toggleRegistratorPopup,
   closeRegistratorPopups,
   reloadPage,
-  RegistratorsRecord,
 } from "@store/slices/registratorsSlice"
 import { DotsIcon } from "@components/app/icons/DotsIcon"
 import { PlusIcon } from "@components/app/icons/PlusIcon"
@@ -34,6 +32,7 @@ import { SearchEntity } from "@components/app/SearchEntity"
 import { EyeIcon } from "@components/app/icons/EyeIcon"
 import { PaginationDataGrid } from "@components/app/PaginationDataGrid"
 import { useConfirm } from "@components/app/hooks/useConfirm"
+import { AppDispatch } from "@store/store"
 
 export const RegistratorsList: React.FC = () => {
   const [editId, setEditId] = useState(0)
@@ -41,7 +40,7 @@ export const RegistratorsList: React.FC = () => {
 
   const { ask } = useConfirm()
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const items = useSelector(listRegistrators)
 

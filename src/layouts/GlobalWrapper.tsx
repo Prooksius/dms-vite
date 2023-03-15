@@ -1,5 +1,5 @@
-import React, { ReactChildren, ReactElement, ReactNode, useEffect } from "react"
-import { useSearchParams, useNavigate, Navigate } from "react-router-dom"
+import React, { useEffect } from "react"
+import { useSearchParams, useNavigate } from "react-router-dom"
 import MainLayout from "@layouts/MainLayout"
 import { useDispatch, useSelector } from "react-redux"
 import { checkToken, isLogged, listAuthStatus } from "@store/slices/authSlice"
@@ -28,11 +28,12 @@ import {
   fetchRegistratorsPage,
 } from "@store/slices/registratorsSlice"
 import { REACT_APP_SSO_URL } from "@config"
+import { AppDispatch } from "@store/store"
 
 const PAGE_TITLE = "Вход"
 
 const GlobalWrapper: React.FC = ({ children }) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const navigate = useNavigate()
 
   const providersFilterChanges = useSelector(listProvidersFilterChanges)

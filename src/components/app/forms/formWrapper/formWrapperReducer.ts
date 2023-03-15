@@ -39,7 +39,7 @@ import {
 type FormPayload = {
   fields?: FieldsData
   field?: string
-  value?: string | ArrayValue | SelectValue
+  value?: string | ArrayValue | SelectValue | SelectValue[]
   index?: number
   errorData?: ErrorPayloadData
 }
@@ -117,6 +117,8 @@ const handlers: FormHandlers = {
       if (field) {
         if (typeof payload.value === "string") {
           field.value = payload.value
+        } else if (payload.value?.constructor === Array) {
+          field.valueArr = payload.value
         } else if (typeof payload.value === "object") {
           if (typeof payload.index === "number") {
             field.valueArr[payload.index] = <ArrayValue>payload.value

@@ -1,17 +1,6 @@
+import { useQuery } from "@components/app/hooks/useQuery"
 import React from "react"
-import { useLocation, useNavigate } from "react-router-dom"
-
-interface queryRets {
-  route: string
-  query: URLSearchParams
-}
-
-function useQuery(): queryRets {
-  // Use the URLSearchParams API to extract the query parameters
-  // useLocation().search will have the query parameters eg: ?foo=bar&a=b
-  const loc = useLocation()
-  return { route: loc.pathname, query: new URLSearchParams(loc.search) }
-}
+import { useNavigate } from "react-router-dom"
 
 const About: React.FC = () => {
   const navigate = useNavigate()

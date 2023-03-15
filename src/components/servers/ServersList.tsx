@@ -1,7 +1,7 @@
 import classNames from "classnames"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { askConfirm, toastAlert } from "@config"
+import { askConfirm } from "@config"
 import {
   listServers,
   archiveServer,
@@ -11,32 +11,30 @@ import {
   listServersItemsCount,
   listServersStatus,
   listServersItemsInPage,
-  listServersFilter,
   listServersFilterChanges,
   listServersSearch,
   listServersLoaded,
   setSort,
   setPage,
   setSearch,
-  setFilter,
   setItemsInPage,
   toggleServerOpen,
   toggleServerPopup,
   closeServerPopups,
   reloadPage,
-  ServersRecord,
 } from "@store/slices/serversSlice"
 import { CaretIcon } from "@components/app/icons/CaretIcon"
 import { DotsIcon } from "@components/app/icons/DotsIcon"
 import { PlusIcon } from "@components/app/icons/PlusIcon"
-import PaginationList, { HeaderSlot } from "@components/app/PaginationList"
 import Popuper, { PopupHeaderSlot } from "@components/app/Popuper"
 import { ServersFilter } from "./ServersFilter"
 import { ServerEditForm } from "./ServerEditForm"
 import { SearchEntity } from "@components/app/SearchEntity"
-import { DataGrid } from "@components/app/DataGrid"
 import { PaginationDataGrid } from "@components/app/PaginationDataGrid"
 import { useConfirm } from "@components/app/hooks/useConfirm"
+import { ServersExpand } from "./ServersExpand"
+import { AppDispatch, RootState } from "@store/store"
+import { StatusType } from "@components/app/forms/formWrapper/types"
 
 export const ServersList: React.FC = () => {
   const [editId, setEditId] = useState(0)
@@ -44,7 +42,7 @@ export const ServersList: React.FC = () => {
 
   const { ask } = useConfirm()
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const items = useSelector(listServers)
 
@@ -54,7 +52,6 @@ export const ServersList: React.FC = () => {
   const page = useSelector(listServersPage)
   const itemsInPage = useSelector(listServersItemsInPage)
   const search = useSelector(listServersSearch)
-  const filter = useSelector(listServersFilter)
   const filterChanges = useSelector(listServersFilterChanges)
   const itemsCount = useSelector(listServersItemsCount)
 
@@ -117,36 +114,7 @@ export const ServersList: React.FC = () => {
     <>
       <PaginationDataGrid
         status={status}
-        getExpanded={(row) => (
-          <div className="pagination-tablelist__row-down with-button-td">
-            <div className="pagination-tablelist__info">
-              <span className="title">Доступы к ПУ</span>
-              <span className="value">{row.login_link_cp}</span>
-            </div>
-            <div className="pagination-tablelist__info">
-              <span className="title">Веб-панель (опционально)</span>
-              <span className="value">{row.web_panel}</span>
-            </div>
-            <div className="pagination-tablelist__info">
-              <span className="title">IP-адреса</span>
-              <span className="value">
-                {row.ip_addr &&
-                  row.ip_addr.map((ipItem) => (
-                    <span
-                      key={ipItem.ip_addr}
-                      style={{
-                        display: "block",
-                        color: ipItem.server_status === "up" ? "green" : "red",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {ipItem.ip_addr}
-                    </span>
-                  ))}
-              </span>
-            </div>
-          </div>
-        )}
+        getExpanded={(row) => <ServersExpand row={row} />}
         data={items}
         page={page}
         sort={sort}

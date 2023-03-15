@@ -17,7 +17,7 @@ import {
   ErrorPayloadData,
 } from "@components/app/forms/formWrapper/types"
 import { AxiosError } from "axios"
-import { start } from "repl"
+import isEqual from "lodash/isEqual"
 //import ts from "typescript"
 
 interface SubdomainsRecord {
@@ -53,6 +53,11 @@ interface SubdomainsEditRecord {
   domain_id?: number
 }
 
+export interface TagRecord {
+  id: number
+  name: string
+}
+
 export interface DomainsRecord {
   id?: number
   created_at?: string
@@ -77,7 +82,7 @@ export interface DomainsRecord {
   integration_registrator_status: boolean
 
   ns: string[]
-  tags: string[]
+  tags: TagRecord[]
 
   whois_status: boolean
   whois_condition: string
@@ -118,7 +123,10 @@ export interface DomainsShortRecord {
 }
 
 interface DomainsFilter
-  extends Record<string, string | number | boolean | SelectValue> {
+  extends Record<
+    string,
+    string | number | boolean | SelectValue | SelectValue[]
+  > {
   available_condition: SelectValue
   expirationtime_condition: string
   department_name: SelectValue
@@ -127,10 +135,11 @@ interface DomainsFilter
   registrator_id: SelectValue
   registration_date: string
   active: SelectValue
+  tags: SelectValue[]
   is_activated: SelectValue
 }
 
-interface DomainsState {
+export interface DomainsState {
   list: DomainsRecord[]
   listAll: DomainsRecord[]
   page: number
@@ -164,7 +173,7 @@ type DomainEditRecord = {
   ip_addr_id: number
 
   ns: string[]
-  tags: string[]
+  tags: number[]
 
   whois_status: boolean
   available_status: boolean
@@ -217,8 +226,7 @@ const fillDomainEditRecord = (
     ns: fields.ns.valueArr
       .filter((ns_rec) => ns_rec.checked)
       .map((item) => item.value),
-    tags: fields.tags.valueArr
-      .map((item) => item.value),
+    tags: fields.tags.valueArr.map((item) => Number(item.value)),
     expirationtime_status:
       fields.expirationtime_status.value === "1" ? true : false,
     provider_id: Number(fields.provider_id.valueObj.value),
@@ -241,6 +249,33 @@ const fillDomainEditRecord = (
   }
 
   return bodyData
+}
+
+// load all Tags using API call
+export const loadTags = async () => {
+  let items: TagRecord[] = []
+  try {
+    // get запрос для получения имен
+    const query = new URLSearchParams({
+      offset: "0",
+      limit: "99999999",
+    }).toString()
+
+    const response = await axiosInstance.get<ServerGetResponse<TagRecord>>(
+      `/tags/?${query}`
+    )
+
+    console.log("response.data", response.data)
+    items = response.data.data ? response.data.data : []
+  } catch (e) {
+    items = []
+  }
+
+  return items.map((item) => ({
+    value: item.id.toString(),
+    label: item.name,
+    checked: true,
+  }))
 }
 
 // load options using API call
@@ -352,6 +387,9 @@ export const fetchDomainAll = createAsyncThunk(
       expirationtime_condition: domains.filter.expirationtime_condition
         ? domains.filter.expirationtime_condition.split(".").reverse().join("-")
         : "",
+      tags: domains.filter.tags
+        ? domains.filter.tags.map((tag) => tag.value).join(",")
+        : "",
     }
     if (domains.filter.available_condition?.value) {
       queryObj.available_condition = domains.filter.available_condition.value
@@ -361,7 +399,7 @@ export const fetchDomainAll = createAsyncThunk(
     const response = await axiosInstance.get<ServerGetResponse<DomainsRecord>>(
       `/domains/?${query}`
     )
-    console.log("response.data", response.data)
+    console.log("response.data ALL", response.data)
     return response.data
   }
 )
@@ -398,6 +436,9 @@ export const fetchDomainPage = createAsyncThunk(
         : "",
       expirationtime_condition: domains.filter.expirationtime_condition
         ? domains.filter.expirationtime_condition.split(".").reverse().join("-")
+        : "",
+      tags: domains.filter.tags
+        ? domains.filter.tags.map((tag) => tag.value).join(",")
         : "",
     }
     if (domains.filter.available_condition?.value) {
@@ -557,6 +598,19 @@ export const switchMonitoringDomain = createAsyncThunk(
   }
 )
 
+const defFilter: DomainsFilter = {
+  available_condition: null,
+  expirationtime_condition: null,
+  department_name: null,
+  server_id: null,
+  provider_id: null,
+  registrator_id: null,
+  registration_date: null,
+  active: null,
+  tags: [],
+  is_activated: null,
+}
+
 const initialState: DomainsState = {
   list: [],
   listAll: [],
@@ -572,17 +626,7 @@ const initialState: DomainsState = {
   error: "",
   errorData: null,
   search: "",
-  filter: {
-    available_condition: null,
-    expirationtime_condition: null,
-    department_name: null,
-    server_id: null,
-    provider_id: null,
-    registrator_id: null,
-    registration_date: null,
-    active: null,
-    is_activated: null,
-  },
+  filter: defFilter,
   filterChanges: 0,
   selectedIds: [],
 }
@@ -591,15 +635,28 @@ export const domainsSlice = createSlice({
   name: "domains",
   initialState,
   reducers: {
-    setFilter: (state, { payload }: PayloadAction<FieldsData>) => {
-      Object.keys(payload).map((key) => {
+    setFilter: (
+      state,
+      {
+        payload: { fields, silent = false },
+      }: PayloadAction<{ fields: FieldsData; silent?: boolean }>
+    ) => {
+      Object.keys(fields).map((key) => {
         state.filter[key] =
-          payload[key].type === "select"
-            ? payload[key].valueObj
-            : payload[key].value
+          fields[key].type === "select"
+            ? fields[key].valueObj
+            : fields[key].type === "array"
+            ? fields[key].valueArr
+            : fields[key].value
       })
       state.page = 1
-      state.filterChanges++
+      if (!silent) state.filterChanges++
+    },
+    clearFilter: (state) => {
+      if (!isEqual(state.filter, defFilter)) {
+        state.filter = defFilter
+        state.filterChanges++
+      }
     },
     setPage: (state, { payload }: PayloadAction<number>) => {
       if (state.page !== payload) {
@@ -860,6 +917,7 @@ export const domainsSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
   setFilter,
+  clearFilter,
   setSearch,
   setPage,
   setSort,

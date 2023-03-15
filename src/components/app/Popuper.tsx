@@ -28,7 +28,6 @@ const Popuper: React.FC<PopuperProps> = (props) => {
   }
 
   const escPressed = (event: KeyboardEvent) => {
-    console.log("event", event)
     if (event.keyCode === 27) {
       document.querySelector("body").classList.remove("noscroll")
       props.closeHandler()
@@ -37,13 +36,12 @@ const Popuper: React.FC<PopuperProps> = (props) => {
 
   useEffect(() => {
     document.addEventListener("keyup", escPressed)
-
     return () => {
-      //document.querySelector("body").classList.remove("noscroll")
       document.removeEventListener("keyup", escPressed)
     }
     // eslint-disable-next-line
   }, [])
+
   useEffect(() => {
     if (props.opened) {
       document.querySelector("body").classList.add("noscroll")

@@ -21,7 +21,7 @@ const CheckboxArrayField: React.FC<CheckboxArrayFieldProps> = ({
 
   const thisField = form.fields[name]
 
-  const dependField = form.fields[thisField.dependency?.field]
+  const dependField = form.fields[thisField?.dependency?.field]
 
   const getDepFieldValue = (thisField: FieldData): string => {
     if (thisField.dependency) {

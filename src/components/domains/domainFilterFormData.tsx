@@ -1,7 +1,20 @@
 import { MyFormData } from "@components/app/forms/formWrapper/types"
+import { getSelectFromQuery } from "@config"
 
 export const filterFormData: MyFormData = {
   fields: {
+    tags: {
+      label: "Тэги",
+      type: "array",
+      value: "",
+      valueObj: { value: "", label: "Не выбрано" },
+      valueArr: [],
+      options: [],
+      dropdown: "default",
+      validations: {},
+      errorMessage: "",
+      dirty: false,
+    },
     available_condition: {
       label: "Код ответа",
       value: "",
@@ -11,8 +24,13 @@ export const filterFormData: MyFormData = {
       dropdown: "default",
       options: [
         { value: "", label: "Не выбрано" },
-        { value: "available", label: "Доступен" },
-        { value: "unavailable", label: "Недоступен" },
+        { value: "No Response", label: "No Response" },
+        { value: "Unexpected", label: "Unexpected" },
+        { value: "1xx", label: "1xx" },
+        { value: "2xx", label: "2xx" },
+        { value: "3xx", label: "3xx" },
+        { value: "4xx", label: "4xx" },
+        { value: "5xx", label: "5xx" },
       ],
       validations: {},
       errorMessage: "",

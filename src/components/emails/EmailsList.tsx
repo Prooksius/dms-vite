@@ -1,7 +1,7 @@
 import classNames from "classnames"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { askConfirm, formatDateTime, toastAlert } from "@config"
+import { askConfirm, formatDateTime } from "@config"
 import {
   listEmails,
   archiveEmail,
@@ -18,14 +18,12 @@ import {
   setPage,
   setSort,
   setSearch,
-  setFilter,
   setItemsInPage,
   setSelected,
   toggleEmailOpen,
   toggleEmailPopup,
   closeEmailPopups,
   reloadPage,
-  EmailsRecord,
 } from "@store/slices/emailsSlice"
 import { DotsIcon } from "@components/app/icons/DotsIcon"
 import { PlusIcon } from "@components/app/icons/PlusIcon"
@@ -37,6 +35,7 @@ import { EyeIcon } from "@components/app/icons/EyeIcon"
 import { PaginationDataGrid } from "@components/app/PaginationDataGrid"
 import { MinusIcon } from "@components/app/icons/MinusIcon"
 import { useConfirm } from "@components/app/hooks/useConfirm"
+import { AppDispatch } from "@store/store"
 
 export const EmailsList: React.FC = () => {
   const [editId, setEditId] = useState(0)
@@ -44,7 +43,7 @@ export const EmailsList: React.FC = () => {
 
   const { ask } = useConfirm()
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const items = useSelector(listEmails)
 
@@ -53,7 +52,6 @@ export const EmailsList: React.FC = () => {
   const sort = useSelector(listEmailsSort)
   const itemsInPage = useSelector(listEmailsItemsInPage)
   const search = useSelector(listEmailsSearch)
-  const filter = useSelector(listEmailsFilter)
   const filterChanges = useSelector(listEmailsFilterChanges)
   const itemsCount = useSelector(listEmailsItemsCount)
   const selectedIds = useSelector(listEmailsSelectedIds)
@@ -65,27 +63,6 @@ export const EmailsList: React.FC = () => {
       }
     })
   }
-
-  /*
-  const num = 10
-  let str = ""
-  for (let i = 0; i < num; i++) {
-    str = ""
-    for (let j = 0; j < num; j++) {
-      if (
-        i === 0 ||
-        j === 0 ||
-        i === num-1 ||
-        j === num-1 ||
-        i === j ||
-        i === num-j-1
-      )
-        str += "#"
-      else str += "-"
-    }
-    console.log(i + "-" + str)
-  }
-  */
 
   const archiveHandler = async (id: number) => {
     ask("", askConfirm).then((result) => {

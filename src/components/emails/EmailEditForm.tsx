@@ -16,7 +16,7 @@ import {
 } from "@store/slices/emailsSlice"
 import { useSelector, useDispatch } from "react-redux"
 import { FormWrapperState } from "@components/app/forms/formWrapper/FormWrapperState"
-import type { RootState } from "@store/store"
+import type { AppDispatch, RootState } from "@store/store"
 import {
   clearEmailForm,
   emailEditFormData,
@@ -33,7 +33,7 @@ export const EmailEditForm: React.FC<EmailEditFormProps> = ({
   id,
   onDoneCallback,
 }): ReactElement => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const [formFilled, setFormFilled] = useState<boolean>(false)
 

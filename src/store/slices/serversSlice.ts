@@ -17,6 +17,7 @@ import {
   ValidationErrors,
 } from "@components/app/forms/formWrapper/types"
 import { AxiosError } from "axios"
+import isEqual from "lodash/isEqual"
 
 export interface ServersRecord {
   id?: number
@@ -54,7 +55,7 @@ interface ServersFilter
   active: SelectValue
 }
 
-interface ServersState {
+export interface ServersState {
   list: ServersRecord[]
   page: number
   itemsInPage: number
@@ -315,6 +316,13 @@ export const archiveServer = createAsyncThunk(
   }
 )
 
+const defFilter: ServersFilter = {
+  department_name: null,
+  provider_id: null,
+  registrator_id: null,
+  active: null,
+}
+
 const initialState: ServersState = {
   list: [],
   page: 1,
@@ -327,12 +335,7 @@ const initialState: ServersState = {
   error: "",
   errorData: null,
   search: "",
-  filter: {
-    department_name: null,
-    provider_id: null,
-    registrator_id: null,
-    active: null,
-  },
+  filter: defFilter,
   filterChanges: 0,
   selectedIds: [],
 }
@@ -341,14 +344,26 @@ export const serversSlice = createSlice({
   name: "servers",
   initialState,
   reducers: {
-    setFilter: (state, { payload }: PayloadAction<FieldsData>) => {
-      Object.keys(payload).map((key) => {
+    setFilter: (
+      state,
+      {
+        payload: { fields, silent = false },
+      }: PayloadAction<{ fields: FieldsData; silent?: boolean }>
+    ) => {
+      Object.keys(fields).map((key) => {
         state.filter[key] =
-          payload[key].type === "select"
-            ? payload[key].valueObj
-            : payload[key].value
+          fields[key].type === "select"
+            ? fields[key].valueObj
+            : fields[key].value
       })
-      state.filterChanges++
+      state.page = 1
+      if (!silent) state.filterChanges++
+    },
+    clearFilter: (state) => {
+      if (!isEqual(state.filter, defFilter)) {
+        state.filter = defFilter
+        state.filterChanges++
+      }
     },
     setPage: (state, { payload }: PayloadAction<number>) => {
       if (state.page !== payload) {
@@ -552,6 +567,7 @@ export const serversSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
   setFilter,
+  clearFilter,
   setSearch,
   setPage,
   setSort,

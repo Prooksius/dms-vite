@@ -1,9 +1,7 @@
 import classNames from "classnames"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useLocation, useSearchParams } from "react-router-dom"
-import { TransitionGroup, CSSTransition } from "react-transition-group"
-import { toastAlert, formatDateTime, askConfirm } from "@config"
+import { formatDateTime, askConfirm } from "@config"
 import {
   listItems,
   listPage,
@@ -12,12 +10,10 @@ import {
   listItemsInPage,
   listSearch,
   listFilterChanges,
-  fetchPage,
   setPage,
   setItemsInPage,
   setSearch,
   reloadPage,
-  ProvidersRecord,
   toggleProviderPopup,
   deleteProvider,
   archiveProvider,
@@ -28,25 +24,22 @@ import {
   listSort,
   listSelectedIds,
 } from "@store/slices/providersSlice"
-import PaginationList, { HeaderSlot } from "@components/app/PaginationList"
 import Popuper, { PopupHeaderSlot } from "@components/app/Popuper"
 import { SearchEntity } from "@components/app/SearchEntity"
-import { DataGrid } from "@components/app/DataGrid"
 import { PaginationDataGrid } from "@components/app/PaginationDataGrid"
 import { PlusIcon } from "@components/app/icons/PlusIcon"
 import { DotsIcon } from "@components/app/icons/DotsIcon"
 import { ProviderEditForm } from "./ProviderEditForm"
 import { useConfirm } from "@components/app/hooks/useConfirm"
+import { AppDispatch } from "@store/store"
 
 export const ProvidersList: React.FC = () => {
   const [editId, setEditId] = useState(0)
   const [editOpened, setEditOpened] = useState(false)
 
-  const [searchParams, setSearchParams] = useSearchParams()
-
   const { ask } = useConfirm()
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const providers = useSelector(listItems)
   const status = useSelector(listStatus)

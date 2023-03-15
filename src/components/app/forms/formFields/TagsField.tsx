@@ -10,6 +10,7 @@ import CreatableSelect from "react-select/creatable"
 import Select, { components } from "react-select"
 import type { StylesConfig } from "react-select"
 import { FieldData, NS, SelectValue } from "../formWrapper/types"
+import { loadTags, TagRecord } from "@store/slices/domainsSlice"
 
 const { SingleValue, MultiValue, Option } = components
 
@@ -145,7 +146,16 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, creatable }) => {
 
   const thisField = form.fields[name]
 
+  const [allTags, setAllTags] = useState<SelectValue[]>([])
   const [inputValue, setInputValue] = useState("")
+
+  useEffect(() => {
+    const load = async () => {
+      const value = await loadTags()
+      setAllTags(value)
+    }
+    load()
+  }, [])
 
   if (!thisField) {
     return (
@@ -201,7 +211,7 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, creatable }) => {
         <CreatableSelect
           value={thisField.valueArr}
           inputValue={inputValue}
-          placeholder="Тэги не добавлены"
+          placeholder="Тэги не выбраны"
           isClearable
           isMulti
           menuIsOpen={false}
@@ -213,6 +223,7 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, creatable }) => {
           }}
           onInputChange={(newValue) => setInputValue(newValue)}
           onKeyDown={handleKeyDown}
+          options={allTags}
           onChange={(options) => {
             setFieldValue({ field: name }) // удаляем все теги
             if (options.length) {
@@ -222,7 +233,7 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, creatable }) => {
                   field: name,
                   value: {
                     value: selValue.value,
-                    label: selValue.value,
+                    label: selValue.label,
                     checked: true,
                   },
                   index,
@@ -236,7 +247,7 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, creatable }) => {
         <Select
           value={thisField.valueArr}
           inputValue={inputValue}
-          placeholder="Тэги не добавлены"
+          placeholder="Тэги не выбраны"
           isClearable
           isMulti
           closeMenuOnSelect={false}
@@ -249,10 +260,9 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, creatable }) => {
             Option: IconOption,
             IndicatorSeparator: () => null,
           }}
-          options={thisField.options}
+          options={allTags}
           onInputChange={(newValue) => setInputValue(newValue)}
           onChange={(selectedOptions) => {
-            console.log("selectedOptions", selectedOptions)
             setFieldValue({ field: name }) // удаляем все теги
             if (selectedOptions.length) {
               selectedOptions.map((selValue: NS, index) => {
@@ -277,7 +287,7 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, creatable }) => {
         <Select
           value={thisField.valueArr}
           inputValue={inputValue}
-          placeholder="Тэги не добавлены"
+          placeholder="Тэги не выбраны"
           isClearable
           isMulti
           className="multiselect"
@@ -285,9 +295,10 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, creatable }) => {
           components={{
             IndicatorSeparator: () => null,
           }}
-          options={thisField.options}
+          options={allTags}
           onInputChange={(newValue) => setInputValue(newValue)}
           onChange={(selectedOptions) => {
+            console.log("selectedOptions", selectedOptions)
             setFieldValue({ field: name }) // удаляем все теги
             if (selectedOptions.length) {
               selectedOptions.map((selValue, index) => {
@@ -296,7 +307,7 @@ const TagsField: React.FC<TagsFieldProps> = ({ name, creatable }) => {
                   field: name,
                   value: {
                     value: selValue.value,
-                    label: selValue.value,
+                    label: selValue.label,
                     checked: true,
                   },
                   index,

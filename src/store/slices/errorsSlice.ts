@@ -12,6 +12,7 @@ import {
 import { RootState } from "@store/index"
 import type { ServerGetResponse } from "@store/index"
 import { AxiosError } from "axios"
+import isEqual from "lodash/isEqual"
 
 export type EntityType =
   | "domain"
@@ -141,6 +142,12 @@ export const fetchPage = createAsyncThunk(
   }
 )
 
+const defFilter: ErrorsFilter = {
+  created_at: null,
+  deleted_at: null,
+  entity_type: "domain",
+}
+
 const initialState: ErrorsState = {
   list: [],
   page: 1,
@@ -152,11 +159,7 @@ const initialState: ErrorsState = {
   loaded: false,
   error: "",
   search: "",
-  filter: {
-    created_at: null,
-    deleted_at: null,
-    entity_type: "domain",
-  },
+  filter: defFilter,
   filterChanges: 0,
   selectedIds: [],
 }
@@ -170,6 +173,12 @@ export const errorsSlice = createSlice({
         state.filter[key] = payload[key]
       })
       state.filterChanges++
+    },
+    clearFilter: (state) => {
+      if (!isEqual(state.filter, defFilter)) {
+        state.filter = defFilter
+        state.filterChanges++
+      }
     },
     setPage: (state, { payload }: PayloadAction<number>) => {
       if (state.page !== payload) {
@@ -242,6 +251,7 @@ export const errorsSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
   setFilter,
+  clearFilter,
   setSearch,
   setPage,
   setSort,

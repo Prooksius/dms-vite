@@ -16,6 +16,7 @@ import {
   ValidationErrors,
 } from "@components/app/forms/formWrapper/types"
 import { AxiosError } from "axios"
+import isEqual from "lodash/isEqual"
 
 export interface EmailsRecord {
   id: number
@@ -40,7 +41,7 @@ interface EmailsFilter extends Record<string, string | SelectValue> {
   deleted_at: string
 }
 
-interface EmailsState {
+export interface EmailsState {
   list: EmailsRecord[]
   page: number
   itemsInPage: number
@@ -286,6 +287,12 @@ export const archiveEmail = createAsyncThunk(
   }
 )
 
+const defFilter: EmailsFilter = {
+  email_addr: null,
+  created_at: null,
+  deleted_at: null,
+}
+
 const initialState: EmailsState = {
   list: [],
   page: 1,
@@ -298,11 +305,7 @@ const initialState: EmailsState = {
   error: "",
   errorData: null,
   search: "",
-  filter: {
-    email_addr: null,
-    created_at: null,
-    deleted_at: null,
-  },
+  filter: defFilter,
   filterChanges: 0,
   selectedIds: [],
 }
@@ -311,15 +314,26 @@ export const emailsSlice = createSlice({
   name: "emails",
   initialState,
   reducers: {
-    setFilter: (state, { payload }: PayloadAction<FieldsData>) => {
-      Object.keys(payload).map((key) => {
+    setFilter: (
+      state,
+      {
+        payload: { fields, silent = false },
+      }: PayloadAction<{ fields: FieldsData; silent?: boolean }>
+    ) => {
+      Object.keys(fields).map((key) => {
         state.filter[key] =
-          payload[key].type === "select"
-            ? payload[key].valueObj
-            : payload[key].value
+          fields[key].type === "select"
+            ? fields[key].valueObj
+            : fields[key].value
       })
-      state.selectedIds = []
-      state.filterChanges++
+      state.page = 1
+      if (!silent) state.filterChanges++
+    },
+    clearFilter: (state) => {
+      if (!isEqual(state.filter, defFilter)) {
+        state.filter = defFilter
+        state.filterChanges++
+      }
     },
     setPage: (state, { payload }: PayloadAction<number>) => {
       if (state.page !== payload) {
@@ -484,6 +498,7 @@ export const emailsSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
   setFilter,
+  clearFilter,
   setSearch,
   setPage,
   setSort,

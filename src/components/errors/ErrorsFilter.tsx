@@ -1,20 +1,14 @@
 import classNames from "classnames"
-import React, { MouseEventHandler, useEffect, useRef, useState } from "react"
+import React from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { CalendarIcon } from "@components/app/icons/CalendarIcon"
-import Datetime from "react-datetime"
 import "moment/locale/ru"
-import {
-  fetchPage,
-  setFilter,
-  listFilter,
-  EntityType,
-} from "@store/slices/errorsSlice"
+import { setFilter, listFilter, EntityType } from "@store/slices/errorsSlice"
 
 import "react-datetime/css/react-datetime.css"
+import { AppDispatch } from "@store/store"
 
 export const ErrorsFilter: React.FC = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
 
   const filter = useSelector(listFilter)
 
