@@ -121,7 +121,7 @@ export const FilterWrapper: React.FC<FilterWrapperProps> = ({
       } else if (filterFormData.fields[key].type === "array") {
         fieldData.value = (filter[key] as SelectValue[])
           .map((item) => item.label)
-          .join(", ")
+          .join("|")
       }
       return fieldData
     })

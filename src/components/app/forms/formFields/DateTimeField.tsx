@@ -1,12 +1,15 @@
 import React, { useContext, useEffect, useState } from "react"
 import classnames from "classnames"
-import Datetime from "react-datetime"
+//import Datetime from "react-datetime"
 import "moment/locale/ru"
 import { FormWrapperContext } from "../formWrapper/formWrapperContext"
 import { CalendarIcon } from "@components/app/icons/CalendarIcon"
 import "react-datetime/css/react-datetime.css"
 import { FieldData } from "../formWrapper/types"
 import moment from "moment"
+import ReactDatetimeClass from "react-datetime"
+let Datetime = ReactDatetimeClass
+if (ReactDatetimeClass.default) Datetime = ReactDatetimeClass.default
 
 type CalendarPlace = "left-top" | "left-bottom" | "right-top" | "right-bottom"
 

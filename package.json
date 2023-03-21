@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "main": "src/index.tsx",
+  "type": "module",
   "dependencies": {
     "@craco/craco": "^6.4.4",
     "@reduxjs/toolkit": "^1.7.1",
@@ -49,20 +50,18 @@
     "typescript": "^4.5.5",
     "use-confirm": "^1.0.0",
     "validator": "^13.7.0",
+    "vite-tsconfig-paths": "^4.0.7",
     "web-vitals": "^2.1.4"
   },
   "resolutions": {
     "@types/react": "17.0.40"
   },
   "scripts": {
-    "start": "craco start",
+    "preview": "vite preview",
+    "start": "vite",
     "server": "json-server -w src/server/db.json -p 3001",
     "dev": "concurrently \"yarn server\" \"yarn start\"",
-    "build": "craco build",
-    "test": "craco test",
-    "eject": "react-scripts eject",
-    "sb": "start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public"
+    "build": "vite build"
   },
   "eslintConfig": {
     "extends": [
@@ -105,6 +104,7 @@
     "@storybook/testing-library": "^0.0.13",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "@typescript-eslint/parser": "^5.11.0",
+    "@vitejs/plugin-react": "^3.1.0",
     "babel-plugin-named-exports-order": "^0.0.2",
     "concurrently": "^7.2.2",
     "eslint": "^8.8.0",
@@ -116,6 +116,8 @@
     "json-server": "^0.17.0",
     "prettier": "2.5.1",
     "react-app-rewired": "^2.1.11",
+    "vite": "^4.1.4",
+    "vite-plugin-html": "^3.2.0",
     "webpack": "^5.73.0"
   }
 }

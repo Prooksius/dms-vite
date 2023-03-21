@@ -9,8 +9,8 @@ import {
 // test text
 
 export const APP_TITLE = "DMS"
-export const REACT_APP_DB_URL = process.env.REACT_APP_DB_URL
-export const REACT_APP_SSO_URL = process.env.REACT_APP_SSO_URL
+export const REACT_APP_DB_URL = import.meta.env.VITE_DB_URL
+export const REACT_APP_SSO_URL = import.meta.env.VITE_SSO_URL
 //export const REACT_APP_DB_URL = "https://dev.seodms.com/api/v1.0"
 //export const REACT_APP_SSO_URL = "https://sso.seoreserved.ru/auth?service=dms_local"
 

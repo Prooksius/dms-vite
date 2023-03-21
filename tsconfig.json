@@ -18,9 +18,9 @@
     "esModuleInterop": true,
     "allowJs": true,
     "moduleResolution": "node",
-    "module": "commonJS",
+    "module": "esnext",
     "lib": ["es6", "dom"],
-    "target": "ES5",
+    "target": "esnext",
     "jsx": "react"
   },
   "exclude": ["node_modules", "build"]
